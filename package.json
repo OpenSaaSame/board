@@ -4,10 +4,11 @@
   "description": "An open source kanban application created with React and Redux.",
   "main": "dist/server.js",
   "scripts": {
-    "build": "webpack --watch --mode development",
+    "build": "webpack --mode development",
+    "build:watch": "webpack --watch --mode development",
     "build:prod": "BABEL_ENV=production webpack --mode production",
-    "serve": "nodemon dist/server.js",
-    "serve:prod": "NODE_ENV=production node dist/server.js",
+    "start": "nodemon dist/server.js",
+    "start:prod": "NODE_ENV=production node dist/server.js",
     "analyze-bundle": "BABEL_ENV=production webpack --mode production --profile --json > stats.json && webpack-bundle-analyzer stats.json dist/public -s gzip",
     "lint": "eslint --ext .js,.jsx src/",
     "format": "prettier --write '**/*.{js,jsx,css,scss,json,md}'"
