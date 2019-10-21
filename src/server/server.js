@@ -33,7 +33,7 @@ configurePassport(dabl);
 app.use(helmet());
 app.use(logger("tiny"));
 app.use(compression());
-app.use(favicon("dist/public/favicons/favicon.ico"));
+app.use(favicon("dist/public/favicons/favicon.png"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // aggressive cache static assets (1 year)

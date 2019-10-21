@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import FaUserSecret from "react-icons/lib/fa/user-secret";
 import FaSignOut from "react-icons/lib/fa/sign-out";
 import FaSignIn from "react-icons/lib/fa/sign-in";
-import kanbanLogo from "../../../assets/images/kanban-logo.svg";
+import kanbanLogo from "../../../assets/images/kanban-logo.png";
 import "./Header.scss";
 
 class Header extends Component {

@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Title } from "react-head";
 import FaUserSecret from "react-icons/lib/fa/user-secret";
 import googleLogo from "../../../assets/images/google-logo.svg";
-import kanbanLogo from "../../../assets/images/kanban-logo.svg";
+import kanbanLogo from "../../../assets/images/kanban-logo.png";
 import background1920 from "../../../assets/images/postits-1920.jpg";
 import background1366 from "../../../assets/images/postits-1366.jpg";
 import "./LandingPage.scss";
