@@ -84,8 +84,9 @@ class BoardAdder extends Component {
   };
 }
 
-const mapStateToProps = state => ({
-  userId: state.user ? state.user._id : "guest"
-});
+const mapStateToProps = state => {
+  console.log(state.user);
+  return {userId: state.user ? state.user._id : "guest"};
+};
 
 export default connect(mapStateToProps)(BoardAdder);

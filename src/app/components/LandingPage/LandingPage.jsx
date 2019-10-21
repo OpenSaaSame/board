@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Title } from "react-head";
-import FaTwitter from "react-icons/lib/fa/twitter";
 import FaUserSecret from "react-icons/lib/fa/user-secret";
 import googleLogo from "../../../assets/images/google-logo.svg";
 import kanbanLogo from "../../../assets/images/kanban-logo.svg";
@@ -52,11 +51,6 @@ class LandingPage extends Component {
             </a>.
           </p>
           <div className="signin-buttons">
-            <div>
-              <a href="/auth/twitter" className="signin-button twitter-button">
-                <FaTwitter className="logo-icon" /> &nbsp;Sign in with Twitter
-              </a>
-            </div>
             <div>
               <a href="/auth/google" className="signin-button google-button">
                 <img

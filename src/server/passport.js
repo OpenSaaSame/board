@@ -1,71 +1,52 @@
+import NestedError from "nested-error-stacks";
 import passport from "passport";
-import { Strategy as TwitterStrategy } from "passport-twitter";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import createWelcomeBoard from "./createWelcomeBoard";
+import {getUserProfile, getOrCreateUserProfile} from "./ledger";
 
-const configurePassport = db => {
-  const users = db.collection("users");
-  const boards = db.collection("boards");
+const GOOGLE_CLIENT_ID = "855307575663-o1ugub02p8q7rhlrvhtsvpuuet9n2v5j.apps.googleusercontent.com";
+const GOOGLE_CLIENT_SECRET = "jYLyTt1hwSJRuPkNzzQILGJt";
+const ROOT_URL = "http://localhost:1337"
+
+const configurePassport = dabl => {
 
   passport.serializeUser((user, cb) => {
     cb(null, user._id);
   });
-  passport.deserializeUser((id, cb) => {
-    users.findOne({ _id: id }).then(user => {
-      cb(null, user);
+  passport.deserializeUser((userName, cb) => {
+    dabl.getUser(userName).then(user => {
+      getUserProfile(user)
+      .then(userProfile => {
+        cb(null, userProfile);
+      })
+      .catch(err => {
+        cb(new NestedError("Error fetching user profile for " + userName, err), null);
+      });
+    })
+    .catch(err => {
+      cb(new NestedError("Error deserialising user " + userName, err), null);
     });
   });
 
   passport.use(
-    new TwitterStrategy(
-      {
-        consumerKey: process.env.TWITTER_API_KEY,
-        consumerSecret: process.env.TWITTER_API_SECRET,
-        callbackURL: `${process.env.ROOT_URL}/auth/twitter/callback`
-      },
-      (token, tokenSecret, profile, cb) => {
-        users.findOne({ _id: profile.id }).then(user => {
-          if (user) {
-            cb(null, user);
-          } else {
-            const newUser = {
-              _id: profile.id,
-              name: profile.displayName,
-              imageUrl: profile._json.profile_image_url
-            };
-            users.insertOne(newUser).then(() => {
-              boards
-                .insertOne(createWelcomeBoard(profile.id))
-                .then(() => cb(null, newUser));
-            });
-          }
-        });
-      }
-    )
-  );
-  passport.use(
     new GoogleStrategy(
       {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.ROOT_URL}/auth/google/callback`
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: `${ROOT_URL}/auth/google/callback`
       },
       (accessToken, refreshToken, profile, cb) => {
-        users.findOne({ _id: profile.id }).then(user => {
-          if (user) {
-            cb(null, user);
-          } else {
-            const newUser = {
-              _id: profile.id,
-              name: profile.displayName,
-              imageUrl: profile._json.image.url
-            };
-            users.insertOne(newUser).then(() => {
-              boards
-                .insertOne(createWelcomeBoard(profile.id))
-                .then(() => cb(null, newUser));
-            });
-          }
+        dabl.getUser(profile.id)
+        .then(user => {
+          getOrCreateUserProfile(user, profile)
+          .then(userProfile => {
+            cb(null, userProfile);
+          })
+          .catch(err => {
+            cb(new NestedError (`Error getting or creating user profile for ${profile.id}`, err), null);
+          })
+        })
+        .catch(err => {
+          cb(new NestedError (`Could not log in user ${profile.id}`, err), null);
         });
       }
     )
