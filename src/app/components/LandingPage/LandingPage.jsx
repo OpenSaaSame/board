@@ -20,7 +20,7 @@ class LandingPage extends Component {
 
   render = () => (
     <div className="landing-page">
-      <Title>Sign in | React Kanban</Title>
+      <Title>Sign in | Danban</Title>
       <div className="landing-page-background">
         <img
           srcSet={`${background1920} 1920w, ${background1366} 1366w`}
@@ -37,13 +37,13 @@ class LandingPage extends Component {
               className="landing-page-logo"
             />
             &nbsp;
-            <h1>React Kanban</h1>
+            <h1>Danban</h1>
           </div>
           <p className="landing-page-description">
             An open source kanban application inspired by Trello. Check out the
             source code on{" "}
             <a
-              href="https://github.com/yogaboll/react-kanban"
+              href="https://github.com/bame-da/react-kanban"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -60,14 +60,6 @@ class LandingPage extends Component {
                 />
                 &nbsp;Sign in with Google
               </a>
-            </div>
-            <div className="guest-button-wrapper">
-              <button
-                onClick={this.enterAsGuest}
-                className="signin-button guest-button"
-              >
-                <FaUserSecret className="logo-icon" /> &nbsp;Enter as guest
-              </button>
             </div>
           </div>
         </div>

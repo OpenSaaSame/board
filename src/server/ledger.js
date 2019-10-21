@@ -1,11 +1,12 @@
 import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
 
-const ledgerURL = "https://api.projectdabl.com/data/dqbqr7j8q5y7oab5/";
+const ledgerURL = () => `https://api.projectdabl.com/data/${process.env.DABL_LEDGER}/`;
 
 const fetchUserProfiles = user => {
+    console.log(ledgerURL());
     return fetch(
-        ledgerURL + "contracts/search",
+        ledgerURL() + "contracts/search",
         {
             "credentials":"include",
             "headers":{
@@ -49,7 +50,7 @@ const fetchUserProfiles = user => {
 
 const createProfile = (user, profile) => {
     return fetch(
-        ledgerURL + "command/create",
+        ledgerURL() + "command/create",
         {
             "credentials":"include",
             "headers":{
@@ -82,7 +83,6 @@ const createProfile = (user, profile) => {
         return response.json();
     })
     .then(response => {
-        console.log(response);
         return response["result"][0].created;
     })
     .catch(err => {
@@ -95,11 +95,11 @@ export const getUserProfile = user => {
     .then(profiles => {
         if(profiles.length == 0) throw new Error("No profiles found for party " + user.party)
         else {
-            console.log(profiles);
             let profile = profiles[0].argument;
             profile._id = user.userName;
             profile.party = user.party;
             profile.token = user.token;
+            profile.cid = profiles[0].contractId;
             return profile;
         }
     });
@@ -112,11 +112,11 @@ export const getOrCreateUserProfile = (user, profile) => {
         else return profiles[0];
     })
     .then(userProfile => {
-        console.log(p);
         let p = userProfile.argument;
         p._id = user.userName;
         p.party = user.party;
         p.token = user.token;
+        p.cid = userProfile.contractId;
         return p;
     });
 }

@@ -11,3 +11,92 @@ template UserProfile
 
     key party : Party
     maintainer key
+
+    controller party can
+      nonconsuming DeleteBoard
+        : ()
+        with
+          ref : Text
+        do
+          let 
+            boardKey = BoardKey with
+              ref
+              admins = [party]
+
+          oOldCid <- lookupByKey @Board boardKey
+          case oOldCid of
+            Some oldCid -> do
+              old <- fetch oldCid
+              forA old.columns (\colRef -> do
+                (colCid, col) <- fetchByKey @Column (key old, colRef)
+                forA col.cards (\cardRef -> do
+                  exerciseByKey @Card (key old, colRef, cardRef) Archive
+                  )
+                archive colCid
+                )
+              archive oldCid
+            _ -> return ()
+
+      nonconsuming PutBoard
+        : ContractId Board
+        with
+          board : Board
+          columns : [Column]
+          cards : [Card]
+        do
+          
+          exercise self DeleteBoard with
+            ref = board.id.ref
+          forA cards create
+          forA columns create
+          create board
+
+data BoardKey = BoardKey with
+  ref : Text
+  admins : [Party]
+    deriving (Show, Eq)
+
+template Board
+  with
+    id : BoardKey
+    title : Text
+    color : Text
+    users : [Party]
+    obs : [Party]
+    columns : [Text]
+  where
+    signatory id.admins
+    observer users, obs
+
+    key id : BoardKey
+    maintainer key.admins
+
+type ColumnKey = (BoardKey, Text)
+
+template Column 
+  with
+    board : BoardKey
+    ref : Text
+    title : Text
+    cards : [Text]
+  where
+    signatory board.admins
+
+    key (board, ref) : ColumnKey
+    maintainer key._1.admins
+
+type CardKey = (BoardKey, Text, Text)
+
+template Card
+  with
+    board : BoardKey
+    column : Text
+    ref : Text
+    color : Optional Text
+    text : Text
+    due : Optional Time
+  where
+    signatory board.admins
+
+    key (board, column, ref) : CardKey
+    maintainer key._1.admins

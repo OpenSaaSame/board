@@ -25,7 +25,7 @@ class Home extends Component {
     const { boards, listsById, history } = this.props;
     return (
       <>
-        <Title>Home | React Kanban</Title>
+        <Title>Home | Danban</Title>
         <Header />
         <div className="home">
           <div className="main-content">

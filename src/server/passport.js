@@ -2,9 +2,6 @@ import NestedError from "nested-error-stacks";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {getUserProfile, getOrCreateUserProfile} from "./ledger";
-
-const GOOGLE_CLIENT_ID = "855307575663-o1ugub02p8q7rhlrvhtsvpuuet9n2v5j.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "jYLyTt1hwSJRuPkNzzQILGJt";
 const ROOT_URL = "http://localhost:1337"
 
 const configurePassport = dabl => {
@@ -30,8 +27,8 @@ const configurePassport = dabl => {
   passport.use(
     new GoogleStrategy(
       {
-        clientID: GOOGLE_CLIENT_ID,
-        clientSecret: GOOGLE_CLIENT_SECRET,
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: `${ROOT_URL}/auth/google/callback`
       },
       (accessToken, refreshToken, profile, cb) => {

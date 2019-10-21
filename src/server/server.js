@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import renderPage from "./renderPage";
 import configurePassport from "./passport";
 import auth from "./routes/auth";
+var proxy = require('express-http-proxy');
 import login from "./login";
 import connectDabl from "./dabl";
 
@@ -18,6 +19,14 @@ dotenv.config();
 
 const app = express();
 const dabl = connectDabl();
+
+app.use("/api", proxy("https://api.projectdabl.com", {
+  "proxyReqPathResolver" : req => {
+    const parts = req.url.split('/api/');
+    console.log(parts);
+    return "/data/" + process.env.DABL_LEDGER + parts[0];
+  }
+}));
 
 configurePassport(dabl);
 

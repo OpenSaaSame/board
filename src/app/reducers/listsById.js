@@ -63,6 +63,17 @@ const listsById = (state = {}, action) => {
       const { listId } = action.payload;
       const { [listId]: deletedList, ...restOfLists } = state;
       return restOfLists;
+    }    
+    case "LOAD_DATA": {
+      let ret = {};
+      action.payload.lists.forEach(list => {
+        ret[list.ref] = {
+          _id : list.ref,
+          cards : list.cards,
+          title : list.title
+        };
+      })
+      return ret;
     }
     default:
       return state;
