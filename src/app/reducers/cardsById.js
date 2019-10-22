@@ -31,17 +31,8 @@ const cardsById = (state = {}, action) => {
           {}
         );
     }    
-    case "LOAD_DATA": {
-      let ret = {};
-      action.payload.cards.forEach(card => {
-        ret[card.ref] = {
-          _id : card.ref,
-          color : card.color,
-          text : card.text,
-          date : card.due
-        };
-      })
-      return ret;
+    case "SUCCEED_READ": {
+      return action.payload.cards;
     }
     default:
       return state;

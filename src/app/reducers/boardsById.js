@@ -68,18 +68,8 @@ const boardsById = (state = {}, action) => {
       const { [boardId]: deletedBoard, ...restOfBoards } = state;
       return restOfBoards;
     }
-    case "LOAD_DATA": {
-      let ret = {};
-      action.payload.boards.forEach(board => {
-        ret[board.id.ref] = {
-          _id : board.id.ref,
-          title : board.title,
-          color : board.color,
-          users : board.users,
-          lists : board.columns
-        };
-      })
-      return ret;
+    case "SUCCEED_READ": {
+      return action.payload.boards;
     }
     default:
       return state;

@@ -19,58 +19,10 @@ const store = createStore(
 );
 
 const poll = () => {
-  const state = store.getState();
-  if(state.user) {
-    fetch(
-      "/api/contracts/search",
-      {
-          "credentials":"include",
-          "headers":{
-              "accept":"application/json",
-              "authorization":"Bearer " + state.user.token,
-              "content-type":"application/json",
-              "sec-fetch-mode":"cors"
-          },
-          "method": "POST",
-          "body" : JSON.stringify({
-              "%templates": [
-                {
-                  "moduleName": "Danban",
-                  "entityName": "Board"
-                },
-                {
-                  "moduleName": "Danban",
-                  "entityName": "Column"
-                },
-                {
-                  "moduleName": "Danban",
-                  "entityName": "Card"
-                }
-              ]
-          }),
-          "mode":"cors"
-      }
-    )
-    .then(response => {
-      return response.json();
-    })
-    .then(contracts => {
-      const boards = contracts.result.filter(c => c.templateId.startsWith("Danban:Board")).map(c => c.argument);
-      const lists = contracts.result.filter(c => c.templateId.startsWith("Danban:Column")).map(c => c.argument);
-      const cards = contracts.result.filter(c => c.templateId.startsWith("Danban:Card")).map(c => c.argument);
-      store.dispatch({
-        type: "LOAD_DATA",
-        payload: {
-          boards,
-          lists,
-          cards
-        }
-      });
-    })
-    .catch(err => {
-      throw err;
-    })
-  }
+  store.dispatch({
+    type: "QUEUE_READ",
+    payload: {at : Date.now()}
+  });
 }
 
 setInterval(poll, 5000);
