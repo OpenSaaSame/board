@@ -1,39 +1,158 @@
 daml 1.2
 module Danban where
 
-template UserProfile
-  with
-    party : Party
-    displayName : Text
-    imageUrl : Text
-  where
-    signatory party
+import DA.Action
+import DA.List
+import DA.Optional
 
-    key party : Party
+template DanbanApp
+  with
+    operator: Party
+  where
+    signatory operator
+
+    key operator : Party
     maintainer key
 
+    controller operator can
+      nonconsuming StartApp
+        : ()
+        do
+          create UserDirectory with operator; users = []
+          create BoardDirectory with operator; users = []; boards = []
+          create AppSemaphore with operator; users = []
+          return ()
+
+      nonconsuming PauseApp
+        : ()
+        do exerciseByKey @AppSemaphore operator Archive
+
+      nonconsuming UnpauseApp
+        : ContractId AppSemaphore
+        do
+          (_, ud) <- fetchByKey @UserDirectory operator
+          create AppSemaphore with operator; users = ud.users
+
+      nonconsuming AddUser
+        : ContractId UserRole
+        with
+          party : Party
+        do
+          exerciseByKey @UserDirectory operator UserDirectory_AddObs with party
+          exerciseByKey @BoardDirectory operator BoardDirectory_UpdateObs
+          create UserRole with ..
+
+template UserDirectory
+  with
+    operator : Party
+    users : [Party]
+  where
+    signatory operator
+    observer users
+
+    key operator : Party
+    maintainer key
+
+    controller operator can
+     UserDirectory_AddObs
+        : ContractId UserDirectory
+        with
+          party : Party
+        do
+          ret <- create this with users = dedupSort (party :: users)
+          forA users (\user -> exerciseByKey @UserProfile (operator, user) Profile_UpdateObs)
+          return ret
+
+template BoardDirectory
+  with
+    operator : Party
+    users : [Party]
+    boards : [Text]
+  where
+    signatory operator
+    observer users
+
+    key operator : Party
+    maintainer key
+
+    controller operator can
+      BoardDirectory_UpdateObs
+        : ContractId BoardDirectory
+        do
+          (_, userDirectory) <- fetchByKey @UserDirectory operator
+          forA boards (\board -> exerciseByKey @Board (operator, board) Board_UpdateObs)
+          create this with users = userDirectory.users
+
+      BoardDirectory_AddBoard
+        : ContractId BoardDirectory
+        with
+          board : Text
+        do
+          create this with boards = dedupSort (board :: boards)
+
+      BoardDirectory_RemoveBoard
+        : ContractId BoardDirectory
+        with
+          board : Text
+        do
+          create this with boards = delete board boards
+
+-- AppSemaphore allows the op to stop all operattion, e.g. to do bulk updates
+template AppSemaphore
+  with
+    operator : Party
+    users : [Party]
+  where
+    signatory operator
+    observer users
+
+    key operator : Party
+    maintainer key
+
+-- UserRole gives a user the choices to operate on the app
+template UserRole
+  with
+    party : Party
+    operator : Party
+  where
+    signatory operator
+
+    key (operator, party) : (Party, Party)
+    maintainer key._1
+
     controller party can
+      nonconsuming PutProfile
+        : ContractId UserProfile
+        with
+          displayName : Text
+          imageUrl : Text
+        do
+          fetchByKey @AppSemaphore operator
+          (_, userDirectory) <- fetchByKey @UserDirectory operator
+          oProfile <- lookupByKey @UserProfile (operator, party)
+          when (isSome oProfile) (archive (fromSome oProfile))
+          create UserProfile with obs = userDirectory.users, ..
+
       nonconsuming DeleteBoard
         : ()
         with
-          ref : Text
+          _id : Text
         do
-          let 
-            boardKey = BoardKey with
-              ref
-              admins = [party]
+          fetchByKey @AppSemaphore operator
 
-          oOldCid <- lookupByKey @Board boardKey
+          oOldCid <- lookupByKey @Board (operator, _id)
           case oOldCid of
             Some oldCid -> do
               old <- fetch oldCid
-              forA old.columns (\colRef -> do
-                (colCid, col) <- fetchByKey @Column (key old, colRef)
-                forA col.cards (\cardRef -> do
-                  exerciseByKey @Card (key old, colRef, cardRef) Archive
+              forA old.lists (\listId -> do
+                (listCid, list) <- fetchByKey @CardList (operator, old._id, listId)
+                forA list.cards (\cardRef -> do
+                  exerciseByKey @Card (operator, old._id, listId, cardRef) Archive
                   )
-                archive colCid
+                archive listCid
                 )
+              exerciseByKey @BoardDirectory operator BoardDirectory_RemoveBoard with
+                board = _id
               archive oldCid
             _ -> return ()
 
@@ -41,62 +160,123 @@ template UserProfile
         : ContractId Board
         with
           board : Board
-          columns : [Column]
+          lists : [CardList]
           cards : [Card]
         do
-          
-          exercise self DeleteBoard with
-            ref = board.id.ref
-          forA cards create
-          forA columns create
-          create board
+          fetchByKey @AppSemaphore operator
+          (_, ud) <- fetchByKey @UserDirectory operator
 
-data BoardKey = BoardKey with
-  ref : Text
-  admins : [Party]
-    deriving (Show, Eq)
+          exercise self DeleteBoard with
+            _id = board._id
+          forA cards (\card -> create card with operator; obs = ud.users)
+          forA lists (\list -> create list with operator; obs = ud.users)
+          exerciseByKey @BoardDirectory operator BoardDirectory_AddBoard with 
+            board = board._id
+          create board with operator; obs = ud.users
+
+
+
+template UserProfile
+  with
+    party : Party
+    operator : Party
+    obs : [Party]
+    displayName : Text
+    imageUrl : Text
+  where
+    signatory party, operator
+    observer obs
+
+    key (operator, party) : (Party, Party)
+    maintainer key._1, key._2
+
+    controller operator can
+      Profile_UpdateObs
+        : ContractId UserProfile
+        do
+          (_, userDirectory) <- fetchByKey @UserDirectory operator
+          create this with obs = userDirectory.users
+
+type BoardKey = (Party, Text)
+
 
 template Board
   with
-    id : BoardKey
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+
     title : Text
     color : Text
     users : [Party]
-    obs : [Party]
-    columns : [Text]
+    lists : [Text]
   where
-    signatory id.admins
+    signatory operator, admins
     observer users, obs
 
-    key id : BoardKey
-    maintainer key.admins
+    key (operator, _id) : BoardKey
+    maintainer key._1
 
-type ColumnKey = (BoardKey, Text)
+    controller operator can
+      Board_UpdateObs
+        : ContractId Board
+        do
+          (_, userDirectory) <- fetchByKey @UserDirectory operator
+          forA lists (\list -> exerciseByKey @CardList (operator, _id, list) List_UpdateObs)
+          create this with obs = userDirectory.users
+          
+type ListKey = (Party, Text, Text)
 
-template Column 
+template CardList 
   with
-    board : BoardKey
-    ref : Text
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+
+    boardId : Text
     title : Text
     cards : [Text]
   where
-    signatory board.admins
+    signatory operator, admins
+    observer obs
 
-    key (board, ref) : ColumnKey
-    maintainer key._1.admins
+    key (operator, boardId, _id) : ListKey
+    maintainer key._1
 
-type CardKey = (BoardKey, Text, Text)
+    controller operator can
+      List_UpdateObs
+        : ContractId CardList
+        do
+          (_, userDirectory) <- fetchByKey @UserDirectory operator
+          forA cards (\card -> exerciseByKey @Card (operator, boardId, _id, card) Card_UpdateObs)
+          create this with obs = userDirectory.users
+
+type CardKey = (Party, Text, Text, Text)
 
 template Card
   with
-    board : BoardKey
-    column : Text
-    ref : Text
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+
+    boardId : Text
+    listId : Text
     color : Optional Text
     text : Text
     due : Optional Time
   where
-    signatory board.admins
+    signatory operator, admins
+    observer obs
 
-    key (board, column, ref) : CardKey
-    maintainer key._1.admins
+    key (operator, boardId, listId, _id) : CardKey
+    maintainer key._1
+
+    controller operator can
+      Card_UpdateObs
+        : ContractId Card
+        do
+          (_, userDirectory) <- fetchByKey @UserDirectory operator
+          create this with obs = userDirectory.users

@@ -1,95 +1,37 @@
-import fetch from "node-fetch";
-import NestedError from "nested-error-stacks";
+import {exercise, search} from "../app/middleware/ledgerUtils";
+
 
 const ledgerURL = () => `https://api.projectdabl.com/data/${process.env.DABL_LEDGER}/`;
 
-const fetchUserProfiles = user => {
-    console.log(ledgerURL());
-    return fetch(
-        ledgerURL() + "contracts/search",
+const fetchUserProfiles = user => search(
+        ledgerURL(),
+        user.token,
         {
-            "credentials":"include",
-            "headers":{
-                "accept":"application/json",
-                "authorization":"Bearer " + user.token,
-                "content-type":"application/json",
-                "sec-fetch-mode":"cors"
-            },
-            "method": "POST",
-            "body" : JSON.stringify({
-                "%templates": [
-                    {
-                        "moduleName": "Danban",
-                        "entityName": "UserProfile"
-                    }
-                ]
-            }),
-            "mode":"cors"
+            "moduleName": "Danban",
+            "entityName": "UserProfile"
+        },
+        userParty => userParty.argument.party == user.party && userParty.argument.operator == user.operator
+    )
+
+const createProfile = (user, profile) => exercise(
+        ledgerURL(),
+        user.token,
+        {
+            "moduleName": "Danban",
+            "entityName": "UserRole"
+        },
+        user.cid,
+        "PutProfile",
+        {
+            "displayName": profile.displayName,
+            "imageUrl": profile._json.image.url
         }
     )
     .then(response => {
-        if(!response.ok) {
-            return response.text().then(body => {
-                throw new Error(`Bad response from DABL: ${response.status} ${response.statusText} ${body}`);
-            });
-        }
-        return response.json();
-    })
-    .then(response => {
-        let ret = response["result"]
-            .filter(userParty => {
-                return userParty.argument.party == user.party;
-            });
-        console.log(`${ret.length} User Profiles found for ${user.party}`);
-        return ret;
-    })
-    .catch(err => {
-        throw new NestedError("Error fetching user profiles for " + user.party + ": ", err);
+        console.log(response);
+        return response.result[response.result.length - 1].created
     });
-}
-
-const createProfile = (user, profile) => {
-    return fetch(
-        ledgerURL() + "command/create",
-        {
-            "credentials":"include",
-            "headers":{
-                "accept":"application/json",
-                "authorization":"Bearer " + user.token,
-                "content-type":"application/json",
-                "sec-fetch-mode":"cors"
-            },
-            "method": "POST",
-            "body" : JSON.stringify({
-                "templateId": {
-                    "moduleName": "Danban",
-                    "entityName": "UserProfile"
-                },
-                "argument": {
-                    "party": user.party,
-                    "displayName": profile.displayName,
-                    "imageUrl": profile._json.image.url
-                }
-            }),
-            "mode":"cors"
-        }
-    )
-    .then(response => {
-        if(!response.ok) {
-            return response.text().then(body => {
-                throw new Error(`Bad response from DABL: ${response.status} ${response.statusText} ${body}`);
-            });
-        }
-        return response.json();
-    })
-    .then(response => {
-        return response["result"][0].created;
-    })
-    .catch(err => {
-        throw new NestedError("Error fetching user profiles for " + user.party + ": ", err);
-    });
-};
-
+    
 export const getUserProfile = user => {
     return fetchUserProfiles(user)
     .then(profiles => {
@@ -99,7 +41,7 @@ export const getUserProfile = user => {
             profile._id = user.userName;
             profile.party = user.party;
             profile.token = user.token;
-            profile.cid = profiles[0].contractId;
+            profile.cid = user.cid;
             return profile;
         }
     });
@@ -116,7 +58,7 @@ export const getOrCreateUserProfile = (user, profile) => {
         p._id = user.userName;
         p.party = user.party;
         p.token = user.token;
-        p.cid = userProfile.contractId;
+        p.cid = user.cid;
         return p;
     });
 }

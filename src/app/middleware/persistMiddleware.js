@@ -1,44 +1,18 @@
-import { denormalize, schema } from "normalizr";
+import {loadAll, exercise as exerciseUtil} from "./ledgerUtils"
 
 const ledgerUrl = "/api/";
 
-const exercise = (user, template, cid, choice, args) => {
-  return fetch(
-    ledgerUrl + "command/exercise",
+const exercise = (user, template, cid, choice, args) => exerciseUtil(
+    ledgerUrl,
+    user.token,
     {
-        "credentials":"include",
-        "headers":{
-            "accept":"application/json",
-            "authorization":"Bearer " + user.token,
-            "content-type":"application/json",
-        },
-        "method": "POST",
-        "body" : JSON.stringify({
-          "templateId": {
-            "moduleName": "Danban",
-            "entityName": template
-          },
-          "contractId": cid,
-          "choice": choice,
-          "argument": args
-      })
-    });
-}
-
-const loadAll = (user) => {
-  return fetch(
-    ledgerUrl + "contracts",
-    {
-      "credentials":"include",
-      "headers":{
-          "accept":"application/json",
-          "authorization":"Bearer " + user.token,
-          "content-type":"application/json",
-      },
-      "method": "GET"
-    }
-  )
-}
+      "moduleName": "Danban",
+      "entityName": template
+    },
+    cid,
+    choice,
+    args
+  );
 
 const maybeWriteBoard = (user, boardId, boardsById, listsById, cardsById, ledger, store) => {
   const dispatch = type => {
@@ -59,65 +33,36 @@ const maybeWriteBoard = (user, boardId, boardsById, listsById, cardsById, ledger
 
   if(!ledger.boards[boardId] || (ledger.boards[boardId].queued && !ledger.boards[boardId].writing)) {
 
-    
     dispatch("START_WRITE_BOARD");
-    
-    const cardSchema = new schema.Entity("cardsById", {}, { idAttribute: "_id" });
-    const listSchema = new schema.Entity(
-      "listsById",
-      { cards: [cardSchema] },
-      { idAttribute: "_id" }
-    );
-    const boardSchema = new schema.Entity(
-      "boardsById",
-      { lists: [listSchema] },
-      { idAttribute: "_id" }
-    );
-    const entities = { cardsById, listsById, boardsById };
 
-    const boardData = denormalize(boardId, boardSchema, entities);
+    const extraFields = {
+      operator : user.party,
+      admins : [user.party],
+      obs : []
+    };
 
-    const boardKey = {
-      ref : boardId,
-      admins : [user.party]
+    const withExtraFields = (extraFields, item) => {
+      Object.keys(extraFields).forEach(key => item[key] = extraFields[key]);
+      return item;
     }
 
-    let board = {
-      "id" : boardKey,
-      "title" : boardData.title,
-      "color" : boardData.color,
-      "users" : [],
-      "obs" : [],
-      "columns" : boardData.lists.map(c => c._id)
-    }
-
-    let columns = boardData.lists.map(col => ({
-      "board" : boardKey,
-      "ref" : col._id,
-      "title" : col.title,
-      "cards" : col.cards.map(card => card._id)
-    }));
-
-    let cards = boardData.lists.flatMap(col => {
-      return col.cards.map(card => ({
-        "board" : boardKey,
-        "column" : col._id,
-        "ref" : card._id,
-        "color" : card.color,
-        "text" : card.text,
-        "due" : card.date
-      }))
+    let board = withExtraFields(extraFields, boardsById[boardId]);
+    extraFields.boardId = boardId;
+    let lists = board.lists.map(listId => withExtraFields(extraFields, listsById[listId]));
+    let cards = lists.flatMap(list => {
+      extraFields.listId = list._id;
+      return list.cards.map(cardId => withExtraFields(extraFields, cardsById[cardId]))
     });
 
     exercise (
       user,
-      "UserProfile",
+      "UserRole",
       user.cid,
       "PutBoard",
       {
-        "board": board,
-        "columns": columns,
-        "cards": cards
+        board,
+        lists,
+        cards
       }
     )
     .then(r => {
@@ -130,6 +75,12 @@ const maybeWriteBoard = (user, boardId, boardsById, listsById, cardsById, ledger
   }
 }
 
+const sortById = list => {
+  const ret = {};
+  list.forEach(item => ret[item._id] = item);
+  return ret;
+}
+
 const maybeRead = (user, ledger, store) => {
   if(ledger.read.queued && !ledger.read.inProgress) {
     store.dispatch({
@@ -137,44 +88,12 @@ const maybeRead = (user, ledger, store) => {
       payload: { at : Date.now() }
     });
     
-    loadAll(user)
-    .then(response => response.json())
+    loadAll(ledgerUrl, user.token)
     .then(contracts => {
 
-      const boardList = contracts.result.filter(c => c.templateId.startsWith("Danban:Board")).map(c => c.argument);
-      const columnList = contracts.result.filter(c => c.templateId.startsWith("Danban:Column")).map(c => c.argument);
-      const cardList = contracts.result.filter(c => c.templateId.startsWith("Danban:Card")).map(c => c.argument);
-
-      const boards = {};
-      const lists = {}
-      const cards = {};
-
-      boardList.forEach(board => {
-        boards[board.id.ref] = {
-          _id : board.id.ref,
-          title : board.title,
-          color : board.color,
-          users : board.users,
-          lists : board.columns
-        };
-      });
-
-      columnList.forEach(list => {
-        lists[list.ref] = {
-          _id : list.ref,
-          cards : list.cards,
-          title : list.title
-        };
-      })
-
-      cardList.forEach(card => {
-        cards[card.ref] = {
-          _id : card.ref,
-          color : card.color,
-          text : card.text,
-          date : card.due
-        };
-      });
+      const boards = sortById(contracts.result.filter(c => c.templateId.startsWith("Danban:Board@")).map(c => c.argument));
+      const lists = sortById(contracts.result.filter(c => c.templateId.startsWith("Danban:CardList@")).map(c => c.argument));
+      const cards = sortById(contracts.result.filter(c => c.templateId.startsWith("Danban:Card@")).map(c => c.argument));
 
       // Don't overwrite changes that are in-flight
       const {
@@ -187,9 +106,9 @@ const maybeRead = (user, ledger, store) => {
       Object.keys(ledger.boards).forEach(boardId => {
         if(ledger.boards[boardId].queued || ledger.boards[boardId].writing || (ledger.boards[boardId].written > ledger.read.inProgress)) {
           boards[boardId] = boardsById[boardId];
-          boardsById[boardId].lists.forEach(col => {
-            lists[col] = listsById[col];
-            listsById[col].cards.forEach(card => {
+          boardsById[boardId].lists.forEach(list => {
+            lists[list] = listsById[list];
+            listsById[list].cards.forEach(card => {
               cards[card] = cardsById[card];
             })
           })
