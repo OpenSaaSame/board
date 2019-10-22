@@ -187,7 +187,7 @@ const maybeRead = (user, ledger, store) => {
       Object.keys(ledger.boards).forEach(boardId => {
         if(ledger.boards[boardId].queued || ledger.boards[boardId].writing || (ledger.boards[boardId].written > ledger.read.inProgress)) {
           boards[boardId] = boardsById[boardId];
-          boardsById[boardId].columns.forEach(col => {
+          boardsById[boardId].lists.forEach(col => {
             lists[col] = listsById[col];
             listsById[col].cards.forEach(card => {
               cards[card] = cardsById[card];
