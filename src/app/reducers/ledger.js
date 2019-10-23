@@ -1,4 +1,4 @@
-const ledger = (state = {boards : {}, read: {queued: true, inProgress: false}}, action) => {
+const ledger = (state = {write : {queue: [], inProgress: false}, read: {queued: true, inProgress: false}}, action) => {
     switch (action.type) {
       case "QUEUE_READ": {
         const { at } = action.payload;
@@ -41,63 +41,55 @@ const ledger = (state = {boards : {}, read: {queued: true, inProgress: false}}, 
           }
         }
       }     
-      case "QUEUE_WRITE_BOARD": {
-        const { boardId, at } = action.payload;
+      case "QUEUE_WRITE": {
         return {
           ...state,
-          boards: {
-            ...state.boards,
-            [boardId]: {
-              ...state.boards[boardId],
-              queued: at
-            }
+          write: {
+            ...state.write,
+            queue: [{...action.payload, "attempt": 0}, ...state.write.queue]
           }
         }
       }
-      case "START_WRITE_BOARD": {
-        const { boardId, at } = action.payload;
+
+      case "START_WRITE": {
         return {
           ...state,
-          boards: {
-            ...state.boards,
-            [boardId]: {
-              ...state.boards[boardId],
-              writing : at,
-              attempt : (state.boards[boardId].attempt || 0) + 1, 
-              queued : false
-            }
+          write: {
+            ...state.write,
+            inProgress: true,
+            queue: [{
+                ...state.write.queue[0],
+                attempt: state.write.queue[0].attempt + 1
+              },
+              ...state.write.queue.slice(1)
+            ]
           }
         }
       }
-      case "SUCCEED_WRITE_BOARD": {
-        const { boardId, at } = action.payload;
+
+      case "SUCCEED_WRITE": {
+        const { at } = action.payload;
         return {
           ...state,
           read: {
+            ...state.read,
             queued: at
           },
-          boards: {
-            ...state.boards,
-            [boardId]: {
-              ...state.boards[boardId],
-              attempt : 0,
-              writing : false,
-              written : at
-            }
+          write: {
+            ...state.write,
+            queue : state.write.queue.slice(1),
+            inProgress: false
           }
         }
       }
-      case "FAIL_WRITE_BOARD": {
-        const { boardId, at } = action.payload;
+
+      case "FAIL_WRITE": {
         return {
           ...state,
-          boards: {
-            ...state.boards,
-            [boardId]: {
-              ...state.boards[boardId],
-              writing : false,
-              queued : at
-            }
+          write: {
+            ...state.write,
+            inProgress: false,
+            queue: state.write.queue[0].attempt >= 10 ? state.write.queue.slice(1) : state.write.queue
           }
         }
       }

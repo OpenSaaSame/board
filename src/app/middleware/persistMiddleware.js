@@ -14,65 +14,109 @@ const exercise = (user, template, cid, choice, args) => exerciseUtil(
     args
   );
 
-const maybeWriteBoard = (user, boardId, boardsById, listsById, cardsById, ledger, store) => {
-  const dispatch = type => {
-    store.dispatch({
-      type,
-      payload: {
-        boardId,
-        at : Date.now()
-      }
+const maybeWrite = (state, dispatch) => {
+  const {
+    user,
+    ledger
+  } = state;
+
+  if(ledger.write.queue.length == 0 || ledger.write.inProgress) return;
+
+  dispatch({
+    type : "START_WRITE",
+    payload: { }
+  });
+
+  const action = ledger.write.queue[0];
+  let actionFn = null;
+
+  switch(action.type) {
+    case "DELETE_BOARD":
+      actionFn = deleteBoard;
+      break;
+      
+      case "ADD_LIST":
+      case "MOVE_LIST": 
+      case "DELETE_LIST":
+      case "ADD_BOARD":
+      case "CHANGE_BOARD_TITLE":
+      case "CHANGE_BOARD_COLOR":
+
+      case "ADD_CARD":
+      case "MOVE_CARD":
+      case "DELETE_CARD":
+      case "CHANGE_LIST_TITLE":
+
+      case "CHANGE_CARD_TEXT":
+      case "CHANGE_CARD_DATE": 
+      case "CHANGE_CARD_COLOR":
+        actionFn = writeBoard;
+  }
+
+  actionFn(state, action.boardId, action.payload)
+  .then(r => {
+    dispatch({
+      type : "SUCCEED_WRITE",
+      payload: { "at": Date.now() }
     });
-  }
+  })
+  .catch(err => {
+    console.log(err);
+    dispatch({
+      type : "FAIL_WRITE",
+      payload: { }
+    });
+  })
+}
 
-  // Abort after 10 tries
-  if(ledger.boards[boardId].attempt >= 10) {
-    console.log(`Couldn't write board ${boardId} after ${ledger.boards[boardId].attempt} attempts. Aborting.`);
-    dispatch("SUCCEED_WRITE_BOARD");
-  }
-
-  if(!ledger.boards[boardId] || (ledger.boards[boardId].queued && !ledger.boards[boardId].writing)) {
-
-    dispatch("START_WRITE_BOARD");
-
-    const extraFields = {
-      operator : user.party,
-      admins : [user.party],
-      obs : []
-    };
-
-    const withExtraFields = (extraFields, item) => {
-      Object.keys(extraFields).forEach(key => item[key] = extraFields[key]);
-      return item;
+const deleteBoard = (state, boardId, payload) => exercise(
+    state.user,
+    "UserProfile",
+    state.user.cid,
+    "DeleteBoard",
+    {
+      "ref": boardId
     }
+  );
 
-    let board = withExtraFields(extraFields, boardsById[boardId]);
-    extraFields.boardId = boardId;
-    let lists = board.lists.map(listId => withExtraFields(extraFields, listsById[listId]));
-    let cards = lists.flatMap(list => {
-      extraFields.listId = list._id;
-      return list.cards.map(cardId => withExtraFields(extraFields, cardsById[cardId]))
-    });
+const writeBoard = (state, boardId, payload) => {
+  const{
+    user,
+    boardsById,
+    listsById,
+    cardsById
+  } = state;
 
-    exercise (
-      user,
-      "UserRole",
-      user.cid,
-      "PutBoard",
-      {
-        board,
-        lists,
-        cards
-      }
-    )
-    .then(r => {
-      dispatch("SUCCEED_WRITE_BOARD");
-    })
-    .catch(err => {
-      console.log(err);
-      dispatch("FAIL_WRITE_BOARD");
-    })
+  const extraFields = {
+    operator : user.party,
+    admins : [user.party],
+    obs : []
+  };
+
+  const withExtraFields = (extraFields, item) => {
+    Object.keys(extraFields).forEach(key => item[key] = extraFields[key]);
+    return item;
   }
+
+  let board = withExtraFields(extraFields, boardsById[boardId]);
+  extraFields.boardId = boardId;
+  let lists = board.lists.map(listId => withExtraFields(extraFields, listsById[listId]));
+  let cards = lists.flatMap(list => {
+    extraFields.listId = list._id;
+    return list.cards.map(cardId => withExtraFields(extraFields, cardsById[cardId]))
+  });
+
+  return exercise (
+    user,
+    "UserRole",
+    user.cid,
+    "PutBoard",
+    {
+      board,
+      lists,
+      cards
+    }
+  )
 }
 
 const sortById = list => {
@@ -81,8 +125,13 @@ const sortById = list => {
   return ret;
 }
 
-const maybeRead = (user, ledger, store) => {
-  if(ledger.read.queued && !ledger.read.inProgress) {
+const maybeRead = (store) => {
+  const {
+    ledger,
+    user
+  } = store.getState();
+
+  if(ledger.read.queued && !ledger.read.inProgress && ledger.write.queue.length == 0) {
     store.dispatch({
       type : "START_READ",
       payload: { at : Date.now() }
@@ -90,30 +139,18 @@ const maybeRead = (user, ledger, store) => {
     
     loadAll(ledgerUrl, user.token)
     .then(contracts => {
+      //If there are changes in flight, queue another read.
+      if(store.getState().ledger.write.queue.length > 0) {
+        store.dispatch({
+          type : "FAIL_READ",
+          payload: { at : Date.now() }
+        });
+        return;
+      }
 
       const boards = sortById(contracts.filter(c => c.templateId.entityName === "Board").map(c => c.argument));
       const lists = sortById(contracts.filter(c => c.templateId.entityName === "CardList").map(c => c.argument));
       const cards = sortById(contracts.filter(c => c.templateId.entityName === "Card").map(c => c.argument));
-
-      // Don't overwrite changes that are in-flight
-      const {
-        boardsById,
-        listsById,
-        cardsById,
-        ledger
-      } = store.getState();
-
-      Object.keys(ledger.boards).forEach(boardId => {
-        if(ledger.boards[boardId].queued || ledger.boards[boardId].writing || (ledger.boards[boardId].written > ledger.read.inProgress)) {
-          boards[boardId] = boardsById[boardId];
-          boardsById[boardId].lists.forEach(list => {
-            lists[list] = listsById[list];
-            listsById[list].cards.forEach(card => {
-              cards[card] = cardsById[card];
-            })
-          })
-        }
-      });
 
       store.dispatch({
         type : "SUCCEED_READ",
@@ -131,21 +168,17 @@ const maybeRead = (user, ledger, store) => {
         payload: { at : Date.now() }
       });
     })
-  
   }
 }
 
 // Persist the board to the database after almost every action.
 const persistMiddleware = store => next => action => {
   next(action);
+  const state = store.getState();
   const {
     user,
-    boardsById,
-    listsById,
-    cardsById,
-    currentBoardId: boardId,
-    ledger
-  } = store.getState();
+    currentBoardId: boardId
+  } = state;
 
   // Nothing is persisted for guest users
   if (user) {
@@ -178,10 +211,11 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_CARD_DATE": 
       case "CHANGE_CARD_COLOR":
         store.dispatch({
-          type: "QUEUE_WRITE_BOARD",
+          type: "QUEUE_WRITE",
           payload: {
             boardId,
-            at: Date.now()
+            type: action.type,
+            payload: action.payload
           }
         });
         break;
@@ -189,15 +223,15 @@ const persistMiddleware = store => next => action => {
       case "QUEUE_READ":
       case "SUCCEED_READ":
       case "FAIL_READ":
-        maybeRead(user, ledger, store);
+        maybeRead(store);
         break;
-      case "SUCCEED_WRITE_BOARD":
-        maybeWriteBoard(user, boardId, boardsById, listsById, cardsById, ledger, store);
-        maybeRead(user, ledger, store);
+      case "SUCCEED_WRITE":
+        maybeWrite(state, store.dispatch);
+        maybeRead(store);
         break;
-      case "FAIL_WRITE_BOARD":      
-      case "QUEUE_WRITE_BOARD":
-        maybeWriteBoard(user, boardId, boardsById, listsById, cardsById, ledger, store);
+      case "FAIL_WRITE":      
+      case "QUEUE_WRITE":
+        maybeWrite(state, store.dispatch);
         break;
       default:
         break;
