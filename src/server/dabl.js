@@ -54,7 +54,7 @@ const dabl = () => {
                     refreshCookie = raw['set-cookie'][0];
                     refreshCookieTime = Date.now();
                     jwts["site"].time = Date.now();
-                    return redirectURL.query["access_token"]
+                    return redirectURL.query["access_token"];
                 }
                 else {
                     throw new Error("Redirect expected!");
@@ -63,17 +63,18 @@ const dabl = () => {
                 throw new NestedError("Error getting site JWT: ", err);
             });
         }
-        else
-            console.log("Using cached site jwt");
         return jwts["site"].token;
     };
 
-    const fetchFromAPI = (api, path, token, method, body) => callAPI(
-        dablUrl + api + ledgerSegment + path,
-        token,
-        method,
-        body
-    );
+    const fetchFromAPI = (api, path, token, method, body) => {
+        console.log(`Calling ${dablUrl + api + ledgerSegment + path} with ${JSON.stringify(body)}`);
+        return callAPI(
+            dablUrl + api + ledgerSegment + path,
+            token,
+            method,
+            body
+        );
+    }
 
     const getToken = party => {
         // Get a new Token every 12 hours
@@ -99,7 +100,7 @@ const dabl = () => {
                             "for": 86400
                         }
                     )
-                    .then(processResponse)
+                    .then(response => response.json())
                     .then(response => {
                         jwts[party].time = Date.now();
                         return response["access_token"];
@@ -109,8 +110,6 @@ const dabl = () => {
                     throw new NestedError("Error getting JWT for" + party + ": ", err);
                 });
             }
-        else
-            console.log("Using cached token for party ", party);
         return jwts[party].token;
     };
 
@@ -118,9 +117,12 @@ const dabl = () => {
         return getToken(adminParty);
     };
 
-    const fetchContracts = (jwtPromise, template, filter) => jwtPromise.then(jwt => search (
+    const fetchContracts = (jwtPromise, template, filter) => jwtPromise.then(jwt => {
+        console.log(`Fetching contracts ${JSON.stringify(template)}`) 
+        return search (
             dataURL, jwt, template, filter
-        ));        
+        );    
+    });    
 
     const getOrCreateContract = (jwtPromise, template, filter, createCb) => {
         return fetchContracts(jwtPromise, template, filter)
@@ -160,7 +162,7 @@ const dabl = () => {
     const callApp = (choice, argument) => adminToken()
         .then(jwt => {
             if(appCid == null) appCid = getOrCreateApp(adminParty, jwt);
-            
+            console.log(`Making app call ${choice} with ${JSON.stringify(argument)}`)
             return appCid
             .then(cid => exercise(
                     dataURL,
@@ -186,8 +188,8 @@ const dabl = () => {
         let party_ = null;
 
         const userParty = () => {
-            console.log("Getting user party");
             if(party_ == null) {
+                console.log("Getting user party");
                 party_ = getOrCreateContract(
                     adminToken(),
                     {
@@ -207,7 +209,6 @@ const dabl = () => {
                     .then(response => response[0])
                 )
                 .then(contract => {
-                    console.log(JSON.stringify(contract));
                     return contract.argument.party
                 })
                 .catch(err => {

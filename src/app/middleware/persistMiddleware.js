@@ -100,9 +100,13 @@ const maybeRead = (store) => {
         return;
       }
 
-      const boards = sortById(contracts.filter(c => c.templateId.entityName === "Board").map(c => c.argument));
-      const lists = sortById(contracts.filter(c => c.templateId.entityName === "CardList").map(c => c.argument));
-      const cards = sortById(contracts.filter(c => c.templateId.entityName === "Card").map(c => c.argument));
+      const isTemplate = (c, template) => c.templateId instanceof Object
+        ? c.templateId.entityName === template
+        : c.templateId.startsWith(`Danban:${template}@`);
+
+      const boards = sortById(contracts.filter(c => isTemplate(c, "Board")).map(c => c.argument));
+      const lists = sortById(contracts.filter(c => isTemplate(c, "CardList")).map(c => c.argument));
+      const cards = sortById(contracts.filter(c => isTemplate(c, "Card")).map(c => c.argument));
 
       store.dispatch({
         type : "SUCCEED_READ",

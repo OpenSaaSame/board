@@ -77,7 +77,7 @@ export const getOrCreateApp = (admin, jwt) => search(
         app => app.argument.operator == admin
     )
     .then(apps => {
-        if(apps.length > 0) return apps[0];
+        if(apps.length > 0) return apps[0].contractId;
         else return create (
             ledgerURL(),
             jwt,
@@ -88,11 +88,11 @@ export const getOrCreateApp = (admin, jwt) => search(
                 ledgerURL(),
                 jwt,
                 appTemplate,
-                response.contractId,
+                process.env.USE_SANDBOX ? response.contractId : response[0].created.contractId,
                 "StartApp",
                 {}
             )
-            .then(() => response.contractId)
+            .then(() => process.env.USE_SANDBOX ? response.contractId : response[0].created.contractId)
             .catch(err => {
                 throw new NestedError(`Error starting app: `, err);
             })
