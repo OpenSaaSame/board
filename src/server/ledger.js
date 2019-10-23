@@ -31,7 +31,6 @@ const createProfile = (user, profile) => exercise(
         }
     )
     .then(response => {
-        console.log(response);
         return response[response.length - 1].created
     });
     
@@ -51,7 +50,6 @@ export const getUserProfile = user => {
 }
 
 export const getOrCreateUserProfile = (user, profile) => {
-    console.log(JSON.stringify(user));
     return fetchUserProfiles(user)
     .then(profiles => {
         if(profiles.length == 0) return createProfile(user, profile);

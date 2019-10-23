@@ -5,6 +5,31 @@ import DA.Action
 import DA.List
 import DA.Optional
 
+move : Int -> Int -> [a] -> [a]
+move oldIdx newIdx xs =
+  let lowIdx = min oldIdx newIdx
+      highIdx = max oldIdx newIdx
+      (s1, r) = splitAt lowIdx xs
+      (s2, s3) = splitAt (highIdx - lowIdx) r
+      (s2', s3') = if oldIdx < newIdx
+        then (tail s2, head s3 :: head s2 :: tail s3)
+        else (head s3 :: s2, tail s3)
+  in s1 ++ s2' ++ s3'
+
+takeAt : Int -> [a] -> (a, [a])
+takeAt idx xs
+  | idx < 0 = error "Only positive indices allowed"
+  | idx == 0 = (head xs, tail xs)
+  | otherwise =
+    let (x, xs') = takeAt (idx - 1) (tail xs)
+    in (x, head xs :: xs')
+
+insertAt : Int -> a -> [a] -> [a]
+insertAt idx x xs
+  | idx < 0 = error "Only positive indices allowed"
+  | idx == 0 = x :: xs
+  | otherwise = head xs :: insertAt (idx - 1) x (tail xs)
+
 template DanbanApp
   with
     operator: Party
@@ -133,48 +158,204 @@ template UserRole
           when (isSome oProfile) (archive (fromSome oProfile))
           create UserProfile with obs = userDirectory.users, ..
 
-      nonconsuming DeleteBoard
-        : ()
-        with
-          _id : Text
-        do
-          fetchByKey @AppSemaphore operator
-
-          oOldCid <- lookupByKey @Board (operator, _id)
-          case oOldCid of
-            Some oldCid -> do
-              old <- fetch oldCid
-              forA old.lists (\listId -> do
-                (listCid, list) <- fetchByKey @CardList (operator, old._id, listId)
-                forA list.cards (\cardRef -> do
-                  exerciseByKey @Card (operator, old._id, listId, cardRef) Archive
-                  )
-                archive listCid
-                )
-              exerciseByKey @BoardDirectory operator BoardDirectory_RemoveBoard with
-                board = _id
-              archive oldCid
-            _ -> return ()
-
-      nonconsuming PutBoard
+      nonconsuming ADD_BOARD
         : ContractId Board
         with
-          board : Board
-          lists : [CardList]
-          cards : [Card]
+          boardId : Text
+          title : Text
         do
           fetchByKey @AppSemaphore operator
-          (_, ud) <- fetchByKey @UserDirectory operator
-
-          exercise self DeleteBoard with
-            _id = board._id
-          forA cards (\card -> create card with operator; obs = ud.users)
-          forA lists (\list -> create list with operator; obs = ud.users)
           exerciseByKey @BoardDirectory operator BoardDirectory_AddBoard with 
-            board = board._id
-          create board with operator; obs = ud.users
+            board = boardId
+          create Board with
+            _id = boardId
+            operator
+            admins = [party]
+            obs = []
+            title
+            color = "blue"
+            users = []
+            lists = []
 
+      nonconsuming DELETE_BOARD
+        : ()
+        with
+          boardId : Text
+        do
+          fetchByKey @AppSemaphore operator
 
+          oOldCid <- lookupByKey @Board (operator, boardId)
+          case oOldCid of
+            Some oldCid -> do
+              exerciseByKey @BoardDirectory operator BoardDirectory_RemoveBoard with
+                board = boardId
+              exercise oldCid Board_Delete
+            _ -> return ()
+
+      nonconsuming CHANGE_BOARD_TITLE
+        : ContractId Board
+        with
+          boardId : Text
+          newTitle : Text
+        do
+          fetchByKey @AppSemaphore operator
+          (oldCid, oldBoard) <- fetchByKey @Board (operator, boardId)
+          archive oldCid
+          create oldBoard with title = newTitle
+
+      nonconsuming CHANGE_BOARD_COLOR
+        : ContractId Board
+        with
+          boardId : Text
+          newColor : Text
+        do
+          fetchByKey @AppSemaphore operator
+          (oldCid, oldBoard) <- fetchByKey @Board (operator, boardId)
+          archive oldCid
+          create oldBoard with color = newColor
+
+      nonconsuming ADD_LIST
+        : ContractId CardList
+        with
+          boardId : Text
+          listId : Text
+          title : Text
+        do
+          fetchByKey @AppSemaphore operator
+          (oldCid, board) <- fetchByKey @Board (operator, boardId)
+          archive oldCid
+          create board with lists = board.lists ++ [listId]
+          create CardList with
+            _id = listId
+            admins = board.admins
+            obs = board.obs
+            operator = board.operator
+            boardId
+            title
+            cards = []
+
+      nonconsuming DELETE_LIST
+        : ()
+        with
+          boardId : Text
+          listId : Text
+        do
+          fetchByKey @AppSemaphore operator
+          (oldCid, board) <- fetchByKey @Board (operator, boardId)
+          archive oldCid
+          create board with lists = delete listId board.lists
+          exerciseByKey @CardList (operator, listId) List_Delete
+      
+      nonconsuming MOVE_LIST
+        : ContractId Board
+        with
+          boardId : Text
+          oldIdx : Int
+          newIdx : Int
+        do
+          fetchByKey @AppSemaphore operator
+          (oldCid, board) <- fetchByKey @Board (operator, boardId)
+          archive oldCid
+          create board with lists = move oldIdx newIdx board.lists
+      
+      nonconsuming CHANGE_LIST_TITLE
+        : ContractId CardList
+        with
+          listId : Text
+          newTitle : Text
+        do
+          fetchByKey @AppSemaphore operator
+          (oldCid, list) <- fetchByKey @CardList (operator, listId)
+          archive oldCid
+          create list with title = newTitle
+
+      nonconsuming ADD_CARD
+        : ContractId Card
+        with
+          listId : Text
+          cardId : Text
+          text : Text
+        do
+          fetchByKey @AppSemaphore operator
+          (oldCid, list) <- fetchByKey @CardList (operator, listId)
+          archive oldCid
+          create list with cards = list.cards ++ [cardId]
+          create Card with
+            _id = cardId
+            admins = list.admins
+            obs = list.obs
+            operator = list.operator
+            boardId = list.boardId
+            listId
+            text
+            color = None
+            date = None
+
+      nonconsuming MOVE_CARD
+        : ()
+        with
+          sourceListId : Text
+          destListId : Text
+          oldIdx : Int
+          newIdx : Int
+        do
+          fetchByKey @AppSemaphore operator
+          if(sourceListId == destListId)
+            then do
+              (oldCid, list) <- fetchByKey @CardList (operator, sourceListId)
+              archive oldCid
+              create list with cards = move oldIdx newIdx list.cards
+              return ()
+            else do
+              (oldSourceCid, source) <- fetchByKey @CardList (operator, sourceListId)
+              (oldDestCid, dest) <- fetchByKey @CardList (operator, destListId)
+              archive oldSourceCid
+              archive oldDestCid
+              let (x, newSourceCards) = takeAt oldIdx source.cards
+              create source with cards = newSourceCards
+              create dest with cards = insertAt newIdx x dest.cards
+              return ()
+
+      nonconsuming DELETE_CARD
+        : ContractId CardList
+        with
+          listId : Text
+          cardId : Text
+        do
+          (oldCid, list) <- fetchByKey @CardList (operator, listId)
+          archive oldCid
+          exerciseByKey @Card (operator, cardId) Card_Delete
+          create list with cards = delete cardId list.cards
+
+      nonconsuming CHANGE_CARD_TEXT
+        : ContractId Card
+        with
+          cardId : Text
+          newText : Text
+        do
+          (oldCid, card) <- fetchByKey @Card (operator, cardId)
+          archive oldCid
+          create card with text = newText
+
+      nonconsuming CHANGE_CARD_DATE
+        : ContractId Card
+        with
+          cardId : Text
+          newDate : Optional Time
+        do
+          (oldCid, card) <- fetchByKey @Card (operator, cardId)
+          archive oldCid
+          create card with date = newDate
+
+      nonconsuming CHANGE_CARD_COLOR
+        : ContractId Card
+        with
+          cardId : Text
+          newColor : Optional Text
+        do
+          (oldCid, card) <- fetchByKey @Card (operator, cardId)
+          archive oldCid
+          create card with color = newColor
 
 template UserProfile
   with
@@ -215,7 +396,7 @@ template Board
     signatory operator, admins
     observer users, obs
 
-    key (operator, _id) : BoardKey
+    key (operator, _id) : (Party, Text)
     maintainer key._1
 
     controller operator can
@@ -223,10 +404,17 @@ template Board
         : ContractId Board
         do
           (_, userDirectory) <- fetchByKey @UserDirectory operator
-          forA lists (\list -> exerciseByKey @CardList (operator, _id, list) List_UpdateObs)
+          forA lists (\list -> exerciseByKey @CardList (operator, list) List_UpdateObs)
           create this with obs = userDirectory.users
+
+    controller admins can
+      Board_Delete
+        : ()
+        do
+          forA lists (\list -> exerciseByKey @CardList (operator, list) List_Delete)
+          return ()
+
           
-type ListKey = (Party, Text, Text)
 
 template CardList 
   with
@@ -242,7 +430,7 @@ template CardList
     signatory operator, admins
     observer obs
 
-    key (operator, boardId, _id) : ListKey
+    key (operator, _id) : (Party, Text)
     maintainer key._1
 
     controller operator can
@@ -250,8 +438,15 @@ template CardList
         : ContractId CardList
         do
           (_, userDirectory) <- fetchByKey @UserDirectory operator
-          forA cards (\card -> exerciseByKey @Card (operator, boardId, _id, card) Card_UpdateObs)
+          forA cards (\card -> exerciseByKey @Card (operator, card) Card_UpdateObs)
           create this with obs = userDirectory.users
+
+    controller admins can
+      List_Delete
+        : ()
+        do
+          forA cards (\card -> exerciseByKey @Card (operator, card) Card_Delete)
+          return ()
 
 type CardKey = (Party, Text, Text, Text)
 
@@ -266,12 +461,12 @@ template Card
     listId : Text
     color : Optional Text
     text : Text
-    due : Optional Time
+    date : Optional Time
   where
     signatory operator, admins
     observer obs
 
-    key (operator, boardId, listId, _id) : CardKey
+    key (operator, _id) : (Party, Text)
     maintainer key._1
 
     controller operator can
@@ -280,6 +475,12 @@ template Card
         do
           (_, userDirectory) <- fetchByKey @UserDirectory operator
           create this with obs = userDirectory.users
+
+    controller admins can
+      Card_Delete
+        : ()
+        do
+          return ()
 
 startApp = scenario do
   admin <- getParty "Admin"

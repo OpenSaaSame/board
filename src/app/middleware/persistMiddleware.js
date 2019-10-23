@@ -28,30 +28,7 @@ const maybeWrite = (state, dispatch) => {
   });
 
   const action = ledger.write.queue[0];
-  let actionFn = null;
-
-  switch(action.type) {
-    case "DELETE_BOARD":
-      actionFn = deleteBoard;
-      break;
-      
-      case "ADD_LIST":
-      case "MOVE_LIST": 
-      case "DELETE_LIST":
-      case "ADD_BOARD":
-      case "CHANGE_BOARD_TITLE":
-      case "CHANGE_BOARD_COLOR":
-
-      case "ADD_CARD":
-      case "MOVE_CARD":
-      case "DELETE_CARD":
-      case "CHANGE_LIST_TITLE":
-
-      case "CHANGE_CARD_TEXT":
-      case "CHANGE_CARD_DATE": 
-      case "CHANGE_CARD_COLOR":
-        actionFn = writeBoard;
-  }
+  const actionFn = exerciseUserChoice(action.type);
 
   actionFn(state, action.boardId, action.payload)
   .then(r => {
@@ -69,54 +46,29 @@ const maybeWrite = (state, dispatch) => {
   })
 }
 
-const deleteBoard = (state, boardId, payload) => exercise(
+const exerciseUserChoice = (choice) => (state, boardId, payload) => exercise (
     state.user,
-    "UserProfile",
-    state.user.cid,
-    "DeleteBoard",
-    {
-      "ref": boardId
-    }
-  );
-
-const writeBoard = (state, boardId, payload) => {
-  const{
-    user,
-    boardsById,
-    listsById,
-    cardsById
-  } = state;
-
-  const extraFields = {
-    operator : user.party,
-    admins : [user.party],
-    obs : []
-  };
-
-  const withExtraFields = (extraFields, item) => {
-    Object.keys(extraFields).forEach(key => item[key] = extraFields[key]);
-    return item;
-  }
-
-  let board = withExtraFields(extraFields, boardsById[boardId]);
-  extraFields.boardId = boardId;
-  let lists = board.lists.map(listId => withExtraFields(extraFields, listsById[listId]));
-  let cards = lists.flatMap(list => {
-    extraFields.listId = list._id;
-    return list.cards.map(cardId => withExtraFields(extraFields, cardsById[cardId]))
-  });
-
-  return exercise (
-    user,
     "UserRole",
-    user.cid,
-    "PutBoard",
-    {
-      board,
-      lists,
-      cards
-    }
-  )
+    state.user.cid,
+    choice,
+    payloadTransform[choice](boardId, payload)
+)
+
+const payloadTransform = {
+  "ADD_BOARD": (boardId, payload) => ({ boardId, title: payload.boardTitle }),
+  "DELETE_BOARD": (boardId, payload) => ({ boardId }),
+  "CHANGE_BOARD_TITLE": (boardId, payload) => ({ boardId, newTitle: payload.boardTitle }),
+  "CHANGE_BOARD_COLOR": (boardId, payload) => ({ boardId, newColor: payload.color }),
+  "ADD_LIST": (boardId, payload) => ({ boardId, title: payload.listTitle, listId: payload.listId }),
+  "DELETE_LIST": (boardId, payload) => ({ boardId, listId: payload.listId }),
+  "MOVE_LIST": (boardId, payload) => ({ boardId, oldIdx: payload.oldListIndex, newIdx: payload.newListIndex }),
+  "CHANGE_LIST_TITLE": (boardId, payload) => ({ listId: payload.listId, newTitle: payload.listTitle }),
+  "ADD_CARD": (boardId, payload) => ({ listId: payload.listId, cardId: payload.cardId, text: payload.cardText }),
+  "MOVE_CARD": (boardId, payload) => ({ sourceListId: payload.sourceListId, destListId: payload.destListId, oldIdx: payload.oldCardIndex, newIdx: payload.newCardIndex }),
+  "DELETE_CARD": (boardId, payload) => ({ listId: payload.listId, cardId: payload.cardId }),
+  "CHANGE_CARD_TEXT": (boardId, payload) => ({ cardId: payload.cardId, newText: payload.cardText }),
+  "CHANGE_CARD_DATE": (boardId, payload) => ({ cardId: payload.cardId, newDate: payload.date }),
+  "CHANGE_CARD_COLOR": (boardId, payload) => ({ cardId: payload.cardId, newColor: payload.color }),
 }
 
 const sortById = list => {
@@ -183,29 +135,20 @@ const persistMiddleware = store => next => action => {
   // Nothing is persisted for guest users
   if (user) {
     switch(action.type) {
-      case "DELETE_BOARD":
-        exercise(
-          user,
-          "UserProfile",
-          user.cid,
-          "DeleteBoard",
-          {
-            "ref": boardId
-          }
-        );
-        break;
-      
-      case "ADD_LIST":
-      case "MOVE_LIST": 
-      case "DELETE_LIST":
       case "ADD_BOARD":
+      case "DELETE_BOARD":
+
       case "CHANGE_BOARD_TITLE":
       case "CHANGE_BOARD_COLOR":
+      
+      case "ADD_LIST":
+      case "DELETE_LIST":
+      case "MOVE_LIST": 
+      case "CHANGE_LIST_TITLE":
 
       case "ADD_CARD":
       case "MOVE_CARD":
       case "DELETE_CARD":
-      case "CHANGE_LIST_TITLE":
 
       case "CHANGE_CARD_TEXT":
       case "CHANGE_CARD_DATE": 

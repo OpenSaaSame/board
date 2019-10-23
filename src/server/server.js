@@ -32,7 +32,6 @@ const apiPrefix = process.env.USE_SANDBOX
 app.use("/api", proxy(apiHost, {
   "proxyReqPathResolver" : req => {
     const parts = req.url.split('/api/');
-    console.log(parts);
     return apiPrefix + parts[0];
   }
 }));
