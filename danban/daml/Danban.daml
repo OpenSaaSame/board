@@ -280,3 +280,10 @@ template Card
         do
           (_, userDirectory) <- fetchByKey @UserDirectory operator
           create this with obs = userDirectory.users
+
+startApp = scenario do
+  admin <- getParty "Admin"
+  app <- submit admin do
+    create DanbanApp with operator = admin
+  submit admin do
+    exercise app StartApp

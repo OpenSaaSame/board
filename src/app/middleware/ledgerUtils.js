@@ -58,11 +58,17 @@ export const search = (ledgerUrl, jwt, templateId, filter) => callAPI(
     });
 
 export const loadAll = (ledgerUrl, jwt) => callAPI(
-        ledgerUrl + "contracts",
-        jwt,
-        "GET"
-    )
-    .then(processResponse)
+    ledgerUrl + "contracts/search",
+    jwt,
+    "POST",
+    {
+        "%templates": ["Board", "CardList", "Card"].map(entityName => ({
+            entityName,
+            "moduleName": "Danban"
+        }))
+    }
+)
+.then(processResponse)
     .catch(err => {
         throw new NestedError(`Error all contracts: `, err);
     });

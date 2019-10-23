@@ -91,9 +91,9 @@ const maybeRead = (user, ledger, store) => {
     loadAll(ledgerUrl, user.token)
     .then(contracts => {
 
-      const boards = sortById(contracts.result.filter(c => c.templateId.startsWith("Danban:Board@")).map(c => c.argument));
-      const lists = sortById(contracts.result.filter(c => c.templateId.startsWith("Danban:CardList@")).map(c => c.argument));
-      const cards = sortById(contracts.result.filter(c => c.templateId.startsWith("Danban:Card@")).map(c => c.argument));
+      const boards = sortById(contracts.result.filter(c => c.templateId.entityName === "Board").map(c => c.argument));
+      const lists = sortById(contracts.result.filter(c => c.templateId.entityName === "CardList").map(c => c.argument));
+      const cards = sortById(contracts.result.filter(c => c.templateId.entityName === "Card").map(c => c.argument));
 
       // Don't overwrite changes that are in-flight
       const {

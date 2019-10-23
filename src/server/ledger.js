@@ -1,7 +1,9 @@
 import {exercise, search} from "../app/middleware/ledgerUtils";
 
 
-const ledgerURL = () => `https://api.projectdabl.com/data/${process.env.DABL_LEDGER}/`;
+const ledgerURL = () => process.env.USE_SANDBOX
+? "http://localhost:7575/"
+: `https://api.projectdabl.com/data/${process.env.DABL_LEDGER}/`;
 
 const fetchUserProfiles = user => search(
         ledgerURL(),
@@ -48,6 +50,7 @@ export const getUserProfile = user => {
 }
 
 export const getOrCreateUserProfile = (user, profile) => {
+    console.log(JSON.stringify(user));
     return fetchUserProfiles(user)
     .then(profiles => {
         if(profiles.length == 0) return createProfile(user, profile);

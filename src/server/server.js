@@ -1,3 +1,5 @@
+/* global BigInt */
+
 import express from "express";
 import passport from "passport";
 import compression from "compression";
@@ -13,22 +15,29 @@ import auth from "./routes/auth";
 var proxy = require('express-http-proxy');
 import login from "./login";
 import connectDabl from "./dabl";
+import connectSandbox from "./sandbox";
 
 // Load environment variables from .env file
 dotenv.config();
 
 const app = express();
-const dabl = connectDabl();
+const ledgerAdmin = process.env.USE_SANDBOX ? connectSandbox() : connectDabl();
 
-app.use("/api", proxy("https://api.projectdabl.com", {
+const apiHost = process.env.USE_SANDBOX
+  ? "http://localhost:7575"
+  : "https://api.projectdabl.com";
+const apiPrefix = process.env.USE_SANDBOX
+? ""
+: "/data/" + process.env.DABL_LEDGER ;
+app.use("/api", proxy(apiHost, {
   "proxyReqPathResolver" : req => {
     const parts = req.url.split('/api/');
     console.log(parts);
-    return "/data/" + process.env.DABL_LEDGER + parts[0];
+    return apiPrefix + parts[0];
   }
 }));
 
-configurePassport(dabl);
+configurePassport(ledgerAdmin);
 
 app.use(helmet());
 app.use(logger("tiny"));

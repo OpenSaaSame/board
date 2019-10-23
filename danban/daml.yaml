@@ -1,10 +1,8 @@
 sdk-version: 0.13.30
 name: danban
 source: daml
-scenario: Main:setup
 parties:
-  - Alice
-  - Bob
+  - Admin
 version: 0.0.1
 dependencies:
   - daml-prim

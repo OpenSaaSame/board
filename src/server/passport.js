@@ -3,13 +3,13 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {getUserProfile, getOrCreateUserProfile} from "./ledger";
 
-const configurePassport = dabl => {
+const configurePassport = ledgerAdmin => {
 
   passport.serializeUser((user, cb) => {
     cb(null, user._id);
   });
   passport.deserializeUser((userName, cb) => {
-    dabl.getUser(userName).then(user => {
+    ledgerAdmin.getUser(userName).then(user => {
       getUserProfile(user)
       .then(userProfile => {
         cb(null, userProfile);
@@ -31,7 +31,7 @@ const configurePassport = dabl => {
         callbackURL: `${process.env.ROOT_URL}/auth/google/callback`
       },
       (accessToken, refreshToken, profile, cb) => {
-        dabl.getUser(profile.id)
+        ledgerAdmin.getUser(profile.id)
         .then(user => {
           getOrCreateUserProfile(user, profile)
           .then(userProfile => {
