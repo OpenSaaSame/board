@@ -1,11 +1,14 @@
-import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
-import {processResponse, callAPI, exercise, search} from "../app/middleware/ledgerUtils";
+import {exercise, search} from "../app/middleware/ledgerUtils";
 import { JWT, JWK } from "jose"
+import {getOrCreateApp} from "./ledger"
+
 
 const sandbox = () => {
     const adminParty = "Admin" 
     const dataURL = "http://localhost:7575/"
+
+    let appCid = null;
     
     const getToken = party => {
         return JWT.sign(
@@ -43,20 +46,28 @@ const sandbox = () => {
         });
     }
 
-    const callApp = (choice, argument) => exercise(
-            dataURL,
-            adminToken(),
-            {
-                "moduleName": "Danban",
-                "entityName": "DanbanApp"
-            },
-            process.env.APP_CID,
-            choice,
-            argument
+    const callApp = (choice, argument) => {
+        if(appCid == null) appCid = getOrCreateApp(adminParty, adminToken());
+        return appCid
+        .then(cid => exercise(
+                dataURL,
+                adminToken(),
+                {
+                    "moduleName": "Danban",
+                    "entityName": "DanbanApp"
+                },
+                cid,
+                choice,
+                argument
+            )
+            .catch(err => {
+                throw new NestedError(`Error calling app choice ${choice} with ${argument}`, err);
+            })
         )
         .catch(err => {
-            throw new NestedError(`Error calling app choice ${choice} with ${argument}`, err);
-        });
+            throw new NestedError(`Error getting app cid or calling app choice ${choice} with ${argument}`, err);
+        })
+    }
 
     const getUser = user => {
 
@@ -87,7 +98,7 @@ const sandbox = () => {
                     })
                 )
                 .then(response => {
-                    return response.result[response.result.length - 1].created;
+                    return response[response.length - 1].created;
                 })
                 .catch(err => {
                     throw new NestedError(`Error creating User Role for ${user}`, err)

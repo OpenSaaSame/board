@@ -1,4 +1,5 @@
-import {exercise, search} from "../app/middleware/ledgerUtils";
+import {create, exercise, search} from "../app/middleware/ledgerUtils";
+import NestedError from "nested-error-stacks";
 
 
 const ledgerURL = () => process.env.USE_SANDBOX
@@ -31,7 +32,7 @@ const createProfile = (user, profile) => exercise(
     )
     .then(response => {
         console.log(response);
-        return response.result[response.result.length - 1].created
+        return response[response.length - 1].created
     });
     
 export const getUserProfile = user => {
@@ -65,3 +66,41 @@ export const getOrCreateUserProfile = (user, profile) => {
         return p;
     });
 }
+
+const appTemplate = {
+    "moduleName": "Danban",
+    "entityName": "DanbanApp"
+};
+
+export const getOrCreateApp = (admin, jwt) => search(
+        ledgerURL(),
+        jwt,
+        appTemplate,
+        app => app.argument.operator == admin
+    )
+    .then(apps => {
+        if(apps.length > 0) return apps[0];
+        else return create (
+            ledgerURL(),
+            jwt,
+            appTemplate,
+            { "operator": admin }
+        )
+        .then(response => exercise(
+                ledgerURL(),
+                jwt,
+                appTemplate,
+                response.contractId,
+                "StartApp",
+                {}
+            )
+            .then(() => response.contractId)
+            .catch(err => {
+                throw new NestedError(`Error starting app: `, err);
+            })
+        )
+        .catch(err => {
+            throw new NestedError(`Error creating app: `, err);
+        });
+    });
+    

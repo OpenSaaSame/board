@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
 import {processResponse, callAPI, exercise, search} from "../app/middleware/ledgerUtils";
+import {getOrCreateApp} from "./ledger"
 const url = require("url");
 
 const dabl = () => {
@@ -15,6 +16,8 @@ const dabl = () => {
     let refreshCookieTime = null;
     
     let jwts = {};
+
+    let appCid = null;
 
     const getSiteJWT = () => {
         // Get a new refresh token every 2 weeks.
@@ -155,21 +158,29 @@ const dabl = () => {
     };
 
     const callApp = (choice, argument) => adminToken()
-        .then(jwt => exercise(
-                dataURL,
-                jwt,
-                {
-                    "moduleName": "Danban",
-                    "entityName": "DanbanApp"
-                },
-                process.env.APP_CID,
-                choice,
-                argument
+        .then(jwt => {
+            if(appCid == null) appCid = getOrCreateApp(adminParty, jwt);
+            
+            return appCid
+            .then(cid => exercise(
+                    dataURL,
+                    jwt,
+                    {
+                        "moduleName": "Danban",
+                        "entityName": "DanbanApp"
+                    },
+                    cid,
+                    choice,
+                    argument
+                )
+                .catch(err => {
+                    throw new NestedError(`Error calling app choice ${choice} with ${argument}`, err);
+                })
             )
             .catch(err => {
-                throw new NestedError(`Error calling app choice ${choice} with ${argument}`, err);
+                throw new NestedError(`Error getting app cid or calling app choice ${choice} with ${argument}`, err);
             })
-        );
+        });
 
     const getUser = user => {
         let party_ = null;
@@ -242,7 +253,7 @@ const dabl = () => {
                     )
                     .then(response => {
                         console.log(`Role response: ${response}`)
-                        return response.result[response.result.length - 1].created;
+                        return response[response.length - 1].created;
                     })
                     .catch(err => {
                         throw new NestedError(`Error creating User Role for ${user}`, err)
