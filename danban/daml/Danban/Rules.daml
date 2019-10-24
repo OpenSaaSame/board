@@ -1,0 +1,289 @@
+daml 1.2
+module Danban.Rules where
+
+import DA.List
+
+import qualified Danban.Board as Board
+import qualified Danban.User as User
+import Danban.Util
+
+data AccessLevel
+  = Read
+  | Write
+  | Admin
+  | SignedAdmin
+    deriving (Eq, Show, Ord)
+
+template Board
+  with
+    boardId : Text
+    operator : Party
+    users : [(Party, AccessLevel)]
+  where
+    signatory operator, map fst . filter (\x -> snd x == SignedAdmin) $ users
+    observer map fst . filter (\x -> snd x /= Read) $ users, 
+    
+    key (operator, boardId) : (Party, Text)
+    maintainer key._1
+
+    let
+      checkAccess (u: Party) (r: AccessLevel) : Update () = case lookup u users of
+        Some ur -> assertMsg
+          (show r <> " access required. " <> show u <> " only has " <> show ur <> ".")
+          (ur >= r) 
+        None -> abort (show u <> " does not have access to board " <> boardId <> ".")
+
+    -- Helper Choices
+    nonconsuming choice UPDATE_OBS
+      : ContractId Board.Data
+      controller signatory this
+      do
+        (cid, board) <- fetchByKey @Board.Data (operator, boardId)
+        newObs <- if board.isPublic
+          then do
+            (_, ud) <- fetchByKey @User.Directory operator
+            return ud.users
+          else return (map fst users)
+        
+        exerciseByKey @Board.Data (operator, boardId) Board.Data_UpdateObs with newObs
+
+    -- Admin Access Actions
+    choice ADD_USER
+      : ContractId Board.Data
+      with
+        admin : Party
+        newUser : Party
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        assertMsg (show newUser <> " is already a user.") (newUser `notElem` map fst users)
+        newSelf <- create this with users = sortOn fst ((newUser, Read) :: users)
+        exercise newSelf UPDATE_OBS
+
+    choice CHANGE_PERMISSIONS
+      : ContractId Board
+      with
+        admin : Party
+        user : Party
+        access : AccessLevel
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        create this with users = map (\(u, r) -> if u == user then (u, access) else (u, r)) users        
+
+    -- Admin Board Actions
+    nonconsuming choice TOGGLE_PUBLIC
+      : ContractId Board.Data
+      with
+        admin : Party
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (cid, board) <- fetchByKey @Board.Data (operator, boardId)
+        archive cid
+        cid <- create board with isPublic = not board.isPublic
+        exercise self UPDATE_OBS
+
+    nonconsuming choice DELETE_BOARD
+      : ()
+      with
+        admin : Party
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        oOldCid <- lookupByKey @Board.Data (operator, boardId)
+        case oOldCid of
+          Some oldCid -> do
+            exerciseByKey @Board.Directory operator Board.Directory_RemoveBoard with
+              board = boardId
+            exercise oldCid Board.Data_Delete
+          _ -> return ()
+
+    nonconsuming choice CHANGE_BOARD_TITLE
+      : ContractId Board.Data
+      with
+        admin : Party
+        newTitle : Text
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (oldCid, oldBoard) <- fetchByKey @Board.Data (operator, boardId)
+        archive oldCid
+        create oldBoard with title = newTitle
+
+    nonconsuming choice CHANGE_BOARD_COLOR
+      : ContractId Board.Data
+      with
+        admin : Party
+        newColor : Text
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (oldCid, oldBoard) <- fetchByKey @Board.Data (operator, boardId)
+        archive oldCid
+        create oldBoard with color = newColor
+
+    nonconsuming choice ADD_LIST
+      : ContractId Board.CardList
+      with
+        admin : Party
+        listId : Text
+        title : Text
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (oldCid, board) <- fetchByKey @Board.Data (operator, boardId)
+        archive oldCid
+        create board with lists = board.lists ++ [listId]
+        create Board.CardList with
+          _id = listId
+          admins = board.admins
+          obs = board.obs
+          operator = board.operator
+          boardId
+          title
+          cards = []
+
+    nonconsuming choice DELETE_LIST
+      : ()
+      with
+        admin : Party
+        listId : Text
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (oldCid, board) <- fetchByKey @Board.Data (operator, boardId)
+        archive oldCid
+        create board with lists = delete listId board.lists
+        exerciseByKey @Board.CardList (operator, listId) Board.List_Delete
+    
+    nonconsuming choice MOVE_LIST
+      : ContractId Board.Data
+      with
+        user : Party
+        oldIdx : Int
+        newIdx : Int
+      controller [operator, user]
+      do
+        checkAccess user Admin
+        (oldCid, board) <- fetchByKey @Board.Data (operator, boardId)
+        archive oldCid
+        create board with lists = move oldIdx newIdx board.lists
+    
+    nonconsuming choice CHANGE_LIST_TITLE
+      : ContractId Board.CardList
+      with
+        user : Party
+        listId : Text
+        newTitle : Text
+      controller [operator, user]
+      do
+        checkAccess user Admin
+        (oldCid, list) <- fetchByKey @Board.CardList (operator, listId)
+        archive oldCid
+        create list with title = newTitle
+
+    -- User Board Actions
+    nonconsuming choice ADD_CARD
+      : ContractId Board.Card
+      with
+        user : Party
+        listId : Text
+        cardId : Text
+        text : Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCid, list) <- fetchByKey @Board.CardList (operator, listId)
+        archive oldCid
+        create list with cards = list.cards ++ [cardId]
+        create Board.Card with
+          _id = cardId
+          admins = list.admins
+          obs = list.obs
+          operator = list.operator
+          boardId = list.boardId
+          listId
+          text
+          color = None
+          date = None
+
+    nonconsuming choice MOVE_CARD
+      : ()
+      with
+        user : Party
+        sourceListId : Text
+        destListId : Text
+        oldIdx : Int
+        newIdx : Int
+      controller [operator, user]
+      do
+        checkAccess user Write
+        if(sourceListId == destListId)
+          then do
+            (oldCid, list) <- fetchByKey @Board.CardList (operator, sourceListId)
+            archive oldCid
+            create list with cards = move oldIdx newIdx list.cards
+            return ()
+          else do
+            (oldSourceCid, source) <- fetchByKey @Board.CardList (operator, sourceListId)
+            (oldDestCid, dest) <- fetchByKey @Board.CardList (operator, destListId)
+            archive oldSourceCid
+            archive oldDestCid
+            let (x, newSourceCards) = takeAt oldIdx source.cards
+            create source with cards = newSourceCards
+            create dest with cards = insertAt newIdx x dest.cards
+            return ()
+
+    nonconsuming choice DELETE_CARD
+      : ContractId Board.CardList
+      with
+        user : Party
+        listId : Text
+        cardId : Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCid, list) <- fetchByKey @Board.CardList (operator, listId)
+        archive oldCid
+        exerciseByKey @Board.Card (operator, cardId) Board.Card_Delete
+        create list with cards = delete cardId list.cards
+
+    nonconsuming choice CHANGE_CARD_TEXT
+      : ContractId Board.Card
+      with
+        user : Party
+        cardId : Text
+        newText : Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
+        archive oldCid
+        create card with text = newText
+
+    nonconsuming choice CHANGE_CARD_DATE
+      : ContractId Board.Card
+      with
+        user : Party
+        cardId : Text
+        newDate : Optional Time
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
+        archive oldCid
+        create card with date = newDate
+
+    nonconsuming choice CHANGE_CARD_COLOR
+      : ContractId Board.Card
+      with
+        user : Party
+        cardId : Text
+        newColor : Optional Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
+        archive oldCid
+        create card with color = newColor

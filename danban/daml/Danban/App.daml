@@ -1,7 +1,7 @@
 daml 1.2
 module Danban.App where
 
--- AppSemaphore allows the op to stop all operattion, e.g. to do bulk updates
+-- App.Semaphore allows the op to stop all operattion, e.g. to do bulk updates
 template Semaphore
   with
     operator : Party

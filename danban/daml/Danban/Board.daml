@@ -22,7 +22,7 @@ template Directory
         : ContractId Directory
         do
           (_, userDirectory) <- fetchByKey @User.Directory operator
-          forA boards (\board -> exerciseByKey @Data (operator, board) Data_UpdateObs)
+          forA boards (\board -> exerciseByKey @Data (operator, board) Data_UpdatePublic)
           create this with users = userDirectory.users
 
       Directory_AddBoard
@@ -50,22 +50,33 @@ template Data
 
     title : Text
     color : Text
-    users : [Party]
+    isPublic : Bool
     lists : [Text]
   where
     signatory operator, admins
-    observer users, obs
+    observer obs
 
     key (operator, _id) : (Party, Text)
     maintainer key._1
 
     controller operator can
-      Data_UpdateObs
+      nonconsuming Data_UpdatePublic
         : ContractId Data
         do
-          (_, userDirectory) <- fetchByKey @User.Directory operator
-          forA lists (\list -> exerciseByKey @CardList (operator, list) List_UpdateObs)
-          create this with obs = userDirectory.users
+          if isPublic
+            then do
+              (_, ud) <- fetchByKey @User.Directory operator
+              exercise self Data_UpdateObs with newObs = ud.users
+            else return self
+
+    controller operator, admins can
+      Data_UpdateObs
+        : ContractId Data
+        with
+          newObs : [Party]
+        do
+          forA lists (\list -> exerciseByKey @CardList (operator, list) List_UpdateObs with newObs)
+          create this with obs = newObs
 
     controller admins can
       Data_Delete
@@ -94,10 +105,11 @@ template CardList
     controller operator can
       List_UpdateObs
         : ContractId CardList
+        with
+          newObs : [Party]
         do
-          (_, userDirectory) <- fetchByKey @User.Directory operator
-          forA cards (\card -> exerciseByKey @Card (operator, card) Card_UpdateObs)
-          create this with obs = userDirectory.users
+          forA cards (\card -> exerciseByKey @Card (operator, card) Card_UpdateObs with newObs)
+          create this with obs = newObs
 
     controller admins can
       List_Delete
@@ -130,9 +142,10 @@ template Card
     controller operator can
       Card_UpdateObs
         : ContractId Card
+        with
+          newObs : [Party]
         do
-          (_, userDirectory) <- fetchByKey @User.Directory operator
-          create this with obs = userDirectory.users
+          create this with obs = newObs
 
     controller admins can
       Card_Delete

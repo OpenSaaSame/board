@@ -1,5 +1,15 @@
 const boardsById = (state = {}, action) => {
   switch (action.type) {
+    case "TOGGLE_PUBLIC": {
+      const { boardId } = action.payload;
+      return {
+        ...state,
+        [boardId]: {
+          ...state[boardId],
+          isPublic: !state[boardId].isPublic
+        }
+      };
+    }
     case "ADD_LIST": {
       const { boardId, listId } = action.payload;
       return {
@@ -39,7 +49,7 @@ const boardsById = (state = {}, action) => {
           admins: [userId],
           title: boardTitle,
           lists: [],
-          users: [],
+          public: false,
           color: "blue"
         }
       };

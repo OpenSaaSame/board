@@ -55,6 +55,7 @@ const exerciseUserChoice = (choice) => (state, boardId, payload) => exercise (
 
 const payloadTransform = {
   "ADD_BOARD": (boardId, payload) => ({ boardId, title: payload.boardTitle }),
+  "TOGGLE_PUBLIC": (boardId, payload) => ({ boardId }),
   "DELETE_BOARD": (boardId, payload) => ({ boardId }),
   "CHANGE_BOARD_TITLE": (boardId, payload) => ({ boardId, newTitle: payload.boardTitle }),
   "CHANGE_BOARD_COLOR": (boardId, payload) => ({ boardId, newColor: payload.color }),
@@ -139,6 +140,7 @@ const persistMiddleware = store => next => action => {
   if (user) {
     switch(action.type) {
       case "ADD_BOARD":
+      case "TOGGLE_PUBLIC":
       case "DELETE_BOARD":
 
       case "CHANGE_BOARD_TITLE":
