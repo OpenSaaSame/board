@@ -44,6 +44,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.11.0",
     "react-aria-menubutton": "^5.1.1",
+    "react-autocomplete": "^1.8.1",
     "react-beautiful-dnd": "github:yogaboll/react-beautiful-dnd#include-generated",
     "react-day-picker": "^7.4.0",
     "react-dom": "^16.11.0",

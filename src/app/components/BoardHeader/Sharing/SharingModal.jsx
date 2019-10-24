@@ -5,7 +5,8 @@ import { withRouter } from "react-router-dom";
 import { Button, Wrapper, Menu, MenuItem } from "react-aria-menubutton";
 import FaShareSquare from "react-icons/lib/fa/share-square";
 import Switch from "react-switch";
-import "./AccessModal.scss";
+import UserList from "./UserList"
+import "./SharingModal.scss";
 
 class AccessModal extends Component {
   constructor() {
@@ -45,19 +46,9 @@ class AccessModal extends Component {
             <span className="access-modal-public-header">Public</span>
             <Switch onChange={this.handleChange} checked={this.props.isPublic} height={22} className="access-modal-public-switch"/>
           </label>
-
           <div className="access-modal-users">
             <span className="access-modal-users-header">Users</span>
-            <div className="access-modal-users-list">
-              {this.props.users.map(user => {
-                return (
-                  <div className="access-modal-users-list-user" key={user}>
-                    <span>{this.props.allUsers.byParty[user["_1"]].displayName}</span>
-                    <span>{user["_2"]}</span>
-                  </div>
-                )
-              })}
-            </div>
+            <UserList />
           </div>
         </Menu>
       </Wrapper>
