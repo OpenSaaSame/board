@@ -2,12 +2,12 @@ import {loadAll, exercise as exerciseUtil} from "./ledgerUtils"
 
 const ledgerUrl = "/api/";
 
-const exercise = (user, template, cid, choice, args) => exerciseUtil(
+const exercise = (user, cid, choice, args) => exerciseUtil(
     ledgerUrl,
     user.token,
     {
-      "moduleName": "Danban",
-      "entityName": template
+      "moduleName": "Danban.Role",
+      "entityName": "User"
     },
     cid,
     choice,
@@ -48,7 +48,6 @@ const maybeWrite = (state, dispatch) => {
 
 const exerciseUserChoice = (choice) => (state, boardId, payload) => exercise (
     state.user,
-    "UserRole",
     state.user.cid,
     choice,
     payloadTransform[choice](boardId, payload)

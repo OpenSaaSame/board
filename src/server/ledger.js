@@ -10,8 +10,8 @@ const fetchUserProfiles = user => search(
         ledgerURL(),
         user.token,
         {
-            "moduleName": "Danban",
-            "entityName": "UserProfile"
+            "moduleName": "Danban.User",
+            "entityName": "Profile"
         },
         userParty => userParty.argument.party == user.party && userParty.argument.operator == user.operator
     )
@@ -20,8 +20,8 @@ const createProfile = (user, profile) => exercise(
         ledgerURL(),
         user.token,
         {
-            "moduleName": "Danban",
-            "entityName": "UserRole"
+            "moduleName": "Danban.Role",
+            "entityName": "User"
         },
         user.cid,
         "PutProfile",
@@ -67,7 +67,7 @@ export const getOrCreateUserProfile = (user, profile) => {
 
 const appTemplate = {
     "moduleName": "Danban",
-    "entityName": "DanbanApp"
+    "entityName": "App"
 };
 
 export const getOrCreateApp = (admin, jwt) => search(

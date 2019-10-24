@@ -169,7 +169,7 @@ const dabl = () => {
                     jwt,
                     {
                         "moduleName": "Danban",
-                        "entityName": "DanbanApp"
+                        "entityName": "App"
                     },
                     cid,
                     choice,
@@ -229,8 +229,8 @@ const dabl = () => {
             .then(party => getOrCreateContract(
                     userToken(),
                     {
-                        "moduleName": "Danban",
-                        "entityName": "UserRole"
+                        "moduleName": "Danban.Role",
+                        "entityName": "User"
                     },
                     role => role.argument.party == party && role.argument.operator == adminParty,
                     () => 

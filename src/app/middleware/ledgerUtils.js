@@ -63,9 +63,9 @@ export const loadAll = (ledgerUrl, jwt) => callAPI(
         jwt,
         "POST",
         {
-            "%templates": ["Board", "CardList", "Card"].map(entityName => ({
+            "%templates": ["Data", "CardList", "Card"].map(entityName => ({
                 entityName,
-                "moduleName": "Danban"
+                "moduleName": "Danban.Board"
             }))
         }
     )

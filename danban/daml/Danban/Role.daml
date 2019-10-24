@@ -1,0 +1,234 @@
+daml 1.2
+module Danban.Role where
+
+import DA.Action
+import DA.List
+import DA.Optional
+
+import qualified Danban.App as App
+import qualified Danban.Board as Board
+import qualified Danban.User as User
+import Danban.Util
+
+-- Role.User gives a user the choices to operate on the app
+template User
+  with
+    party : Party
+    operator : Party
+  where
+    signatory operator
+
+    key (operator, party) : (Party, Party)
+    maintainer key._1
+
+    controller party can
+      nonconsuming PutProfile
+        : ContractId User.Profile
+        with
+          displayName : Text
+          imageUrl : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, userDirectory) <- fetchByKey @User.Directory operator
+          oProfile <- lookupByKey @User.Profile (operator, party)
+          when (isSome oProfile) (archive (fromSome oProfile))
+          create User.Profile with obs = userDirectory.users, ..
+
+      nonconsuming ADD_BOARD
+        : ContractId Board.Data
+        with
+          boardId : Text
+          title : Text
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Board.Directory operator Board.Directory_AddBoard with 
+            board = boardId
+          create Board.Data with
+            _id = boardId
+            operator
+            admins = [party]
+            obs = []
+            title
+            color = "blue"
+            users = []
+            lists = []
+
+      nonconsuming DELETE_BOARD
+        : ()
+        with
+          boardId : Text
+        do
+          fetchByKey @App.Semaphore operator
+
+          oOldCid <- lookupByKey @Board.Data (operator, boardId)
+          case oOldCid of
+            Some oldCid -> do
+              exerciseByKey @Board.Directory operator Board.Directory_RemoveBoard with
+                board = boardId
+              exercise oldCid Board.Data_Delete
+            _ -> return ()
+
+      nonconsuming CHANGE_BOARD_TITLE
+        : ContractId Board.Data
+        with
+          boardId : Text
+          newTitle : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (oldCid, oldBoard) <- fetchByKey @Board.Data (operator, boardId)
+          archive oldCid
+          create oldBoard with title = newTitle
+
+      nonconsuming CHANGE_BOARD_COLOR
+        : ContractId Board.Data
+        with
+          boardId : Text
+          newColor : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (oldCid, oldBoard) <- fetchByKey @Board.Data (operator, boardId)
+          archive oldCid
+          create oldBoard with color = newColor
+
+      nonconsuming ADD_LIST
+        : ContractId Board.CardList
+        with
+          boardId : Text
+          listId : Text
+          title : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (oldCid, board) <- fetchByKey @Board.Data (operator, boardId)
+          archive oldCid
+          create board with lists = board.lists ++ [listId]
+          create Board.CardList with
+            _id = listId
+            admins = board.admins
+            obs = board.obs
+            operator = board.operator
+            boardId
+            title
+            cards = []
+
+      nonconsuming DELETE_LIST
+        : ()
+        with
+          boardId : Text
+          listId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (oldCid, board) <- fetchByKey @Board.Data (operator, boardId)
+          archive oldCid
+          create board with lists = delete listId board.lists
+          exerciseByKey @Board.CardList (operator, listId) Board.List_Delete
+      
+      nonconsuming MOVE_LIST
+        : ContractId Board.Data
+        with
+          boardId : Text
+          oldIdx : Int
+          newIdx : Int
+        do
+          fetchByKey @App.Semaphore operator
+          (oldCid, board) <- fetchByKey @Board.Data (operator, boardId)
+          archive oldCid
+          create board with lists = move oldIdx newIdx board.lists
+      
+      nonconsuming CHANGE_LIST_TITLE
+        : ContractId Board.CardList
+        with
+          listId : Text
+          newTitle : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (oldCid, list) <- fetchByKey @Board.CardList (operator, listId)
+          archive oldCid
+          create list with title = newTitle
+
+      nonconsuming ADD_CARD
+        : ContractId Board.Card
+        with
+          listId : Text
+          cardId : Text
+          text : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (oldCid, list) <- fetchByKey @Board.CardList (operator, listId)
+          archive oldCid
+          create list with cards = list.cards ++ [cardId]
+          create Board.Card with
+            _id = cardId
+            admins = list.admins
+            obs = list.obs
+            operator = list.operator
+            boardId = list.boardId
+            listId
+            text
+            color = None
+            date = None
+
+      nonconsuming MOVE_CARD
+        : ()
+        with
+          sourceListId : Text
+          destListId : Text
+          oldIdx : Int
+          newIdx : Int
+        do
+          fetchByKey @App.Semaphore operator
+          if(sourceListId == destListId)
+            then do
+              (oldCid, list) <- fetchByKey @Board.CardList (operator, sourceListId)
+              archive oldCid
+              create list with cards = move oldIdx newIdx list.cards
+              return ()
+            else do
+              (oldSourceCid, source) <- fetchByKey @Board.CardList (operator, sourceListId)
+              (oldDestCid, dest) <- fetchByKey @Board.CardList (operator, destListId)
+              archive oldSourceCid
+              archive oldDestCid
+              let (x, newSourceCards) = takeAt oldIdx source.cards
+              create source with cards = newSourceCards
+              create dest with cards = insertAt newIdx x dest.cards
+              return ()
+
+      nonconsuming DELETE_CARD
+        : ContractId Board.CardList
+        with
+          listId : Text
+          cardId : Text
+        do
+          (oldCid, list) <- fetchByKey @Board.CardList (operator, listId)
+          archive oldCid
+          exerciseByKey @Board.Card (operator, cardId) Board.Card_Delete
+          create list with cards = delete cardId list.cards
+
+      nonconsuming CHANGE_CARD_TEXT
+        : ContractId Board.Card
+        with
+          cardId : Text
+          newText : Text
+        do
+          (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
+          archive oldCid
+          create card with text = newText
+
+      nonconsuming CHANGE_CARD_DATE
+        : ContractId Board.Card
+        with
+          cardId : Text
+          newDate : Optional Time
+        do
+          (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
+          archive oldCid
+          create card with date = newDate
+
+      nonconsuming CHANGE_CARD_COLOR
+        : ContractId Board.Card
+        with
+          cardId : Text
+          newColor : Optional Text
+        do
+          (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
+          archive oldCid
+          create card with color = newColor

@@ -1,0 +1,141 @@
+daml 1.2
+module Danban.Board where
+
+import DA.List
+
+import qualified Danban.User as User
+
+template Directory
+  with
+    operator : Party
+    users : [Party]
+    boards : [Text]
+  where
+    signatory operator
+    observer users
+
+    key operator : Party
+    maintainer key
+
+    controller operator can
+      Directory_UpdateObs
+        : ContractId Directory
+        do
+          (_, userDirectory) <- fetchByKey @Directory operator
+          forA boards (\board -> exerciseByKey @Data (operator, board) Data_UpdateObs)
+          create this with users = userDirectory.users
+
+      Directory_AddBoard
+        : ContractId Directory
+        with
+          board : Text
+        do
+          create this with boards = dedupSort (board :: boards)
+
+      Directory_RemoveBoard
+        : ContractId Directory
+        with
+          board : Text
+        do
+          create this with boards = delete board boards
+
+type Key = (Party, Text)
+
+template Data
+  with
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+
+    title : Text
+    color : Text
+    users : [Party]
+    lists : [Text]
+  where
+    signatory operator, admins
+    observer users, obs
+
+    key (operator, _id) : (Party, Text)
+    maintainer key._1
+
+    controller operator can
+      Data_UpdateObs
+        : ContractId Data
+        do
+          (_, userDirectory) <- fetchByKey @User.Directory operator
+          forA lists (\list -> exerciseByKey @CardList (operator, list) List_UpdateObs)
+          create this with obs = userDirectory.users
+
+    controller admins can
+      Data_Delete
+        : ()
+        do
+          forA lists (\list -> exerciseByKey @CardList (operator, list) List_Delete)
+          return ()
+
+template CardList 
+  with
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+
+    boardId : Text
+    title : Text
+    cards : [Text]
+  where
+    signatory operator, admins
+    observer obs
+
+    key (operator, _id) : (Party, Text)
+    maintainer key._1
+
+    controller operator can
+      List_UpdateObs
+        : ContractId CardList
+        do
+          (_, userDirectory) <- fetchByKey @User.Directory operator
+          forA cards (\card -> exerciseByKey @Card (operator, card) Card_UpdateObs)
+          create this with obs = userDirectory.users
+
+    controller admins can
+      List_Delete
+        : ()
+        do
+          forA cards (\card -> exerciseByKey @Card (operator, card) Card_Delete)
+          return ()
+
+type CardKey = (Party, Text, Text, Text)
+
+template Card
+  with
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+
+    boardId : Text
+    listId : Text
+    color : Optional Text
+    text : Text
+    date : Optional Time
+  where
+    signatory operator, admins
+    observer obs
+
+    key (operator, _id) : (Party, Text)
+    maintainer key._1
+
+    controller operator can
+      Card_UpdateObs
+        : ContractId Card
+        do
+          (_, userDirectory) <- fetchByKey @User.Directory operator
+          create this with obs = userDirectory.users
+
+    controller admins can
+      Card_Delete
+        : ()
+        do
+          return ()

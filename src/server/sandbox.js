@@ -54,7 +54,7 @@ const sandbox = () => {
                 adminToken(),
                 {
                     "moduleName": "Danban",
-                    "entityName": "DanbanApp"
+                    "entityName": "App"
                 },
                 cid,
                 choice,
@@ -74,8 +74,8 @@ const sandbox = () => {
         const userRole = () => getOrCreateContract(
                 getToken(user),
                 {
-                    "moduleName": "Danban",
-                    "entityName": "UserRole"
+                    "moduleName": "Danban.Role",
+                    "entityName": "User"
                 },
                 role => role.argument.party == user && role.argument.operator == adminParty,
                 () => 
