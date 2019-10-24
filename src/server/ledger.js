@@ -67,7 +67,7 @@ export const getOrCreateUserProfile = (user, profile) => {
 
 const appTemplate = {
     "moduleName": "Danban",
-    "entityName": "App"
+    "entityName": "Admin"
 };
 
 export const getOrCreateApp = (admin, jwt) => search(

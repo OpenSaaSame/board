@@ -21,7 +21,7 @@ template Directory
       Directory_UpdateObs
         : ContractId Directory
         do
-          (_, userDirectory) <- fetchByKey @Directory operator
+          (_, userDirectory) <- fetchByKey @User.Directory operator
           forA boards (\board -> exerciseByKey @Data (operator, board) Data_UpdateObs)
           create this with users = userDirectory.users
 

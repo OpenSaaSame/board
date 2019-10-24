@@ -3,10 +3,10 @@ module Danban where
 
 import qualified Danban.App as App
 import qualified Danban.User as User
-import qualified Danban.Board as Board
+import Danban.Board as Board
 import qualified Danban.Role as Role
 
-template App
+template Admin
   with
     operator: Party
   where
@@ -40,13 +40,17 @@ template App
           party : Party
         do
           exerciseByKey @User.Directory operator User.Directory_AddObs with party
+          (cid, _) <- fetchByKey @Board.Directory operator
           exerciseByKey @Board.Directory operator Board.Directory_UpdateObs
           create Role.User with ..
 
-
 startApp = scenario do
   admin <- getParty "Admin"
+  user <- getParty "User"
   app <- submit admin do
-    create App with operator = admin
+    create Admin with operator = admin
   submit admin do
     exercise app StartApp
+  submit admin do
+    exercise app AddUser with
+      party = user

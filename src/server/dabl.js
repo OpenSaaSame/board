@@ -169,7 +169,7 @@ const dabl = () => {
                     jwt,
                     {
                         "moduleName": "Danban",
-                        "entityName": "App"
+                        "entityName": "Admin"
                     },
                     cid,
                     choice,

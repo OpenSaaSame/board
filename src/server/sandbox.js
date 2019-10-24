@@ -54,7 +54,7 @@ const sandbox = () => {
                 adminToken(),
                 {
                     "moduleName": "Danban",
-                    "entityName": "App"
+                    "entityName": "Admin"
                 },
                 cid,
                 choice,

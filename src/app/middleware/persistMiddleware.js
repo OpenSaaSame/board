@@ -101,9 +101,9 @@ const maybeRead = (store) => {
 
       const isTemplate = (c, template) => c.templateId instanceof Object
         ? c.templateId.entityName === template
-        : c.templateId.startsWith(`Danban:${template}@`);
+        : c.templateId.startsWith(`Danban.Board:${template}@`);
 
-      const boards = sortById(contracts.filter(c => isTemplate(c, "Board")).map(c => c.argument));
+      const boards = sortById(contracts.filter(c => isTemplate(c, "Data")).map(c => c.argument));
       const lists = sortById(contracts.filter(c => isTemplate(c, "CardList")).map(c => c.argument));
       const cards = sortById(contracts.filter(c => isTemplate(c, "Card")).map(c => c.argument));
 
