@@ -34,7 +34,9 @@
   color: white;
   background: rgba(255, 255, 255, 0.9);
 }
-
+.access-modal-public {
+  padding-bottom:10px;
+}
 .access-modal-public-header {
   color: black;
   font-weight: 700;
@@ -43,6 +45,16 @@
 .access-modal-public-switch {
   vertical-align: middle;
   float: right;
+}
+
+.access-modal-users {
+  padding-bottom:10px;
+}
+.access-modal-users-header {
+  color: black;
+  font-weight: 700;
+}
+.access-modal-users-list {
 }
 
 .access-modalpicker-item {

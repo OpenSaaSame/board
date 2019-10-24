@@ -18,6 +18,8 @@ class Board extends Component {
     boardId: PropTypes.string.isRequired,
     boardTitle: PropTypes.string.isRequired,
     boardColor: PropTypes.string.isRequired,
+    hasWrite: PropTypes.bool.isRequired,
+    hasAdmin: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -138,7 +140,7 @@ class Board extends Component {
         <div className={classnames("board", boardColor)}>
           <Title>{boardTitle} | React Kanban</Title>
           <Header />
-          <BoardHeader />
+          <BoardHeader hasAdmin={this.props.hasAdmin} />
           {/* eslint-disable jsx-a11y/no-static-element-interactions */}
           <div
             className="lists-wrapper"
@@ -178,11 +180,18 @@ class Board extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const { board } = ownProps;
+  const boardUsersKnown = !(typeof state.boardUsersById[board._id] == 'undefined');
+  const boardUser = boardUsersKnown && state.boardUsersById[board._id].users.filter(user => user._1 == state.user._id);
+  const hasAdmin = boardUsersKnown && boardUser.length > 0 && ["Admin", "SignedAdmin"].includes(boardUser[0]._2);
+  const hasWrite = boardUsersKnown && boardUser.length > 0 && ["Write", "Admin", "SignedAdmin"].includes(boardUser[0]._2);
+
   return {
     lists: board.lists.map(listId => state.listsById[listId]),
     boardTitle: board.title,
     boardColor: board.color,
-    boardId: board._id
+    boardId: board._id,
+    hasWrite,
+    hasAdmin
   };
 };
 

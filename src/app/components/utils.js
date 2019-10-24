@@ -4,3 +4,9 @@ export const findCheckboxes = text => {
   const checked = checkboxes.filter(checkbox => checkbox === "[x]").length;
   return { total: checkboxes.length, checked };
 };
+
+export const mapBy = field => list => {
+  const ret = {};
+  list.forEach(item => ret[item[field]] = item);
+  return ret;
+}

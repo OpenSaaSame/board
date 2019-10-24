@@ -5,12 +5,12 @@ import BoardDeleter from "./BoardDeleter";
 import AccessModal from "./AccessModal";
 import "./BoardHeader.scss";
 
-const BoardHeader = () => (
+const BoardHeader = (props) => (
   <div className="board-header">
     <BoardTitle />
     <div className="board-header-right">
-      <AccessModal />
-      <div className="vertical-line" />
+      { props.hasAdmin &&  <AccessModal /> }
+      { props.hasAdmin &&  <div className="vertical-line" /> }
       <ColorPicker />
       <div className="vertical-line" />
       <BoardDeleter />

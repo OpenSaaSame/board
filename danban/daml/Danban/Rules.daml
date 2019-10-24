@@ -84,7 +84,7 @@ template Board
         cid <- create board with isPublic = not board.isPublic
         exercise self UPDATE_OBS
 
-    nonconsuming choice DELETE_BOARD
+    choice DELETE_BOARD
       : ()
       with
         admin : Party

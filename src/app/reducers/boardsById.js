@@ -49,7 +49,7 @@ const boardsById = (state = {}, action) => {
           admins: [userId],
           title: boardTitle,
           lists: [],
-          public: false,
+          isPublic: false,
           color: "blue"
         }
       };

@@ -1,4 +1,5 @@
 import {loadAll, exercise as exerciseUtil} from "./ledgerUtils"
+import {mapBy} from "../components/utils"
 
 const ledgerUrl = "/api/";
 
@@ -71,12 +72,6 @@ const payloadTransform = {
   "CHANGE_CARD_COLOR": (boardId, payload) => ({ cardId: payload.cardId, newColor: payload.color }),
 }
 
-const sortById = list => {
-  const ret = {};
-  list.forEach(item => ret[item._id] = item);
-  return ret;
-}
-
 const maybeRead = (store) => {
   const {
     ledger,
@@ -100,20 +95,25 @@ const maybeRead = (store) => {
         return;
       }
 
-      const isTemplate = (c, template) => c.templateId instanceof Object
-        ? c.templateId.entityName === template
-        : c.templateId.startsWith(`Danban.Board:${template}@`);
+      const isTemplate = (c, moduleName, entityName) => c.templateId instanceof Object
+        ? c.templateId.entityName === entityName && c.templateId.moduleName === moduleName
+        : c.templateId.startsWith(`${moduleName}:${entityName}@`);
 
-      const boards = sortById(contracts.filter(c => isTemplate(c, "Data")).map(c => c.argument));
-      const lists = sortById(contracts.filter(c => isTemplate(c, "CardList")).map(c => c.argument));
-      const cards = sortById(contracts.filter(c => isTemplate(c, "Card")).map(c => c.argument));
+      const boards = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "Data")).map(c => c.argument));
+      const lists = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "CardList")).map(c => c.argument));
+      const cards = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "Card")).map(c => c.argument));
+      const users = contracts.filter(c => isTemplate(c, "Danban.User", "Profile")).map(c => c.argument);
+      users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
+      const boardUsers = mapBy("boardId")(contracts.filter(c => isTemplate(c, "Danban.Rules", "Board")).map(c => c.argument));
 
       store.dispatch({
         type : "SUCCEED_READ",
         payload: {
           boards,
           lists,
-          cards
+          cards,
+          users,
+          boardUsers
         }
       });
     })

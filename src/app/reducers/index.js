@@ -6,6 +6,8 @@ import user from "./user";
 import isGuest from "./isGuest";
 import currentBoardId from "./currentBoardId";
 import ledger from "./ledger";
+import users from "./users";
+import boardUsersById from "./boardUsersById";
 
 export default combineReducers({
   cardsById,
@@ -14,5 +16,7 @@ export default combineReducers({
   user,
   isGuest,
   currentBoardId,
-  ledger
+  ledger,
+  users,
+  boardUsersById
 });

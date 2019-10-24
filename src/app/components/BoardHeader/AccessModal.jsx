@@ -16,6 +16,8 @@ class AccessModal extends Component {
   static propTypes = {
     boardId: PropTypes.string.isRequired,
     isPublic: PropTypes.bool.isRequired,
+    allUsers: PropTypes.object.isRequired,
+    users: PropTypes.array.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -43,6 +45,20 @@ class AccessModal extends Component {
             <span className="access-modal-public-header">Public</span>
             <Switch onChange={this.handleChange} checked={this.props.isPublic} height={22} className="access-modal-public-switch"/>
           </label>
+
+          <div className="access-modal-users">
+            <span className="access-modal-users-header">Users</span>
+            <div className="access-modal-users-list">
+              {this.props.users.map(user => {
+                return (
+                  <div className="access-modal-users-list-user" key={user}>
+                    <span>{this.props.allUsers.byParty[user["_1"]].displayName}</span>
+                    <span>{user["_2"]}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </Menu>
       </Wrapper>
     );
@@ -53,6 +69,8 @@ const mapStateToProps = (state, ownProps) => {
   const { boardId } = ownProps.match.params;
   return {
     isPublic: state.boardsById[boardId].isPublic,
+    users: state.boardUsersById[boardId].users,
+    allUsers: state.users,
     boardId
   };
 };
