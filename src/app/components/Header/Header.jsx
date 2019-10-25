@@ -9,7 +9,7 @@ import kanbanLogo from "../../../assets/images/kanban-logo.png";
 import "./Header.scss";
 
 class Header extends Component {
-  static propTypes = { user: PropTypes.object };
+  static propTypes = { user: PropTypes.object, dispatch: PropTypes.func.isRequired };
   render = () => {
     const { user } = this.props;
     return (
@@ -35,7 +35,7 @@ class Header extends Component {
               &nbsp;Sign out
             </a>
           ) : (
-            <a className="signout-link" href="/">
+            <a className="signout-link" href="/auth/google">
               <FaSignIn className="signout-icon" />
               &nbsp;Sign in
             </a>

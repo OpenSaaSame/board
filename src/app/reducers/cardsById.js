@@ -32,7 +32,7 @@ const cardsById = (state = {}, action) => {
         );
     }    
     case "SUCCEED_READ": {
-      return action.payload.cards;
+      return action.payload.cardsById;
     }
     default:
       return state;

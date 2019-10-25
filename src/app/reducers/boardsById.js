@@ -1,4 +1,4 @@
-const boardsById = (state = {}, action) => {
+const boardsById = (state = {}, action) => {  
   switch (action.type) {
     case "TOGGLE_PUBLIC": {
       const { boardId } = action.payload;
@@ -80,7 +80,7 @@ const boardsById = (state = {}, action) => {
       return restOfBoards;
     }
     case "SUCCEED_READ": {
-      return action.payload.boards;
+      return action.payload.boardsById;
     }
     default:
       return state;

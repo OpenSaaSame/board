@@ -18,6 +18,9 @@ const store = createStore(
   composeWithDevTools(applyMiddleware(persistMiddleware))
 );
 
+if(preloadedState.user)
+  store.dispatch({type: "LOG_IN"})
+
 const poll = () => {
   store.dispatch({
     type: "QUEUE_READ",

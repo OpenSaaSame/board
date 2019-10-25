@@ -1,5 +1,4 @@
-import {loadAll, exercise as exerciseUtil} from "./ledgerUtils"
-import {mapBy} from "../components/utils"
+import {loadState, exercise as exerciseUtil} from "./ledgerUtils"
 
 const ledgerUrl = "/api/";
 
@@ -31,7 +30,7 @@ const maybeWrite = (state, dispatch) => {
   const action = ledger.write.queue[0];
   const actionFn = exerciseUserChoice(action.type);
 
-  actionFn(state, action.boardId, action.payload)
+  actionFn(state, action.payload)
   .then(r => {
     dispatch({
       type : "SUCCEED_WRITE",
@@ -47,32 +46,32 @@ const maybeWrite = (state, dispatch) => {
   })
 }
 
-const exerciseUserChoice = (choice) => (state, boardId, payload) => exercise (
+const exerciseUserChoice = (choice) => (state, payload) => exercise (
     state.user,
     state.user.cid,
     choice,
-    payloadTransform[choice](boardId, payload)
+    payloadTransform[choice](payload)
 )
 
 const payloadTransform = {
-  "ADD_BOARD": (boardId, payload) => ({ boardId: payload.boardId, title: payload.boardTitle }),
-  "TOGGLE_PUBLIC": (boardId, payload) => payload,
-  "CHANGE_PERMISSIONS": (boardId, payload) => payload,
-  "ADD_USER": (boardId, payload) => payload,
-  "REMOVE_USER": (boardId, payload) => payload,
-  "DELETE_BOARD": (boardId, payload) => ({ boardId }),
-  "CHANGE_BOARD_TITLE": (boardId, payload) => ({ boardId, newTitle: payload.boardTitle }),
-  "CHANGE_BOARD_COLOR": (boardId, payload) => ({ boardId, newColor: payload.color }),
-  "ADD_LIST": (boardId, payload) => ({ boardId, title: payload.listTitle, listId: payload.listId }),
-  "DELETE_LIST": (boardId, payload) => ({ boardId, listId: payload.listId }),
-  "MOVE_LIST": (boardId, payload) => ({ boardId, oldIdx: payload.oldListIndex, newIdx: payload.newListIndex }),
-  "CHANGE_LIST_TITLE": (boardId, payload) => ({ listId: payload.listId, newTitle: payload.listTitle }),
-  "ADD_CARD": (boardId, payload) => ({ listId: payload.listId, cardId: payload.cardId, text: payload.cardText }),
-  "MOVE_CARD": (boardId, payload) => ({ sourceListId: payload.sourceListId, destListId: payload.destListId, oldIdx: payload.oldCardIndex, newIdx: payload.newCardIndex }),
-  "DELETE_CARD": (boardId, payload) => ({ listId: payload.listId, cardId: payload.cardId }),
-  "CHANGE_CARD_TEXT": (boardId, payload) => ({ cardId: payload.cardId, newText: payload.cardText }),
-  "CHANGE_CARD_DATE": (boardId, payload) => ({ cardId: payload.cardId, newDate: payload.date }),
-  "CHANGE_CARD_COLOR": (boardId, payload) => ({ cardId: payload.cardId, newColor: payload.color }),
+  "ADD_BOARD": payload => ({ boardId: payload.boardId, title: payload.boardTitle }),
+  "TOGGLE_PUBLIC": payload => payload,
+  "CHANGE_PERMISSIONS": payload => payload,
+  "ADD_USER": payload => payload,
+  "REMOVE_USER": payload => payload,
+  "DELETE_BOARD": payload => payload,
+  "CHANGE_BOARD_TITLE": payload => ({ boardId: payload.boardId, newTitle: payload.boardTitle }),
+  "CHANGE_BOARD_COLOR": payload => ({ boardId: payload.boardId, newColor: payload.color }),
+  "ADD_LIST": payload => ({ boardId: payload.boardId, title: payload.listTitle, listId: payload.listId }),
+  "DELETE_LIST": payload => ({ boardId: payload.boardId, listId: payload.listId }),
+  "MOVE_LIST": payload => ({ boardId: payload.boardId, oldIdx: payload.oldListIndex, newIdx: payload.newListIndex }),
+  "CHANGE_LIST_TITLE": payload => ({ listId: payload.listId, newTitle: payload.listTitle }),
+  "ADD_CARD": payload => ({ listId: payload.listId, cardId: payload.cardId, text: payload.cardText }),
+  "MOVE_CARD": payload => ({ sourceListId: payload.sourceListId, destListId: payload.destListId, oldIdx: payload.oldCardIndex, newIdx: payload.newCardIndex }),
+  "DELETE_CARD": payload => ({ listId: payload.listId, cardId: payload.cardId }),
+  "CHANGE_CARD_TEXT": payload => ({ cardId: payload.cardId, newText: payload.cardText }),
+  "CHANGE_CARD_DATE": payload => ({ cardId: payload.cardId, newDate: payload.date }),
+  "CHANGE_CARD_COLOR": payload => ({ cardId: payload.cardId, newColor: payload.color }),
 }
 
 const maybeRead = (store) => {
@@ -87,8 +86,8 @@ const maybeRead = (store) => {
       payload: { at : Date.now() }
     });
     
-    loadAll(ledgerUrl, user.token)
-    .then(contracts => {
+    loadState(ledgerUrl, user.token)
+    .then(state => {
       //If there are changes in flight, queue another read.
       if(store.getState().ledger.write.queue.length > 0) {
         store.dispatch({
@@ -97,27 +96,9 @@ const maybeRead = (store) => {
         });
         return;
       }
-
-      const isTemplate = (c, moduleName, entityName) => c.templateId instanceof Object
-        ? c.templateId.entityName === entityName && c.templateId.moduleName === moduleName
-        : c.templateId.startsWith(`${moduleName}:${entityName}@`);
-
-      const boards = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "Data")).map(c => c.argument));
-      const lists = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "CardList")).map(c => c.argument));
-      const cards = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "Card")).map(c => c.argument));
-      const users = contracts.filter(c => isTemplate(c, "Danban.User", "Profile")).map(c => c.argument);
-      users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
-      const boardUsers = mapBy("boardId")(contracts.filter(c => isTemplate(c, "Danban.Rules", "Board")).map(c => c.argument));
-
       store.dispatch({
         type : "SUCCEED_READ",
-        payload: {
-          boards,
-          lists,
-          cards,
-          users,
-          boardUsers
-        }
+        payload: state
       });
     })
     .catch(err => {
@@ -135,8 +116,7 @@ const persistMiddleware = store => next => action => {
   next(action);
   const state = store.getState();
   const {
-    user,
-    currentBoardId: boardId
+    user
   } = state;
 
   // Nothing is persisted for guest users
@@ -167,7 +147,6 @@ const persistMiddleware = store => next => action => {
         store.dispatch({
           type: "QUEUE_WRITE",
           payload: {
-            boardId,
             type: action.type,
             payload: action.payload
           }

@@ -19,6 +19,7 @@ class Home extends Component {
       }).isRequired
     ).isRequired,
     listsById: PropTypes.object.isRequired,
+    listsById: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired
   };
   render = () => {
@@ -65,8 +66,9 @@ class Home extends Component {
   };
 }
 
-const mapStateToProps = ({ boardsById, listsById }) => ({
+const mapStateToProps = ({ boardsById, listsById, user }) => ({
   boards: Object.keys(boardsById).map(key => boardsById[key]),
+  user,
   listsById
 });
 

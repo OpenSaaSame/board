@@ -290,7 +290,8 @@ const dabl = () => {
     };
 
     return {
-        getUser: getUser
+        adminToken,
+        getUser
     }
 }
 

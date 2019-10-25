@@ -10,3 +10,6 @@ export const mapBy = field => list => {
   list.forEach(item => ret[item[field]] = item);
   return ret;
 }
+
+export const filterObject = (obj, pred) =>
+  Object.fromEntries(Object.entries(obj).filter(item => pred(item[1])));

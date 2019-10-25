@@ -124,7 +124,8 @@ const sandbox = () => {
     };
 
     return {
-        getUser: getUser
+        adminToken,
+        getUser
     }
 }
 
