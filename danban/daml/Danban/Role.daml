@@ -26,6 +26,8 @@ template User
         with
           displayName : Text
           imageUrl : Text
+          email : Optional Text
+          domain : Optional Text
         do
           fetchByKey @App.Semaphore operator
           (_, userDirectory) <- fetchByKey @User.Directory operator

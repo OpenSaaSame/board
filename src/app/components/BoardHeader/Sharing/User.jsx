@@ -44,8 +44,14 @@ class User extends Component {
       "Admin": {icon: <FaCog />, text: "Admin"},
       "SignedAdmin": {icon: <FaGavel />, text: "Signatory"}
     }
+    const user = this.props.user;
     return <div className="user">
-      <span className="user-name">{this.props.user.displayName}</span>
+      <img
+        src={user.imageUrl}
+        alt={user.email || user.displayName}
+        className="user-thumbnail"
+        />
+      <span className="user-name">{user.email || user.displayName}</span>
       <Wrapper
         className="user-rights-wrapper"
         onSelection={this.handleSelection}

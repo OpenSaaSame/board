@@ -22,9 +22,9 @@ class Header extends Component {
           {user ? (
             <img
               src={user.imageUrl}
-              alt={user.name}
+              alt={user.displayName}
               className="user-thumbnail"
-              title={user.name}
+              title={user.displayName}
             />
           ) : (
             <FaUserSecret className="guest-icon" />

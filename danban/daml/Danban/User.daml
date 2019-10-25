@@ -31,6 +31,8 @@ template Profile
     obs : [Party]
     displayName : Text
     imageUrl : Text
+    email: Optional Text
+    domain: Optional Text
   where
     signatory party, operator
     observer obs

@@ -6,6 +6,7 @@
 
 .user-list-autocomplete{
     width:100%;
+    padding: 5px;
     input {
         width: calc(100% - 6px);
         padding: 6px 0;
@@ -14,6 +15,22 @@
     .item {
         padding: 2px 4px;
         cursor: default;
+        border-radius: 11px;
+
+        .user-thumbnail{
+            vertical-align: middle;
+            height: 22px;
+            border-radius: 11px;
+          }
+
+        .user-name{
+            display: inline-block;
+            vertical-align: middle;
+            text-overflow: ellipsis;
+            padding:5px;
+            max-width: 200px;
+            overflow: hidden;
+        }
     }
 }
 

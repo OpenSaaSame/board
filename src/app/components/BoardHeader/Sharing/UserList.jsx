@@ -45,9 +45,17 @@ class UserList extends Component {
       <Autocomplete
           getItemValue={(user) => user.party}
           items={this.filteredUsers()}
+          shouldItemRender={(item, value) => item.displayName.toLowerCase().includes(value.toLowerCase())
+            || (item.email && item.email.toLowerCase().includes(value.toLowerCase()))
+          }
           renderItem={(user, isHighlighted) =>
-              <div key={user._id} className="item" style={{ background: isHighlighted ? 'lightgray' : 'white' }}>
-                {user.displayName}
+              <div key={user.party} className="item" style={{ background: isHighlighted ? 'lightgray' : 'white' }}>
+                <img
+                  src={user.imageUrl}
+                  alt={user.email || user.displayName}
+                  className="user-thumbnail"
+                />
+                <span className="user-name">{user.email || user.displayName}</span>
               </div>
           }
           value={this.state.acValue}
@@ -55,6 +63,16 @@ class UserList extends Component {
           onSelect={this.handleSelect}
           wrapperProps={{
             "className": "user-list-autocomplete"          
+          }}
+          menuStyle={{
+            borderRadius: '3px',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)',
+            background: 'rgba(255, 255, 255, 0.9)',
+            padding: '5px',
+            fontSize: '90%',
+            position: 'fixed',
+            overflow: 'auto',
+            maxHeight: '50%', // TODO: don't cheat, let it flow to the bottom
           }}
       />
   </div>

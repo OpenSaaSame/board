@@ -5,20 +5,29 @@
   border-width: 1px;
   background: rgba(255, 255, 255, 0.8);
   border-color: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+  border-radius: 14px;
   border-style: solid;
   margin-bottom: -1px;
-}
 
-.user-name{
-  display: inline-block;
-  padding:5px;
+  .user-thumbnail{
+    vertical-align: middle;
+    height: 27px;
+    border-radius: 14px;
+  }
+
+  .user-name{
+    display: inline-block;
+    vertical-align: middle;
+    text-overflow: ellipsis;
+    padding:5px;
+    max-width: 170px;
+    overflow: hidden;
+  }
 }
 
 .user-rights-wrapper{
   display: inline-block;
   position: absolute;
-  border-radius: 3px;
   right: 0;
 
   .angle-down{
@@ -31,6 +40,7 @@
   padding:5px;
   cursor: pointer;
   background: rgba(0, 0, 0, 0.1);
+  border-radius: 0 14px 14px 0;
 
   &:hover,
   &:focus {
