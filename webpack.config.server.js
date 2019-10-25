@@ -47,7 +47,7 @@ module.exports = {
             emitFile: false,
             limit: 4096,
             name: "[name].[hash:6].[ext]",
-            outputPath: "images/"
+            outputPath: "/static/images/"
           }
         }
       }

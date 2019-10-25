@@ -46,13 +46,12 @@ const renderPage = (req, res) => {
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-        <meta name="description" content="An open source kanban application created with React and Redux. ">
+        <meta name="description" content="An open source kanban application created with React, Redux, and DAML. ">
         <link rel="apple-touch-icon-precomposed" href="/static/favicons/favicon.png" />
         <link rel="icon" type="image/png" href="/static/favicons/favicon.png"" />
         <link rel="icon" type="image/png" href="/static/favicons/favicon.png"" />
         <meta name="msapplication-TileColor" content="#FFFFFF" />
         <meta name="msapplication-TileImage" content="/static/favicons/favicon.png" />
-        <meta property="og:image" content="https://reactkanban.com/static/favicons/og-kanban-logo.png">
         <style>${css}</style>
         ${renderToString(headTags)}
       </head>
