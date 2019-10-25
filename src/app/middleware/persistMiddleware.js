@@ -59,6 +59,7 @@ const payloadTransform = {
   "TOGGLE_PUBLIC": (boardId, payload) => payload,
   "CHANGE_PERMISSIONS": (boardId, payload) => payload,
   "ADD_USER": (boardId, payload) => payload,
+  "REMOVE_USER": (boardId, payload) => payload,
   "DELETE_BOARD": (boardId, payload) => ({ boardId }),
   "CHANGE_BOARD_TITLE": (boardId, payload) => ({ boardId, newTitle: payload.boardTitle }),
   "CHANGE_BOARD_COLOR": (boardId, payload) => ({ boardId, newColor: payload.color }),
@@ -144,6 +145,7 @@ const persistMiddleware = store => next => action => {
       case "ADD_BOARD":
       case "TOGGLE_PUBLIC":
       case "ADD_USER":
+      case "REMOVE_USER":
       case "CHANGE_PERMISSIONS":
       case "DELETE_BOARD":
 

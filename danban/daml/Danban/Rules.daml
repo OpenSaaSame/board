@@ -21,7 +21,8 @@ template Board
     users : [(Party, AccessLevel)]
   where
     signatory operator, map fst . filter (\x -> snd x == SignedAdmin) $ users
-    observer map fst . filter (\x -> snd x /= Read) $ users, 
+    observer map fst . filter (\x -> snd x /= Read) $ users
+    ensure length (filter (\x -> snd x == SignedAdmin) users) > 0
     
     key (operator, boardId) : (Party, Text)
     maintainer key._1
@@ -60,6 +61,23 @@ template Board
         newSelf <- create this with users = sortOn fst ((newUser, Read) :: users)
         exercise newSelf UPDATE_OBS
 
+    choice REMOVE_USER
+      : ContractId Board.Data
+      with
+        admin : Party
+        user : Party
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        case lookup user this.users of
+          None -> abort (show user <> " is not a user.")
+          Some access -> do
+            assertMsg
+              (show user <> " is a signed administrator and can not be downgraded.")
+              (user == admin || access /= SignedAdmin)
+            newSelf <- create this with users = filter (\u -> u._1 /= user) this.users
+            exercise newSelf UPDATE_OBS
+       
     choice CHANGE_PERMISSIONS
       : ContractId Board
       with
@@ -69,8 +87,14 @@ template Board
       controller [operator, admin]
       do
         checkAccess admin Admin
-        create this with users = map (\(u, r) -> if u == user then (u, access) else (u, r)) users        
-
+        case lookup user this.users of
+          None -> abort (show user <> " is not a user.")
+          Some currentAccess -> do
+            assertMsg
+              (show user <> " is a signed administrator and can not be downgraded.")
+              (user == admin || currentAccess /= SignedAdmin || access == SignedAdmin)
+            create this with users = map (\(u, r) -> if u == user then (u, access) else (u, r)) users        
+        
     -- Admin Board Actions
     nonconsuming choice TOGGLE_PUBLIC
       : ContractId Board.Data
@@ -91,6 +115,9 @@ template Board
       controller [operator, admin]
       do
         checkAccess admin Admin
+        assertMsg 
+          "Board can not be deleted as long as there are several signed admins"
+          (length (filter (\x -> snd x == SignedAdmin) users) == 1)
         oOldCid <- lookupByKey @Board.Data (operator, boardId)
         case oOldCid of
           Some oldCid -> do

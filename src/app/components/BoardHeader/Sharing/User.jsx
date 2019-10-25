@@ -28,7 +28,9 @@ class User extends Component {
   handleSelection = newAccess => {
     const { dispatch, boardId, user, access } = this.props;
     // Dispatch update only if selected color is not the same as current board color.
-    if (newAccess !== access) {
+    if(newAccess === "Trash")
+      dispatch({ type: "REMOVE_USER", payload: { boardId, user: user.party} });
+    else if (newAccess !== access) {
       dispatch({ type: "CHANGE_PERMISSIONS", payload: { boardId, user: user.party, access: newAccess} });
     }
   };
