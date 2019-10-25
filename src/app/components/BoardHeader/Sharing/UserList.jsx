@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Autocomplete from "react-autocomplete"
+import User from "./User"
 import "./UserList.scss";
 
 class UserList extends Component {
@@ -27,6 +28,7 @@ class UserList extends Component {
     this.props.dispatch({
       "type": "ADD_USER",
       "payload": {
+          "boardId": this.props.boardId,
           "newUser" : val
         }
     });
@@ -35,25 +37,25 @@ class UserList extends Component {
 
   render() {
     return <div className="user-list">
-      {this.props.boardUsers.map(user => {
-        return (
-          <div className="user-list-users" key={user}>
-            <span>{this.props.allUsers.byParty[user["_1"]].displayName}</span>
-            <span>{user["_2"]}</span>
-          </div>
-        )
-      })}
+      <div className="user-list-users">
+      {this.props.boardUsers.map(user => 
+        <User key={user._1} user={this.props.allUsers.byParty[user._1]} access={user._2} /> 
+      )}
+      </div>
       <Autocomplete
           getItemValue={(user) => user.party}
           items={this.filteredUsers()}
           renderItem={(user, isHighlighted) =>
-              <div style={{ background: isHighlighted ? 'lightgray' : 'white' }}>
+              <div key={user._id} className="item" style={{ background: isHighlighted ? 'lightgray' : 'white' }}>
                 {user.displayName}
               </div>
           }
           value={this.state.acValue}
           onChange={e => this.setState({ acValue: e.target.value })}
           onSelect={this.handleSelect}
+          wrapperProps={{
+            "className": "user-list-autocomplete"          
+          }}
       />
   </div>
   } 
