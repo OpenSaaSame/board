@@ -4,7 +4,7 @@
 
 A Kanban board backed by a DAML Ledger, inspired by [Trello](https://trello.com/home) and based on [react-kanban](https://github.com/markusenglund/react-kanban).
 
-![react kanban example](https://github.com/yogaboll/react-kanban/blob/master/example.gif?raw=true)
+![react kanban example](https://github.com/digital-asset/danban/blob/master/example.gif?raw=true)
 
 [Check out the live website](https://danban.daml.com)
 
