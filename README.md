@@ -6,7 +6,7 @@ A Kanban board backed by a DAML Ledger, inspired by [Trello](https://trello.com/
 
 ![react kanban example](https://github.com/yogaboll/react-kanban/blob/master/example.gif?raw=true)
 
-[Check out the live website](https://www.reactkanban.com)
+[Check out the live website](https://danban.daml.com)
 
 ### Features
 
@@ -94,7 +94,7 @@ npm run serve:prod
 ### Run on Project DABL
 
 To run on DABL, you need a DABL Ledger with the DAML model deployed. You also need the refresh cookie for the ledger admin account. Then add the following two
-variables to your environment:
+variables to your environment and remove `USE_SANDBOX`:
 
 ```shell
 REFRESH_COOKIE="__DABL_SESSION={YOUR_COOKIE}"
