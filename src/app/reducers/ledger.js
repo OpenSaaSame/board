@@ -1,29 +1,46 @@
-const ledger = (state = {write : {queue: [], inProgress: false}, read: {queued: true, inProgress: false}}, action) => {
+const ledger = (state = {
+    network: {
+      error: null,
+      retry: false
+    },
+    write : {
+      queue: [], 
+      inProgress: false
+    }, 
+    read: {
+      queued: true, 
+      inProgress: false, 
+      cancelled: false
+    }
+  }, action) => {
   switch (action.type) {
     case "QUEUE_READ": {
-      const { at } = action.payload;
       return {
         ...state,
         read: {
           ...state.read,
-          queued: at
+          queued: true
         }
       }
     }
     case "START_READ": {
-      const { at } = action.payload;
       return {
         ...state,
         read: {
           ...state.read,
           queued: false,
-          inProgress: at
+          cancelled: false,
+          inProgress: true
         }
       }
     }
     case "SUCCEED_READ": {
       return {
         ...state,
+        network: {
+          ...state.network,
+          error: null
+        },
         read: {
           ...state.read,
           inProgress: false
@@ -31,12 +48,15 @@ const ledger = (state = {write : {queue: [], inProgress: false}, read: {queued: 
       }
     }
     case "FAIL_READ": {
-      const { at } = action.payload;
       return {
         ...state,
+        network: {
+          ...state.network,
+          error: null
+        },
         read: {
           ...state.read,
-          queued: at,
+          queued: true,
           inProgress: false
         }
       }
@@ -44,6 +64,10 @@ const ledger = (state = {write : {queue: [], inProgress: false}, read: {queued: 
     case "QUEUE_WRITE": {
       return {
         ...state,
+        read: {
+          ...state.read,
+          cancelled: true
+        },
         write: {
           ...state.write,
           queue: [{...action.payload, "attempt": 0}, ...state.write.queue]
@@ -68,12 +92,15 @@ const ledger = (state = {write : {queue: [], inProgress: false}, read: {queued: 
     }
 
     case "SUCCEED_WRITE": {
-      const { at } = action.payload;
       return {
         ...state,
+        network: {
+          ...state.network,
+          error: null
+        },
         read: {
           ...state.read,
-          queued: at
+          queued: true
         },
         write: {
           ...state.write,
@@ -86,10 +113,43 @@ const ledger = (state = {write : {queue: [], inProgress: false}, read: {queued: 
     case "FAIL_WRITE": {
       return {
         ...state,
+        network: {
+          ...state.network,
+          error: null
+        },
         write: {
           ...state.write,
           inProgress: false,
           queue: state.write.queue[0].attempt >= 10 ? state.write.queue.slice(1) : state.write.queue
+        }
+      }
+    }
+
+    case "NETWORK_RETRY": {
+      return {
+        ...state,
+        network: {
+          ...state.network,
+          retry: true
+        }
+      }
+    }
+
+    case "NETWORK_ERROR": {
+      const {err} = action.payload;
+      return {
+        ...state,
+        network: {
+          error : err,
+          retry: false
+        },
+        write: {
+          ...state.write,
+          inProgress: false
+        },
+        read: {
+          ...state.read,
+          inProgress: false
         }
       }
     }

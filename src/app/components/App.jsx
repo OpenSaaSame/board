@@ -5,9 +5,10 @@ import { connect } from "react-redux";
 import Home from "./Home/Home";
 import BoardContainer from "./Board/BoardContainer";
 import "./App.scss";
-import { MoonLoader } from "react-spinners";
+import Spinner from "./Spinner/Spinner";
 
-const App = ({ user, ledger }) => {
+
+const App = () => {
   return (
     <div className="app">
       <Switch>
@@ -15,19 +16,14 @@ const App = ({ user, ledger }) => {
         <Route path="/b/:boardId" component={BoardContainer} />
         <Redirect to="/" />
       </Switch>
-      <div className='spinner'>
-        <MoonLoader
-          color={'rgba(0,0,0,0.8)'}
-          loading={user && (ledger.read.inProgress || ledger.read.queued || ledger.write.queue.length > 0 || ledger.write.inProgress) && true}
-        />
-      </div> 
+      <Spinner />
     </div>
   );
 };
 
 App.propTypes = { user: PropTypes.object };
 
-const mapStateToProps = state => ({ user: state.user, ledger: state.ledger });
+const mapStateToProps = state => ({ });
 
 // Use withRouter to prevent strange glitch where other components
 // lower down in the component tree wouldn't update from URL changes

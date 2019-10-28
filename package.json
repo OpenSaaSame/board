@@ -59,6 +59,7 @@
     "react-spinners": "^0.6.1",
     "react-switch": "^5.0.1",
     "react-textarea-autosize": "^6.1.0",
+    "react-tooltip": "^3.11.1",
     "redux": "^3.7.2",
     "redux-devtools-extension": "^2.13.8",
     "serve-favicon": "^2.5.0",

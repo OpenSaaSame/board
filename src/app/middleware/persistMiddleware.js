@@ -14,13 +14,21 @@ const exercise = (user, cid, choice, args) => exerciseUtil(
     args
   );
 
+const rootErr = err => {
+  while(err.nested)
+    err = err.nested
+  return err;
+}
+
+const isNetworkError = err =>
+  rootErr(err) instanceof TypeError;
+
 const maybeWrite = (state, dispatch) => {
   const {
-    user,
     ledger
   } = state;
 
-  if(ledger.write.queue.length == 0 || ledger.write.inProgress) return;
+  if((ledger.network.error && !ledger.network.retry) || ledger.write.queue.length == 0 || ledger.write.inProgress) return;
 
   dispatch({
     type : "START_WRITE",
@@ -34,15 +42,27 @@ const maybeWrite = (state, dispatch) => {
   .then(r => {
     dispatch({
       type : "SUCCEED_WRITE",
-      payload: { "at": Date.now() }
+      payload: { }
     });
   })
   .catch(err => {
-    console.log(err);
-    dispatch({
-      type : "FAIL_WRITE",
-      payload: { }
-    });
+    if(isNetworkError(err)) {
+      dispatch({
+        type : "NETWORK_ERROR",
+        payload: { err: rootErr(err)  }
+      });
+      setTimeout(() => dispatch({
+        type : "NETWORK_RETRY",
+        payload: { }
+      }), 10000)
+    }
+    else{
+      console.log(err);
+      dispatch({
+        type : "FAIL_WRITE",
+        payload: { }
+      });
+    }
   })
 }
 
@@ -80,35 +100,50 @@ const maybeRead = (store) => {
     user
   } = store.getState();
 
-  if(ledger.read.queued && !ledger.read.inProgress && ledger.write.queue.length == 0) {
-    store.dispatch({
-      type : "START_READ",
-      payload: { at : Date.now() }
-    });
-    
-    loadState(ledgerUrl, user.token)
-    .then(state => {
-      //If there are changes in flight, queue another read.
-      if(store.getState().ledger.write.queue.length > 0) {
-        store.dispatch({
-          type : "FAIL_READ",
-          payload: { at : Date.now() }
-        });
-        return;
-      }
+  if((ledger.network.error && !ledger.network.retry) 
+    || ledger.read.inProgress 
+    || ledger.write.queue.length > 0 
+    || !ledger.read.queued) return;
+
+  store.dispatch({
+    type : "START_READ",
+    payload: {  }
+  });
+  
+  loadState(ledgerUrl, user.token)
+  .then(state => {
+    //If there are changes in flight, queue another read.
+    if(store.getState().ledger.read.cancelled) {
       store.dispatch({
-        type : "SUCCEED_READ",
-        payload: state
+        type : "FAIL_READ",
+        payload: { }
       });
-    })
-    .catch(err => {
+      return;
+    }
+    store.dispatch({
+      type : "SUCCEED_READ",
+      payload: state
+    });
+  })
+  .catch(err => {
+    if(isNetworkError(err)) {
+      store.dispatch({
+        type : "NETWORK_ERROR",
+        payload: { err: rootErr(err) }
+      });
+      setTimeout(() => store.dispatch({
+        type : "NETWORK_RETRY",
+        payload: { }
+      }), 10000)
+    }
+    else{
       console.log(err);
       store.dispatch({
         type : "FAIL_READ",
-        payload: { at : Date.now() }
+        payload: { }
       });
-    })
-  }
+    }
+  })
 }
 
 // Persist the board to the database after almost every action.
@@ -159,6 +194,7 @@ const persistMiddleware = store => next => action => {
         maybeRead(store);
         break;
       case "SUCCEED_WRITE":
+      case "NETWORK_RETRY":
         maybeWrite(state, store.dispatch);
         maybeRead(store);
         break;
