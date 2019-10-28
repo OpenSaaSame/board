@@ -52,6 +52,7 @@
     "react-head": "^2.2.0",
     "react-icons": "^2.2.7",
     "react-modal": "^3.10.1",
+    "react-notifications": "^1.4.3",
     "react-onclickoutside": "^6.9.0",
     "react-redux": "^5.1.2",
     "react-router": "^4.3.1",

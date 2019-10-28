@@ -1,27 +1,27 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { Route, Redirect, Switch, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import Home from "./Home/Home";
 import BoardContainer from "./Board/BoardContainer";
 import "./App.scss";
 import Spinner from "./Spinner/Spinner";
-
+import Alert from "./Alert/Alert";
 
 const App = () => {
   return (
-    <div className="app">
+      <div className="app">
       <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/b/:boardId" component={BoardContainer} />
-        <Redirect to="/" />
-      </Switch>
-      <Spinner />
-    </div>
+          <Route exact path="/" component={Home} />
+          <Route path="/b/:boardId" component={BoardContainer} />
+          <Redirect to="/" />
+        </Switch>
+        <Spinner />
+        <Alert />
+      </div>
   );
 };
 
-App.propTypes = { user: PropTypes.object };
+App.propTypes = { };
 
 const mapStateToProps = state => ({ });
 

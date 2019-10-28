@@ -5,7 +5,8 @@ const ledger = (state = {
     },
     write : {
       queue: [], 
-      inProgress: false
+      inProgress: false,
+      error: null
     }, 
     read: {
       queued: true, 
@@ -111,6 +112,9 @@ const ledger = (state = {
     }
 
     case "FAIL_WRITE": {
+      const {err} = action.payload;
+      const giveUp =  state.write.queue[0].attempt >= 10;
+
       return {
         ...state,
         network: {
@@ -120,7 +124,18 @@ const ledger = (state = {
         write: {
           ...state.write,
           inProgress: false,
-          queue: state.write.queue[0].attempt >= 10 ? state.write.queue.slice(1) : state.write.queue
+          queue: giveUp ? state.write.queue.slice(1) : state.write.queue,
+          error: giveUp ? err : state.write.error
+        }
+      }
+    }
+
+    case "CLEAR_ERROR": {
+      return {
+        ...state,
+        write: {
+          ...state.write,
+          error: null
         }
       }
     }

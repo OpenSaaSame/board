@@ -57,10 +57,9 @@ const maybeWrite = (state, dispatch) => {
       }), 10000)
     }
     else{
-      console.log(err);
       dispatch({
         type : "FAIL_WRITE",
-        payload: { }
+        payload: { err }
       });
     }
   })
@@ -137,7 +136,6 @@ const maybeRead = (store) => {
       }), 10000)
     }
     else{
-      console.log(err);
       store.dispatch({
         type : "FAIL_READ",
         payload: { }
