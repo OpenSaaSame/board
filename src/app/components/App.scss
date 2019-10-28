@@ -40,3 +40,17 @@ a {
   font-size: 100%;
   font: inherit;
 }
+
+.spinner {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+}
+
+.app {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+}
