@@ -11,5 +11,7 @@ export const mapBy = field => list => {
   return ret;
 }
 
+Object.fromEntries = l => l.reduce((a, [k,v]) => ({...a, [k]: v}), {});
+
 export const filterObject = (obj, pred) =>
   Object.fromEntries(Object.entries(obj).filter(item => pred(item[1])));
