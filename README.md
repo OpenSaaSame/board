@@ -74,21 +74,21 @@ ROOT_URL=http://127.0.0.1:1337
 
 ```shell
 npm run build:watch
-npm run serve:watch
+npm run start:watch
 ```
 
 #### Run in test mode
 
 ```shell
 npm run build
-npm run serve
+npm run start
 ```
 
 #### Run in prod mode
 
 ```shell
 npm run build:prod
-npm run serve:prod
+npm run start:prod
 ```
 
 ### Run on Project DABL
