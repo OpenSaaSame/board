@@ -27,7 +27,7 @@ const createProfile = (user, profile) => exercise(
         "PutProfile",
         {
             "displayName": profile.displayName,
-            "imageUrl": profile._json.image.url,
+            "imageUrl": profile.photos[0].value,
             "email": profile.emails[0].value,
             "domain": profile._json.domain
         }
