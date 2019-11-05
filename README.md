@@ -27,6 +27,7 @@ A Kanban board backed by a DAML Ledger, inspired by [Trello](https://trello.com/
 * [Express](https://github.com/expressjs/express)
 * [Passport](https://github.com/jaredhanson/passport)
 * [DAML](https://daml.com)
+* [project : DABL](https://projectdabl.com)
 
 
 ### Development
@@ -93,7 +94,7 @@ npm run start:prod
 
 ### Run on Project DABL
 
-To run on DABL, you need a DABL Ledger with the DAML model deployed. You also need the refresh cookie for the ledger admin account. Then add the following two
+To run on DABL, you need to login, create an account, and deploy a DABL Ledger with the DAML model deployed. You also need the refresh cookie for the ledger admin account. Then add the following two
 variables to your environment and remove `USE_SANDBOX`:
 
 ```shell
