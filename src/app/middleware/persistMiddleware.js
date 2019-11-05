@@ -109,7 +109,7 @@ const maybeRead = (store) => {
     payload: {  }
   });
   
-  loadState(ledgerUrl, user.token)
+  loadState(ledgerUrl, user.token, user.party)
   .then(state => {
     //If there are changes in flight, queue another read.
     if(store.getState().ledger.read.cancelled) {

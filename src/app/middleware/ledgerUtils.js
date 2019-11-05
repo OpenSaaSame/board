@@ -86,15 +86,17 @@ export const loadAll = (ledgerUrl, jwt) => callAPI(
         throw new NestedError(`Error fetching all contracts: `, err);
     });
 
-export const loadState = (ledgerUrl, jwt) => loadAll(ledgerUrl, jwt)
+export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jwt)
   .then(contracts => {
     const isTemplate = (c, moduleName, entityName) => c.templateId instanceof Object
         ? c.templateId.entityName === entityName && c.templateId.moduleName === moduleName
         : c.templateId.startsWith(`${moduleName}:${entityName}@`);
 
-    const boardsById = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "Data")).map(c => c.argument));
-    const listsById = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "CardList")).map(c => c.argument));
-    const cardsById = mapBy("_id")(contracts.filter(c => isTemplate(c, "Danban.Board", "Card")).map(c => c.argument));
+    const hasObs = c => !party || c.observers.includes(party) || c.signatories.includes(party);
+
+    const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, "Danban.Board", "Data")).map(c => c.argument));
+    const listsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, "Danban.Board", "CardList")).map(c => c.argument));
+    const cardsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, "Danban.Board", "Card")).map(c => c.argument));
     const users = contracts.filter(c => isTemplate(c, "Danban.User", "Profile")).map(c => c.argument);
     users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
     const boardUsersById = mapBy("boardId")(contracts.filter(c => isTemplate(c, "Danban.Rules", "Board")).map(c => c.argument));
