@@ -28,7 +28,7 @@ const poll = () => {
   });
 }
 
-setInterval(poll, 5000);
+setInterval(poll, 30000);
 poll();
 
 ReactDOM.hydrate(

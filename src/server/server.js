@@ -16,7 +16,7 @@ var proxy = require('express-http-proxy');
 import login from "./login";
 import connectDabl from "./dabl";
 import connectSandbox from "./sandbox";
-import publicBoards from "./publicBoards";
+import {publicBoardsInitial, publicBoards}  from "./publicBoards";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -63,8 +63,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(login);
-app.use(publicBoards(ledgerAdmin));
+app.use(publicBoardsInitial(ledgerAdmin));
 app.use("/auth", auth);
+app.get("/public", publicBoards);
 app.get("*", renderPage);
 
 const port = process.env.PORT || "1337";

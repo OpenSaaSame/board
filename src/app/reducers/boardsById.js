@@ -1,3 +1,5 @@
+import {filterObject} from "../components/utils"
+
 const boardsById = (state = {}, action) => {  
   switch (action.type) {
     case "TOGGLE_PUBLIC": {

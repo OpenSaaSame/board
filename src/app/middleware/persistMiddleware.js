@@ -109,8 +109,12 @@ const maybeRead = (store) => {
     payload: {  }
   });
   
-  loadState(ledgerUrl, user.token, user.party)
-  .then(state => {
+  Promise.all([loadState(ledgerUrl, user.token, user.party), fetch("/public")])
+  .then(([privateState, publicState]) => {
+    const state = {
+      ...publicState,
+      ...privateState
+    }
     //If there are changes in flight, queue another read.
     if(store.getState().ledger.read.cancelled) {
       store.dispatch({

@@ -1,20 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
-import getUser from "../dabl";
 
 const router = Router();
-
-router.get(
-  "/silly",
-  (req, res) => {
-    getUser("silly").then(user => {
-      res.json(user);
-    })
-    .catch(err => {
-      res.status(500).json(JSON.stringify(err, Object.getOwnPropertyNames(err)));
-    });
-  }
-)
 
 router.get(
   "/google",
