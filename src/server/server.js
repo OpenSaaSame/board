@@ -32,8 +32,9 @@ const apiPrefix = process.env.USE_SANDBOX
 : "/data/" + process.env.DABL_LEDGER ;
 app.use("/api", proxy(apiHost, {
   "proxyReqPathResolver" : req => {
+
     const parts = req.url.split('/api/');
-    return apiPrefix + parts[0];
+    return apiPrefix + parts[parts.length - 1];
   }
 }));
 

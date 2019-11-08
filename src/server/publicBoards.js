@@ -2,15 +2,20 @@ import {loadState} from "../app/middleware/ledgerUtils";
 import {filterObject} from "../app/components/utils"
 import { Router } from "express";
 
-export const publicBoardsInitial = ledgerConn => (req, res, next) => {
-
+export const publicBoardsInitial = ledgerConn => {
   const ledgerURL = process.env.USE_SANDBOX
     ? "http://localhost:7575/"
     : `https://api.projectdabl.com/data/${process.env.DABL_LEDGER}/`;
 
-    Promise.resolve(ledgerConn.adminToken())
-    .then(jwt => loadState(ledgerURL, jwt))
-    .then(state => {
+  var _state = null;
+  var _stateAt = 0;
+
+  return (req, res, next) => {
+    if (Date.now() >= _stateAt + 1000 * 10)
+      _state = Promise.resolve(ledgerConn.adminToken())
+        .then(jwt => loadState(ledgerURL, jwt))
+
+    _state.then(state => {
       req.initialState = { 
         ...req.initialState,
         boardsById: filterObject(state.boardsById, board => board.isPublic),
@@ -19,6 +24,7 @@ export const publicBoardsInitial = ledgerConn => (req, res, next) => {
        };
        next();
     });
+  }
 };
 
 
