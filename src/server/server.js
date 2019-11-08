@@ -15,6 +15,7 @@ import auth from "./routes/auth";
 var proxy = require('express-http-proxy');
 import login from "./login";
 import connectDabl from "./dabl";
+import checkToken from "./checkToken";
 import connectSandbox from "./sandbox";
 import {publicBoardsInitial, publicBoards}  from "./publicBoards";
 
@@ -30,7 +31,7 @@ const apiHost = process.env.USE_SANDBOX
 const apiPrefix = process.env.USE_SANDBOX
 ? ""
 : "/data/" + process.env.DABL_LEDGER ;
-app.use("/api", proxy(apiHost, {
+app.use("/api", checkToken, proxy(apiHost, {
   "proxyReqPathResolver" : req => {
 
     const parts = req.url.split('/api/');
