@@ -1,5 +1,61 @@
 daml 1.2
 module Danban.V2.Upgrade where
 
-import Danban
+-- import DA.Generics
 
+import qualified Danban as DanbanV1
+import qualified Danban.Board as BoardV1
+import qualified Danban.Role as RoleV1
+import qualified Danban.Rules as RulesV1
+import qualified Danban.User as UserV1
+
+import DanbanInstances ()
+import Danban.BoardInstances ()
+import Danban.RoleInstances ()
+import Danban.RulesInstances ()
+import Danban.UserInstances ()
+
+import qualified Danban.V2 as DanbanV2
+import qualified Danban.V2.Board as BoardV2
+import qualified Danban.V2.Role as RoleV2
+import qualified Danban.V2.Rules as RulesV2
+import qualified Danban.V2.User as UserV2
+
+import Danban.V2Instances ()
+import Danban.V2.BoardInstances ()
+import Danban.V2.RoleInstances ()
+import Danban.V2.RulesInstances ()
+import Danban.V2.UserInstances ()
+
+-- conv: (Generic a rep, Generic b rep) => a -> b
+-- conv = to . from
+
+template UpgradeInitiator
+  with
+    operator: Party
+  where
+    signatory operator
+
+    controller operator can
+      InitiateUpgrade
+        : ()
+        do
+          create DanbanV2.Admin with operator
+
+          {-
+          -- Convert admin contracts          
+          (adminCid, admin) <- fetchByKey @DanbanV1.Admin operator
+          archive adminCid
+          newAdminCid <- create (conv admin : DanbanV2.Admin)
+          
+          (usersCid, users) <- fetchByKey @UserV1.Directory operator
+          archive usersCid
+          create (conv users : UserV2.Directory)
+
+          exercise newAdminCid DanbanV2.UnpauseApp
+
+          (boardsCid, boards) <- fetchByKey @BoardV1.Directory operator
+          archive boardsCid
+          create (conv boards : BoardV2.Directory)
+          -}
+          return ()
