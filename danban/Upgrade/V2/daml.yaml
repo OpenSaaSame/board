@@ -1,0 +1,13 @@
+sdk-version: 0.0.0
+name: danban-upgrade
+source: daml
+parties:
+  - Admin
+version: 2.0.0
+dependencies:
+  - daml-prim
+  - daml-stdlib
+data-dependencies:
+  - ../../V1/danban.dar
+  - ../../V2/danban-2.0.0.dar
+  
