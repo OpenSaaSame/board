@@ -1,4 +1,4 @@
-import {loadState, exercise as exerciseUtil} from "./ledgerUtils"
+import {modelVersion, loadState, exercise as exerciseUtil} from "./ledgerUtils"
 
 const ledgerUrl = "/api/";
 
@@ -6,7 +6,7 @@ const exercise = (user, cid, choice, args) => exerciseUtil(
     ledgerUrl,
     user.token,
     {
-      "moduleName": "Danban.Role",
+      "moduleName": `${modelVersion}.Role`,
       "entityName": "User"
     },
     cid,

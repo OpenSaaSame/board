@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
-import {processResponse, callAPI, exercise, search} from "../app/middleware/ledgerUtils";
+import {modelVerison, processResponse, callAPI, exercise, search} from "../app/middleware/ledgerUtils";
 import {getOrCreateApp} from "./ledger"
 const url = require("url");
 
@@ -229,7 +229,7 @@ const dabl = () => {
             .then(party => getOrCreateContract(
                     userToken(),
                     {
-                        "moduleName": "Danban.Role",
+                        "moduleName": `${modelVersion}.Role`,
                         "entityName": "User"
                     },
                     role => role.argument.party == party && role.argument.operator == adminParty,

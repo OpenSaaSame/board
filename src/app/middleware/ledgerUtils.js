@@ -2,6 +2,8 @@ import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
 import {mapBy} from "../components/utils"
 
+export const modelVersion = "Danban.V2";
+
 export const processResponse = response => {
     if(!response.ok) {
         return response.text().then(body => {
@@ -67,16 +69,16 @@ export const loadAll = (ledgerUrl, jwt) => callAPI(
             "%templates": [
                 {
                     "entityName": "Profile",
-                    "moduleName": "Danban.User"
+                    "moduleName": `${modelVersion}.User`
                 },
                 {
                     "entityName": "Board",
-                    "moduleName": "Danban.Rules"
+                    "moduleName": `${modelVersion}.Rules`
                 }
             ].concat(
                 ["Data", "CardList", "Card"].map(entityName => ({
                     entityName,
-                    "moduleName": "Danban.Board"
+                    "moduleName": `${modelVersion}.Board`
                 }))
             )
         }
@@ -94,12 +96,12 @@ export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jw
 
     const hasObs = c => !party || c.observers.includes(party) || c.signatories.includes(party);
 
-    const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, "Danban.Board", "Data")).map(c => c.argument));
-    const listsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, "Danban.Board", "CardList")).map(c => c.argument));
-    const cardsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, "Danban.Board", "Card")).map(c => c.argument));
-    const users = contracts.filter(c => isTemplate(c, "Danban.User", "Profile")).map(c => c.argument);
+    const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, `${modelVersion}.Board`, "Data")).map(c => c.argument));
+    const listsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "CardList")).map(c => c.argument));
+    const cardsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "Card")).map(c => c.argument));
+    const users = contracts.filter(c => isTemplate(c, `${modelVersion}.User`, "Profile")).map(c => c.argument);
     users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
-    const boardUsersById = mapBy("boardId")(contracts.filter(c => isTemplate(c, "Danban.Rules", "Board")).map(c => c.argument));
+    const boardUsersById = mapBy("boardId")(contracts.filter(c => isTemplate(c, `${modelVersion}.Rules`, "Board")).map(c => c.argument));
 
     return {
       boardsById,

@@ -1,5 +1,5 @@
 import NestedError from "nested-error-stacks";
-import {exercise, search} from "../app/middleware/ledgerUtils";
+import {modelVersion, exercise, search} from "../app/middleware/ledgerUtils";
 import { JWT, JWK } from "jose"
 import {getOrCreateApp} from "./ledger"
 
@@ -74,7 +74,7 @@ const sandbox = () => {
         const userRole = () => getOrCreateContract(
                 getToken(user),
                 {
-                    "moduleName": "Danban.Role",
+                    "moduleName": `${modelVersion}.Role`,
                     "entityName": "User"
                 },
                 role => role.argument.party == user && role.argument.operator == adminParty,

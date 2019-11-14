@@ -1,4 +1,4 @@
-import {create, exercise, search} from "../app/middleware/ledgerUtils";
+import {modelVersion, create, exercise, search} from "../app/middleware/ledgerUtils";
 import NestedError from "nested-error-stacks";
 
 
@@ -10,7 +10,7 @@ const fetchUserProfiles = user => search(
         ledgerURL(),
         user.token,
         {
-            "moduleName": "Danban.User",
+            "moduleName": `${modelVersion}.User`,
             "entityName": "Profile"
         },
         userParty => userParty.argument.party == user.party && userParty.argument.operator == user.operator
@@ -20,7 +20,7 @@ const createProfile = (user, profile) => exercise(
         ledgerURL(),
         user.token,
         {
-            "moduleName": "Danban.Role",
+            "moduleName": `${modelVersion}.Role`,
             "entityName": "User"
         },
         user.cid,
