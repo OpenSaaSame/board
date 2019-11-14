@@ -53,7 +53,7 @@ const sandbox = () => {
                 dataURL,
                 adminToken(),
                 {
-                    "moduleName": "Danban",
+                    "moduleName": modelVersion,
                     "entityName": "Admin"
                 },
                 cid,

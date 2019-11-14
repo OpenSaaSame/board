@@ -168,7 +168,7 @@ const dabl = () => {
                     dataURL,
                     jwt,
                     {
-                        "moduleName": "Danban",
+                        "moduleName": modelVerison,
                         "entityName": "Admin"
                     },
                     cid,

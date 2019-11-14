@@ -68,7 +68,7 @@ export const getOrCreateUserProfile = (user, profile) => {
 }
 
 const appTemplate = {
-    "moduleName": "Danban",
+    "moduleName": modelVersion,
     "entityName": "Admin"
 };
 
