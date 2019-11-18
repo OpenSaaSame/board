@@ -132,6 +132,8 @@ template Card
     color : Optional Text
     text : Text
     date : Optional Time
+
+    comments : [Text]
   where
     signatory operator, admins
     observer obs
@@ -152,3 +154,19 @@ template Card
         : ()
         do
           return ()
+
+template Comment
+  with
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+    
+    cardId : Text
+    user : Party
+    body : Text
+  where
+    signatory operator, admins
+
+    key (operator, _id) : (Party, Text)
+    maintainer key._1

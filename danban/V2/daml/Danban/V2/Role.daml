@@ -225,3 +225,14 @@ template User
           fetchByKey @App.Semaphore operator
           (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
           exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_CARD_COLOR with user = party, ..
+      
+      nonconsuming ADD_COMMENT
+          : ContractId Board.Comment
+        with
+          cardId : Text
+          commentId : Text
+          comment : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.ADD_COMMENT with user = party; ..
