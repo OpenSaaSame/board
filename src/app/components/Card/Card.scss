@@ -1,5 +1,15 @@
 @import "../../variables.scss";
 
+.card-container {
+  padding-top: 40px;
+  max-width: 50em;
+  margin: auto;
+}
+
+.card-form textarea {
+  display: block;
+}
+
 .card-title {
   position: relative;
   box-sizing: border-box;
@@ -61,4 +71,5 @@
     padding: 4px 2px;
     background: rgba(100, 100, 100, 0.08);
   }
+
 }

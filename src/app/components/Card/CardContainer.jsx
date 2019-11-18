@@ -124,7 +124,7 @@ class CardContainer extends Component {
           <ul>
             {commentsList}
           </ul>
-          <form onSubmit={this.handleCommentSubmit}>
+          <form onSubmit={this.handleCommentSubmit} class="card-form">
             <Textarea
               value={newComment}
               onChange={this.handleChange}
