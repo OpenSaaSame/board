@@ -8,6 +8,7 @@ import Calendar from "./Calendar";
 import ClickOutside from "../ClickOutside/ClickOutside";
 import colorIcon from "../../../assets/images/color-icon.png";
 import "./CardOptions.scss";
+import { Link } from "react-router-dom";
 
 class CardOptions extends Component {
   static propTypes = {
@@ -95,6 +96,15 @@ class CardOptions extends Component {
           alignItems: isCardNearRightBorder ? "flex-end" : "flex-start"
         }}
       >
+        <div>
+          <Link
+              key={card._id}
+              className="options-list-button"
+              to={`/c/${card._id}`}
+            >
+              Full task
+            </Link>
+        </div>
         <div>
           <button onClick={this.deleteCard} className="options-list-button">
             <div className="modal-icon">

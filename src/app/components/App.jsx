@@ -3,6 +3,7 @@ import { Route, Redirect, Switch, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import Home from "./Home/Home";
 import BoardContainer from "./Board/BoardContainer";
+import CardContainer from "./Card/CardContainer";
 import "./App.scss";
 import Spinner from "./Spinner/Spinner";
 import Alert from "./Alert/Alert";
@@ -13,6 +14,7 @@ const App = () => {
       <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/b/:boardId" component={BoardContainer} />
+          <Route path="/c/:cardId" component={CardContainer} />
           <Redirect to="/" />
         </Switch>
         <Spinner />

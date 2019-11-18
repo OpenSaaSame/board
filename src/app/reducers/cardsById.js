@@ -30,7 +30,11 @@ const cardsById = (state = {}, action) => {
           (newState, cardId) => ({ ...newState, [cardId]: state[cardId] }),
           {}
         );
-    }    
+    }
+    case "ADD_COMMENT": {
+      const { commentId, cardId } = action.payload;
+      return { ... state, [cardId]: { ... state[cardId], comments: [...state[cardId].comments, commentId] }};
+    }
     case "SUCCEED_READ": {
       return action.payload.cardsById;
     }

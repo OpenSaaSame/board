@@ -76,7 +76,7 @@ export const loadAll = (ledgerUrl, jwt) => callAPI(
                     "moduleName": `${modelVersion}.Rules`
                 }
             ].concat(
-                ["Data", "CardList", "Card"].map(entityName => ({
+                ["Data", "CardList", "Card", "Comment"].map(entityName => ({
                     entityName,
                     "moduleName": `${modelVersion}.Board`
                 }))
@@ -99,6 +99,7 @@ export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jw
     const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, `${modelVersion}.Board`, "Data")).map(c => c.argument));
     const listsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "CardList")).map(c => c.argument));
     const cardsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "Card")).map(c => c.argument));
+    const commentsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "Comment")).map(c => c.argument));
     const users = contracts.filter(c => isTemplate(c, `${modelVersion}.User`, "Profile")).map(c => c.argument);
     users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
     const boardUsersById = mapBy("boardId")(contracts.filter(c => isTemplate(c, `${modelVersion}.Rules`, "Board")).map(c => c.argument));
@@ -107,6 +108,7 @@ export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jw
       boardsById,
       listsById,
       cardsById,
+      commentsById,
       users,
       boardUsersById
     }

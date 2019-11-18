@@ -91,6 +91,7 @@ const payloadTransform = {
   "CHANGE_CARD_TEXT": payload => ({ cardId: payload.cardId, newText: payload.cardText }),
   "CHANGE_CARD_DATE": payload => ({ cardId: payload.cardId, newDate: payload.date }),
   "CHANGE_CARD_COLOR": payload => ({ cardId: payload.cardId, newColor: payload.color }),
+  "ADD_COMMENT": payload => ({ cardId: payload.cardId, commentId: payload.commentId, comment: payload.comment })
 }
 
 const maybeRead = (store) => {
@@ -181,6 +182,8 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_CARD_TEXT":
       case "CHANGE_CARD_DATE": 
       case "CHANGE_CARD_COLOR":
+
+      case "ADD_COMMENT":
         store.dispatch({
           type: "QUEUE_WRITE",
           payload: {
@@ -189,7 +192,7 @@ const persistMiddleware = store => next => action => {
           }
         });
         break;
-
+      
       case "QUEUE_READ":
       case "SUCCEED_READ":
       case "FAIL_READ":
