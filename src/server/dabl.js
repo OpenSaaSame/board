@@ -20,6 +20,8 @@ const dabl = () => {
     let appCid = null;
 
     const getSiteJWT = () => {
+        if(process.env.SITE_JWT) return Promise.resolve(process.env.SITE_JWT);
+
         // Get a new refresh token every 2 weeks.
         let need_new_refresh_token
             = refreshCookieTime == null 
@@ -92,7 +94,7 @@ const dabl = () => {
                 .then(jwt => {        
                     return fetchFromAPI(
                         "api/ledger",
-                        "token",
+                        "parties/token",
                         jwt,
                         "POST",
                         {
@@ -141,7 +143,7 @@ const dabl = () => {
         .then(jwt => {
             return fetchFromAPI(
                 "api/ledger",
-                "data/parties",
+                "parties",
                 jwt,
                 "POST",
                 {
@@ -193,16 +195,16 @@ const dabl = () => {
                 party_ = getOrCreateContract(
                     adminToken(),
                     {
-                        "moduleName": "DABL.User",
-                        "entityName": "UserParty"
+                        "moduleName": "DABL.Ledger",
+                        "entityName": "LedgerParty"
                     },
                     userParty => userParty.argument.partyName == user,
                     () => createUser(user)
                     .then(() => fetchContracts(
                         adminToken(),
                         {
-                            "moduleName": "DABL.User",
-                            "entityName": "UserParty"
+                            "moduleName": "DABL.Ledger",
+                            "entityName": "LedgerParty"
                         },
                         userParty => userParty.argument.partyName == user
                     ))
