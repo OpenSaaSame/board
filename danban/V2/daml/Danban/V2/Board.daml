@@ -163,8 +163,10 @@ template Comment
     obs : [Party]
     
     cardId : Text
-    user : Party
     body : Text
+
+    createdAt : Time
+    author : Party
   where
     signatory operator, admins
 

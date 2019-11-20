@@ -328,12 +328,17 @@ template Board
         checkAccess user Write
         (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
         archive oldCid
+
+        now <- getTime
+
         create card with comments = card.comments ++ [commentId]
         create Board.Comment with
           _id = commentId
-          user
           operator = card.operator
           admins = card.admins
           obs = card.obs
           body = comment
           cardId = card._id
+          author = user
+          createdAt = now
+          

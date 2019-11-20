@@ -25,9 +25,12 @@ class CardContainer extends Component {
     comments: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
-        body: PropTypes.string.isRequired
+        body: PropTypes.string.isRequired,
+        author: PropTypes.string.isRequired,
+        createdAt: PropTypes.string.isRequired
       })
     ),
+    userId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -64,17 +67,18 @@ class CardContainer extends Component {
   handleCommentSubmit = event => {
     event.preventDefault();
     const { newComment } = this.state;
-    const { dispatch, card } = this.props;
+    const { dispatch, card, userId } = this.props;
     const commentId = shortid.generate();
-
-    console.log("here", newComment, commentId);
+    const createdAt = new Date().toString();
 
     dispatch({
       type: "ADD_COMMENT",
       payload: {
         cardId: card._id,
         comment: newComment,
-        commentId
+        commentId,
+        createdAt,
+        author: userId
       }
     });
 
@@ -91,12 +95,16 @@ class CardContainer extends Component {
     const checkboxes = findCheckboxes(card.text);
 
     const commentsList = comments.map(comment => 
-      <li
+      <div
         key={comment._id}
-        dangerouslySetInnerHTML={{
-          __html: formatMarkdown(comment.body)
-        }}
-      />
+      >
+        <div
+          dangerouslySetInnerHTML={{
+            __html: formatMarkdown(comment.body)
+          }}
+        />
+        {comment.author} &mdash; {comment.createdAt}
+      </div>
     );
     
     return (
@@ -111,7 +119,7 @@ class CardContainer extends Component {
               lower: true
             })}`}
           >
-            <div className="">{board.title}</div>
+            Back to board: {board.title}
           </Link>
 
           <div
@@ -120,11 +128,11 @@ class CardContainer extends Component {
             }}
           >
           </div>
+          
           <h2>Comments</h2>
-          <ul>
-            {commentsList}
-          </ul>
-          <form onSubmit={this.handleCommentSubmit} class="card-form">
+          {commentsList}
+
+          <form onSubmit={this.handleCommentSubmit} className="card-form">
             <Textarea
               value={newComment}
               onChange={this.handleChange}
@@ -142,7 +150,8 @@ const mapStateToProps = (state, ownProps) => {
   const card = state.cardsById[cardId];
   const board = state.boardsById[card.boardId];
   const comments = card.comments.map(cId => state.commentsById[cId]);
-  return { card: card, board: board, comments: comments };
+  const userId = state.user ? state.user.party : "guest";
+  return { card, board, comments, userId };
 };
 
 export default connect(mapStateToProps)(CardContainer);
