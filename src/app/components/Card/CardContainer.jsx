@@ -31,6 +31,7 @@ class CardContainer extends Component {
       })
     ),
     userId: PropTypes.string.isRequired,
+    allUsers: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -64,12 +65,12 @@ class CardContainer extends Component {
     });
   };
 
-  handleCommentSubmit = event => {
+  handleSubmit = event => {
     event.preventDefault();
     const { newComment } = this.state;
     const { dispatch, card, userId } = this.props;
     const commentId = shortid.generate();
-    const createdAt = new Date().toString();
+    const createdAt = Date.now().toString();
 
     dispatch({
       type: "ADD_COMMENT",
@@ -89,23 +90,34 @@ class CardContainer extends Component {
     this.setState({ newComment: event.target.value });
   };
 
+  handleKeyDown = event => {
+    if (event.keyCode === 13 && event.shiftKey === false) {
+      this.handleSubmit(event);
+    }
+  };
+
   render() {
-    const { card, board, comments } = this.props;
+    const { card, board, comments, allUsers } = this.props;
     const { newComment } = this.state;
     const checkboxes = findCheckboxes(card.text);
 
-    const commentsList = comments.map(comment => 
-      <div
-        key={comment._id}
-      >
-        <div
-          dangerouslySetInnerHTML={{
-            __html: formatMarkdown(comment.body)
-          }}
-        />
-        {comment.author} &mdash; {comment.createdAt}
-      </div>
-    );
+    const commentsList = comments.map(comment => {
+      const dateString = new Date(comment.createdAt).toDateString();
+
+      return  <div
+                key={comment._id}
+                className="card-comment"
+              >
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: formatMarkdown(comment.body)
+                  }}
+                />
+                <div className="card-comment-metadata">
+                  {allUsers.byParty[comment.author].email} &mdash; {dateString}
+                </div>
+              </div>
+    });
     
     return (
       <>
@@ -121,21 +133,28 @@ class CardContainer extends Component {
           >
             Back to board: {board.title}
           </Link>
+          
+          <h1>Card</h1>
 
           <div
+            className="card-body"
             dangerouslySetInnerHTML={{
               __html: formatMarkdown(card.text)
             }}
           >
           </div>
           
-          <h2>Comments</h2>
-          {commentsList}
+          <div className="class-comments">
+            <h2>Comments</h2>
+            {commentsList}
+          </div>
 
-          <form onSubmit={this.handleCommentSubmit} className="card-form">
+          <form onSubmit={this.handleSubmit} className="card-form">
             <Textarea
               value={newComment}
               onChange={this.handleChange}
+              onKeyDown={this.handleKeyDown}
+              minRows={3}
             />
             <input type="submit" value="Submit" />
           </form>
@@ -151,7 +170,8 @@ const mapStateToProps = (state, ownProps) => {
   const board = state.boardsById[card.boardId];
   const comments = card.comments.map(cId => state.commentsById[cId]);
   const userId = state.user ? state.user.party : "guest";
-  return { card, board, comments, userId };
+  const allUsers = state.users;
+  return { card, board, comments, userId, allUsers };
 };
 
 export default connect(mapStateToProps)(CardContainer);
