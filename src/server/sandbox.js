@@ -109,12 +109,29 @@ const sandbox = () => {
                 throw new NestedError(`Error getting or creating User Role for ${user}`, err)
             });
 
-        return userRole()
-        .then(roleCid => ({
+        
+        const userUpgrades = () => fetchContracts(
+                getToken(user),
+                {
+                    "moduleName": "Danban.V2.Upgrade",
+                    "entityName": "UpgradeInvite"
+                },
+                upg => upg.argument.party == user && upg.argument.operator == adminParty
+        );
+        
+        const upgradeOrRole = () => userUpgrades()
+            .then(upgrades => {
+                if(upgrades.length > 0) return {cid : upgrades[0].contractId, needsUpgrade: true}
+                else return userRole()
+                    .then(roleCid => ({cid: roleCid, needsUpgrade: false}))
+            });
+
+        return upgradeOrRole()
+        .then(uog => ({
+            ... uog,
             "userName": user,
             "party": user,
             "token": getToken(user),
-            "cid" : roleCid,
             "operator" : adminParty
             })
         )

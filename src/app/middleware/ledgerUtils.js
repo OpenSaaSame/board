@@ -105,10 +105,13 @@ export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jw
     const isTemplate = (c, moduleName, entityName) => c.templateId instanceof Object
         ? c.templateId.entityName === entityName && (c.templateId.moduleName === `Danban.${moduleName}` || c.templateId.moduleName === `Danban.V2.${moduleName}`)
         : c.templateId.startsWith(`Danban.${moduleName}:${entityName}@`) || c.templateId.startsWith(`Danban.V2.${moduleName}:${entityName}@`);
+    const needsUpgrade = c => c.templateId instanceof Object
+        ? c.templateId.moduleName === "Danban.V2.Board"
+        : c.templateId.startsWith("Danban.V2.Board:");
 
     const hasObs = c => !party || c.observers.includes(party) || c.signatories.includes(party);
 
-    const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, "Board", "Data")).map(c => c.argument));
+    const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, "Board", "Data")).map(c => ({... c.argument, needsUpgrade : needsUpgrade(c)})));
     const listsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, "Board", "CardList")).map(c => c.argument));
     const cardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, "Board", "Card")).map(c => c.argument));
     const users = contracts.filter(c => isTemplate(c, "User", "Profile")).map(c => c.argument);

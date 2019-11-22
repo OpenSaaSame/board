@@ -156,8 +156,8 @@ const persistMiddleware = store => next => action => {
     user
   } = state;
 
-  // Nothing is persisted for guest users
-  if (user) {
+  // Nothing is persisted for guest users, or users needing upgrades
+  if (user && !user.needsUpgrade) {
     switch(action.type) {
       case "ADD_BOARD":
       case "TOGGLE_PUBLIC":

@@ -226,62 +226,90 @@ const dabl = () => {
                 return getToken(party);
             });
         }
-
+          
         const userRole = () => userParty()
-            .then(party => getOrCreateContract(
-                    userToken(),
-                    {
-                        "moduleName": "Danban.V2.Role",
-                        "entityName": "User"
-                    },
-                    role => role.argument.party == party && role.argument.operator == adminParty,
-                    () => 
-                    callApp("PauseApp", {})
-                    .then(() =>
-                        callApp(
-                            "AddUser",
-                            {
-                                "party": party,
-                                "operator": adminParty
-                            }
+            .then(party => 
+                {
+                    fetchContracts(userToken(),
+                        {
+                            "moduleName": "Danban.V2.Upgrade",
+                            "entityName": "UpgradeInvite"
+                        },
+                        upg => upg.argument.party == party && upg.argument.operator == adminParty
+                    )
+                    getOrCreateContract(
+                        userToken(),
+                        {
+                            "moduleName": "Danban.V2.Role",
+                            "entityName": "User"
+                        },
+                        role => role.argument.party == party && role.argument.operator == adminParty,
+                        () => 
+                        callApp("PauseApp", {})
+                        .then(() =>
+                            callApp(
+                                "AddUser",
+                                {
+                                    "party": party,
+                                    "operator": adminParty
+                                }
+                            )
+                            .then(ret => {
+                                return callApp("UnpauseApp", {})
+                                .then(() => ret);
+                            })
+                            .catch(err => {
+                                callApp("UnpauseApp", {});
+                                throw new NestedError(`Error creating user role. Unpausing.`, err);
+                            })
                         )
-                        .then(ret => {
-                            return callApp("UnpauseApp", {})
-                            .then(() => ret);
+                        .then(response => {
+                            console.log(`Role response: ${response}`)
+                            return response[response.length - 1].created;
                         })
                         .catch(err => {
-                            callApp("UnpauseApp", {});
-                            throw new NestedError(`Error creating user role. Unpausing.`, err);
+                            throw new NestedError(`Error creating User Role for ${user}`, err)
                         })
                     )
-                    .then(response => {
-                        console.log(`Role response: ${response}`)
-                        return response[response.length - 1].created;
-                    })
+                    .then(contract => contract.contractId)
                     .catch(err => {
-                        throw new NestedError(`Error creating User Role for ${user}`, err)
+                        throw new NestedError(`Error getting or creating User Role for ${user}`, err)
                     })
-                )
-                .then(contract => contract.contractId)
-                .catch(err => {
-                    throw new NestedError(`Error getting or creating User Role for ${user}`, err)
-                })
+                }
             )
             .catch(err => {
                 throw new NestedError(`Failed to get the role for ${user}: `, err);
+            });
+
+        const userUpgrades = () => userParty()
+            .then(party => fetchContracts(
+                    userToken(),
+                    {
+                        "moduleName": "Danban.V2.Upgrade",
+                        "entityName": "UpgradeInvite"
+                    },
+                    upg => upg.argument.party == party && upg.argument.operator == adminParty
+                )
+            );
+        
+        const upgradeOrRole = () => userUpgrades()
+            .then(upgrades => {
+                if(upgrades.length > 0) return {cid : upgrades[0].contractId, needsUpgrade: true}
+                else return userRole()
+                    .then(roleCid => ({cid: roleCid, needsUpgrade: false}))
             });
 
         return userToken()
         .then(token => {
             return userParty()
             .then(party => {
-                return userRole()
-                .then(roleCid => {
+                return upgradeOrRole()
+                .then(uog => {
                     return {
+                        ... uog,
                         "userName": user,
                         "party": party,
                         "token": token,
-                        "cid" : roleCid,
                         "operator" : adminParty
                         }
                 })
