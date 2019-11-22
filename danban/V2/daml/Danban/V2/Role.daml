@@ -42,7 +42,7 @@ template User
           title : Text
         do
           fetchByKey @App.Semaphore operator
-          exerciseByKey @Board.Directory operator Board.Directory_AddBoard with 
+          exerciseByKey @Board.Directory (operator, party) Board.Directory_AddBoard with 
             board = boardId
           create Rules.Board with
             operator

@@ -20,7 +20,6 @@ template Admin
         : ()
         do
           create User.Directory with operator; users = []
-          create Board.Directory with operator; users = []; boards = []
           create App.Semaphore with operator; users = []
           return ()
 
@@ -40,8 +39,7 @@ template Admin
           party : Party
         do
           exerciseByKey @User.Directory operator User.Directory_AddObs with party
-          (cid, _) <- fetchByKey @Board.Directory operator
-          exerciseByKey @Board.Directory operator Board.Directory_UpdateObs
+          create Board.Directory with boards = []; ..
           create Role.User with ..
 
 startApp = scenario do

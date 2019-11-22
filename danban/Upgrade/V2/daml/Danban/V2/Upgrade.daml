@@ -1,7 +1,12 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
 daml 1.2
 module Danban.V2.Upgrade where
 
-import DA.Upgrade
+import DA.Action
+import qualified DA.List as List
+import qualified DA.Next.Map as Map
+import DA.Tuple
 
 import qualified Danban as DanbanV1
 import qualified Danban.Board as BoardV1
@@ -9,32 +14,56 @@ import qualified Danban.Role as RoleV1
 import qualified Danban.Rules as RulesV1
 import qualified Danban.User as UserV1
 
-import DanbanInstances ()
-import Danban.BoardInstances ()
-import Danban.RoleInstances ()
-import Danban.RulesInstances ()
-import Danban.UserInstances ()
-
 import qualified Danban.V2 as DanbanV2
 import qualified Danban.V2.Board as BoardV2
 import qualified Danban.V2.Role as RoleV2
 import qualified Danban.V2.Rules as RulesV2
 import qualified Danban.V2.User as UserV2
 
-import Danban.V2Instances ()
-import Danban.V2.BoardInstances ()
-import Danban.V2.RoleInstances ()
-import Danban.V2.RulesInstances ()
-import Danban.V2.UserInstances ()
+class Upgradable a b where
+  upgrade : a -> b
 
-instance Convertible DanbanV1.Admin DanbanV2.Admin where
-  convert DanbanV1.Admin{..} = DanbanV2.Admin{..}
+-- Define the conversion rules
+instance Upgradable DanbanV1.Admin DanbanV2.Admin where
+  upgrade DanbanV1.Admin{..} = DanbanV2.Admin{..}
 
-instance Convertible UserV1.Directory UserV2.Directory where
-  convert UserV1.Directory{..} = UserV2.Directory{..}
+instance Upgradable UserV1.Directory UserV2.Directory where
+  upgrade UserV1.Directory{..} = UserV2.Directory{..}
 
-instance Convertible BoardV1.Directory BoardV2.Admin where
-  convert BoardV1.Directory{..} = BoardV2.Directory{..}
+instance Upgradable UserV1.Profile UserV2.Profile where
+  upgrade UserV1.Profile{..} = UserV2.Profile{..}
+
+instance Upgradable BoardV1.Data BoardV2.Data where
+  upgrade BoardV1.Data{..} = BoardV2.Data{..}
+
+instance Upgradable BoardV1.CardList BoardV2.CardList where
+  upgrade BoardV1.CardList{..} = BoardV2.CardList{..}
+
+instance Upgradable BoardV1.Card BoardV2.Card where
+  upgrade BoardV1.Card{..} = BoardV2.Card{..}
+
+instance Upgradable RulesV1.Board RulesV2.Board where
+  upgrade RulesV1.Board{..} = RulesV2.Board{users = newUsers; ..}
+    where
+      newUsers = map (second upgrade) users
+
+deriving instance Enum RulesV1.AccessLevel
+deriving instance Enum RulesV2.AccessLevel
+instance Upgradable RulesV1.AccessLevel RulesV2.AccessLevel where
+  upgrade = toEnum . fromEnum
+
+upgradeByKey : forall a b k . (Template b, TemplateKey a k, Upgradable a b) => k -> Update (ContractId b, b)
+upgradeByKey k = do
+  (cid, args) <- fetchByKey @a k
+  archive cid
+  let b = upgrade args
+  bcid <- create @b b
+  return (bcid, b)
+
+updateMap : (Map.MapKey k) => k -> (v -> v) -> Map.Map k v -> Map.Map k v
+updateMap k fn m = case Map.lookup k m of
+  None -> m
+  Some v -> Map.insert k (fn v) m
 
 template UpgradeInitiator
   with
@@ -47,24 +76,87 @@ template UpgradeInitiator
         : ()
         do
           -- Convert admin contracts          
-          (adminCid, admin) <- fetchByKey @DanbanV1.Admin operator
-          archive adminCid
-          newAdminCid <- create (convert admin)
-          
-          (usersCid, users) <- fetchByKey @UserV1.Directory operator
-          archive usersCid
-          create (convert users)
+          (newAdminCid, _) <- upgradeByKey @DanbanV1.Admin @DanbanV2.Admin operator
+          (_, UserV2.Directory{users}) <- upgradeByKey @UserV1.Directory @UserV2.Directory operator
+          (boardDirectoryCid, BoardV1.Directory{boards}) <- fetchByKey @BoardV1.Directory operator
+          archive boardDirectoryCid
+
+          -- Write the relationship Board <> Signatory into two maps
+          let emptySigMap = foldl (\sigMap user -> Map.insert user [] sigMap) Map.empty users
+          (boardMap, sigMap) <- foldlA
+            (\(boardMap, sigMap) boardId -> do
+              (_, rules) <- fetchByKey @RulesV1.Board (operator, boardId)
+              let
+                newBoardMap = Map.insert boardId (signatory rules) boardMap
+                newSigMap = foldl 
+                  (\acc sig -> updateMap sig (\l -> boardId :: l) acc) sigMap (signatory rules)
+              return (newBoardMap, newSigMap)
+              )
+            (Map.empty, emptySigMap)
+            boards
+
+          -- Write Board Update Contracts
+          forA (Map.toList boardMap) (\(boardId, requiredSigs) -> create BoardUpgrader with sigs = []; ..)
+
+          -- Create Upgrade invitations for users
+          forA (Map.toList sigMap) (\(party, boards) -> do
+            exerciseByKey @RoleV1.User (operator, party) Archive
+            create UpgradeInvite with ..
+            )
 
           exercise newAdminCid DanbanV2.UnpauseApp
-
-          (boardsCid, boards) <- fetchByKey @BoardV1.Directory operator
-          archive boardsCid
-          create (convert boards)
-          
           return ()
 
 template BoardUpgrader
   with
     operator : Party
     boardId : Text
+    requiredSigs : [Party]
     sigs : [Party]
+  where
+    signatory operator :: sigs
+    observer requiredSigs
+
+    key (operator, boardId) : (Party, Text)
+    maintainer key._1
+
+    choice Sign
+      : ()
+      with
+        party : Party
+      controller party
+      do
+        assertMsg (show party <> " is not a required signatory") (party `elem` requiredSigs)
+        let newSigs = List.dedupSort (party :: sigs)
+        newSelf <- create this with sigs = newSigs
+        when (newSigs == requiredSigs) (exercise newSelf UpgradeBoard)
+    
+    controller operator can
+      UpgradeBoard
+        : ()
+        do
+          upgradeByKey @RulesV1.Board @RulesV2.Board (operator, boardId)
+          (_, newBoard) <- upgradeByKey @BoardV1.Data @BoardV2.Data (operator, boardId)
+          forA newBoard.lists (\listId -> do
+            (_, newList) <- upgradeByKey @BoardV1.CardList @BoardV2.CardList (operator, listId)
+            forA newList.cards (\cardId -> upgradeByKey @BoardV1.Card @BoardV2.Card (operator, cardId))
+            )
+          return ()
+
+template UpgradeInvite
+  with
+    operator : Party
+    party : Party
+    boards : [Text]
+  where
+    signatory operator
+
+    controller party can
+      Accept_Upgrade
+        : ()
+        do
+          upgradeByKey @UserV1.Profile @UserV2.Profile (operator, party)
+          create RoleV2.User with ..
+          forA boards (\boardId -> exerciseByKey @BoardUpgrader (operator, boardId) Sign with ..)
+          create BoardV2.Directory with ..
+          return ()
