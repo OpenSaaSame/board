@@ -10,7 +10,7 @@ const fetchUserProfiles = user => search(
         ledgerURL(),
         user.token,
         {
-            "moduleName": "Danban.User",
+            "moduleName": "Danban.V2.User",
             "entityName": "Profile"
         },
         userParty => userParty.argument.party == user.party && userParty.argument.operator == user.operator
@@ -20,7 +20,7 @@ const createProfile = (user, profile) => exercise(
         ledgerURL(),
         user.token,
         {
-            "moduleName": "Danban.Role",
+            "moduleName": "Danban.V2.Role",
             "entityName": "User"
         },
         user.cid,
@@ -68,7 +68,7 @@ export const getOrCreateUserProfile = (user, profile) => {
 }
 
 const appTemplate = {
-    "moduleName": "Danban",
+    "moduleName": "Danban.V2",
     "entityName": "Admin"
 };
 

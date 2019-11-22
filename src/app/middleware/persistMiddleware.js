@@ -6,7 +6,7 @@ const exercise = (user, cid, choice, args) => exerciseUtil(
     ledgerUrl,
     user.token,
     {
-      "moduleName": "Danban.Role",
+      "moduleName": "Danban.V2.Role",
       "entityName": "User"
     },
     cid,
