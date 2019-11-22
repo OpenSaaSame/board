@@ -39,7 +39,6 @@ template Admin
           party : Party
         do
           exerciseByKey @User.Directory operator User.Directory_AddObs with party
-          create Board.Directory with boards = []; ..
           create Role.User with ..
 
 startApp = scenario do

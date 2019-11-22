@@ -96,7 +96,8 @@ template UpgradeInitiator
             boards
 
           -- Write Board Update Contracts
-          forA (Map.toList boardMap) (\(boardId, requiredSigs) -> create BoardUpgrader with sigs = []; ..)
+          forA (Map.toList boardMap) (\(boardId, requiredSigs) -> 
+            create BoardUpgrader with sigs = [operator]; requiredSigs = List.dedupSort requiredSigs; ..)
 
           -- Create Upgrade invitations for users
           forA (Map.toList sigMap) (\(party, boards) -> do

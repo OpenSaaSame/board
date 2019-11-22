@@ -11,7 +11,7 @@ template Directory
     party : Party
     boards : [Text]
   where
-    signatory operator
+    signatory operator, party
     observer party
 
     key (operator, party) : (Party, Party)
