@@ -11,9 +11,11 @@ export const publicBoardsInitial = ledgerConn => {
   var _stateAt = 0;
 
   return (req, res, next) => {
-    if (Date.now() >= _stateAt + 1000 * 10)
+    if (Date.now() >= _stateAt + 1000 * 10) {
       _state = Promise.resolve(ledgerConn.adminToken())
-        .then(jwt => loadState(ledgerURL, jwt))
+        .then(jwt => loadState(ledgerURL, jwt));
+      _stateAt = Date.now();
+    }
 
     _state.then(state => {
       req.initialState = { 
