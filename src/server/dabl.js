@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
-import {processResponse, callAPI, exercise, search} from "../app/middleware/ledgerUtils";
-import {getOrCreateApp} from "./ledger"
+import {callAPI, search} from "../app/middleware/ledgerUtils";
+import {getOrCreateApp, getOrCreateContract, getUserProfile, getOrCreateUserProfile} from "./ledger"
 const url = require("url");
 
 const dabl = () => {
@@ -117,25 +117,7 @@ const dabl = () => {
 
     const adminToken = () => {
         return getToken(adminParty);
-    };
-
-    const fetchContracts = (jwtPromise, template, filter) => jwtPromise.then(jwt => {
-        console.log(`Fetching contracts ${JSON.stringify(template)}`) 
-        return search (
-            dataURL, jwt, template, filter
-        );    
-    });    
-
-    const getOrCreateContract = (jwtPromise, template, filter, createCb) => {
-        return fetchContracts(jwtPromise, template, filter)
-        .then(contracts => {
-            if(contracts.length > 0) return contracts[0];
-            else return createCb();
-        })
-        .catch(err => {
-            throw new NestedError(`Error fetching or creating ${JSON.stringify(template)} contracts: `, err);
-        });
-    }
+    }; 
 
     const createUser = user => {
         console.log("Creating user");
@@ -161,61 +143,46 @@ const dabl = () => {
         });
     };
 
-    const callApp = (choice, argument) => adminToken()
+    const getApp = () => adminToken()
         .then(jwt => {
-            if(appCid == null) appCid = getOrCreateApp(adminParty, jwt);
-            console.log(`Making app call ${choice} with ${JSON.stringify(argument)}`)
+            if(appCid == null) appCid = getOrCreateApp(dataURL, adminParty, jwt);
             return appCid
-            .then(cid => exercise(
-                    dataURL,
-                    jwt,
-                    {
-                        "moduleName": "Danban.V2",
-                        "entityName": "Admin"
-                    },
-                    cid,
-                    choice,
-                    argument
-                )
-                .catch(err => {
-                    throw new NestedError(`Error calling app choice ${choice} with ${argument}`, err);
-                })
-            )
-            .catch(err => {
-                throw new NestedError(`Error getting app cid or calling app choice ${choice} with ${argument}`, err);
-            })
         });
 
-    const getUser = user => {
+    const getDABLUser = user => {
         let party_ = null;
 
         const userParty = () => {
             if(party_ == null) {
                 console.log("Getting user party");
-                party_ = getOrCreateContract(
-                    adminToken(),
-                    {
-                        "moduleName": "DABL.Ledger",
-                        "entityName": "LedgerParty"
-                    },
-                    userParty => userParty.argument.partyName == user,
-                    () => createUser(user)
-                    .then(() => fetchContracts(
-                        adminToken(),
+
+                party_ = adminToken()
+                    .then(adminJwt => getOrCreateContract(
+                        adminJwt,
                         {
                             "moduleName": "DABL.Ledger",
                             "entityName": "LedgerParty"
                         },
-                        userParty => userParty.argument.partyName == user
-                    ))
-                    .then(response => response[0])
+                        userParty => userParty.argument.partyName == user,
+                        () => createUser(user)
+                        .then(() => search(
+                            dataURL,
+                            adminJwt,
+                            {
+                                "moduleName": "DABL.User",
+                                "entityName": "UserParty"
+                            },
+                            userParty => userParty.argument.partyName == user
+                        ))
+                        .then(response => response[0])
+                    )
+                    .then(contract => {
+                        return contract.argument.party
+                    })
+                    .catch(err => {
+                        throw new NestedError(`Failed to get the party  for ${user}: `, err);
+                    })
                 )
-                .then(contract => {
-                    return contract.argument.party
-                })
-                .catch(err => {
-                    throw new NestedError(`Failed to get the party  for ${user}: `, err);
-                });
             }
             return party_;
         }
@@ -226,102 +193,19 @@ const dabl = () => {
                 return getToken(party);
             });
         }
-          
-        const userRole = () => userParty()
-            .then(party => 
-                {
-                    fetchContracts(userToken(),
-                        {
-                            "moduleName": "Danban.V2.Upgrade",
-                            "entityName": "UpgradeInvite"
-                        },
-                        upg => upg.argument.party == party && upg.argument.operator == adminParty
-                    )
-                    getOrCreateContract(
-                        userToken(),
-                        {
-                            "moduleName": "Danban.V2.Role",
-                            "entityName": "User"
-                        },
-                        role => role.argument.party == party && role.argument.operator == adminParty,
-                        () => 
-                        callApp("PauseApp", {})
-                        .then(() =>
-                            callApp(
-                                "AddUser",
-                                {
-                                    "party": party,
-                                    "operator": adminParty
-                                }
-                            )
-                            .then(ret => {
-                                return callApp("UnpauseApp", {})
-                                .then(() => ret);
-                            })
-                            .catch(err => {
-                                callApp("UnpauseApp", {});
-                                throw new NestedError(`Error creating user role. Unpausing.`, err);
-                            })
-                        )
-                        .then(response => {
-                            console.log(`Role response: ${response}`)
-                            return response[response.length - 1].created;
-                        })
-                        .catch(err => {
-                            throw new NestedError(`Error creating User Role for ${user}`, err)
-                        })
-                    )
-                    .then(contract => contract.contractId)
-                    .catch(err => {
-                        throw new NestedError(`Error getting or creating User Role for ${user}`, err)
-                    })
-                }
-            )
-            .catch(err => {
-                throw new NestedError(`Failed to get the role for ${user}: `, err);
-            });
 
-        const userUpgrades = () => userParty()
-            .then(party => fetchContracts(
-                    userToken(),
-                    {
-                        "moduleName": "Danban.V2.Upgrade",
-                        "entityName": "UpgradeInvite"
-                    },
-                    upg => upg.argument.party == party && upg.argument.operator == adminParty
-                )
-            );
-        
-        const upgradeOrRole = () => userUpgrades()
-            .then(upgrades => {
-                if(upgrades.length > 0) return {cid : upgrades[0].contractId, needsUpgrade: true}
-                else return userRole()
-                    .then(roleCid => ({cid: roleCid, needsUpgrade: false}))
+        return Promise.all(getApp(), userParty(), userToken(), adminToken())
+            .then(([app, party, partyJwt, adminJwt]) => getUser(app, user, party, partyJwt, adminParty, adminJwt)
+            ).catch(err => {
+                throw new NestedError(`Failed to get user ${user}: `, err);
             });
-
-        return userToken()
-        .then(token => {
-            return userParty()
-            .then(party => {
-                return upgradeOrRole()
-                .then(uog => {
-                    return {
-                        ... uog,
-                        "userName": user,
-                        "party": party,
-                        "token": token,
-                        "operator" : adminParty
-                        }
-                })
-            });
-        }).catch(err => {
-            throw new NestedError(`Failed to get user ${user}: `, err);
-        });
     };
 
     return {
         adminToken,
-        getUser
+        getUser: getDABLUser,
+        getUserProfile : user => getUserProfile(dataURL, user),
+        getOrCreateUserProfile : (user, profile) => getApp().then(app => getOrCreateUserProfile(dataURL, app.version, user, profile))
     }
 }
 

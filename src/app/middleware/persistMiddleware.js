@@ -1,24 +1,30 @@
-import {loadState, exercise as exerciseUtil} from "./ledgerUtils"
+import {loadState, exercise as exerciseUtil, rootErr} from "./ledgerUtils"
 
 const ledgerUrl = "/api/";
 
-const exercise = (user, cid, choice, args) => exerciseUtil(
+export const upgrade = user => exerciseUtil(
+  ledgerUrl,
+  user.token,
+  {
+    "moduleName": `${user.version}.Upgrade`,
+    "entityName": "UpgradeInvite"
+  },
+  user.cid,
+  "Accept_Upgrade",
+  {}
+);
+
+const exercise = (user, choice, args) => exerciseUtil(
     ledgerUrl,
     user.token,
     {
-      "moduleName": "Danban.V2.Role",
+      "moduleName": `${user.version}.Role`,
       "entityName": "User"
     },
-    cid,
+    user.cid,
     choice,
     args
   );
-
-const rootErr = err => {
-  while(err.nested)
-    err = err.nested
-  return err;
-}
 
 const isNetworkError = err =>
   rootErr(err) instanceof TypeError;
@@ -67,7 +73,6 @@ const maybeWrite = (state, dispatch) => {
 
 const exerciseUserChoice = (choice) => (state, payload) => exercise (
     state.user,
-    state.user.cid,
     choice,
     payloadTransform[choice](payload)
 )
@@ -157,7 +162,7 @@ const persistMiddleware = store => next => action => {
   } = state;
 
   // Nothing is persisted for guest users, or users needing upgrades
-  if (user && !user.needsUpgrade) {
+  if (user) {
     switch(action.type) {
       case "ADD_BOARD":
       case "TOGGLE_PUBLIC":
@@ -181,13 +186,14 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_CARD_TEXT":
       case "CHANGE_CARD_DATE": 
       case "CHANGE_CARD_COLOR":
-        store.dispatch({
-          type: "QUEUE_WRITE",
-          payload: {
-            type: action.type,
-            payload: action.payload
-          }
-        });
+        if(!user.needsUpgrade)
+          store.dispatch({
+            type: "QUEUE_WRITE",
+            payload: {
+              type: action.type,
+              payload: action.payload
+            }
+          });
         break;
 
       case "QUEUE_READ":
