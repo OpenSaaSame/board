@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
 import {callAPI, search} from "../app/middleware/ledgerUtils";
-import {getOrCreateApp, getOrCreateContract, getUserProfile, getOrCreateUserProfile} from "./ledger"
+import {getOrCreateApp, getOrCreateContract, getUser, getUserProfile, getOrCreateUserProfile} from "./ledger"
 const url = require("url");
 
 const dabl = () => {
@@ -9,9 +9,9 @@ const dabl = () => {
     const dablUrl = "https://api.projectdabl.com/";
     const ledgerId = process.env.DABL_LEDGER;
     
-    const ledgerSegment = `/${ledgerId}/`
-    const adminParty = `dabl_admin-${ledgerId}` 
-    const dataURL = dablUrl + "data" + ledgerSegment
+    const ledgerSegment = `/${ledgerId}/`;
+    const adminParty = process.env.DABL_ADMIN;
+    const dataURL = dablUrl + "data" + ledgerSegment;
 
     let refreshCookieTime = null;
     
@@ -156,8 +156,9 @@ const dabl = () => {
             if(party_ == null) {
                 console.log("Getting user party");
 
-                party_ = adminToken()
-                    .then(adminJwt => getOrCreateContract(
+                party_ = Promise.all([getApp(), adminToken()])
+                    .then(([app, adminJwt]) => getOrCreateContract(
+                        app,
                         adminJwt,
                         {
                             "moduleName": "DABL.Ledger",
@@ -169,8 +170,8 @@ const dabl = () => {
                             dataURL,
                             adminJwt,
                             {
-                                "moduleName": "DABL.User",
-                                "entityName": "UserParty"
+                                "moduleName": "DABL.Ledger",
+                                "entityName": "LedgerParty"
                             },
                             userParty => userParty.argument.partyName == user
                         ))
@@ -194,7 +195,7 @@ const dabl = () => {
             });
         }
 
-        return Promise.all(getApp(), userParty(), userToken(), adminToken())
+        return Promise.all([getApp(), userParty(), userToken(), adminToken()])
             .then(([app, party, partyJwt, adminJwt]) => getUser(app, user, party, partyJwt, adminParty, adminJwt)
             ).catch(err => {
                 throw new NestedError(`Failed to get user ${user}: `, err);

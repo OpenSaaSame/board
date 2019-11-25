@@ -22,7 +22,7 @@ const skipUpgrade = dispatch => {
 
 const Upgrade = ({dispatch, user}) => {
   let className = "upgrade"
-  if (!user || !user.needsUpgrade || user.skippedUpgrade) className += "hide" 
+  if (!user || !user.needsUpgrade || user.skippedUpgrade) className += " hide" 
   return <div className={className}>
     <div className="upgrade-modal">
       <h1>It's Upgrade Time!</h1>
