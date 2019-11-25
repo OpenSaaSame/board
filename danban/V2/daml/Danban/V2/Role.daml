@@ -1,0 +1,229 @@
+daml 1.2
+module Danban.V2.Role where
+
+import DA.Action
+import DA.Optional
+
+import qualified Danban.V2.App as App
+import qualified Danban.V2.Board as Board
+import qualified Danban.V2.User as User
+import qualified Danban.V2.Rules as Rules
+
+-- Role.User gives a user the choices to operate on the app
+template User
+  with
+    party : Party
+    operator : Party
+  where
+    signatory operator
+
+    key (operator, party) : (Party, Party)
+    maintainer key._1
+
+    controller party can
+      nonconsuming PutProfile
+        : ContractId User.Profile
+        with
+          displayName : Text
+          imageUrl : Text
+          email : Optional Text
+          domain : Optional Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, userDirectory) <- fetchByKey @User.Directory operator
+          oProfile <- lookupByKey @User.Profile (operator, party)
+          when (isSome oProfile) (archive (fromSome oProfile))
+          create User.Profile with obs = userDirectory.users, ..
+
+      nonconsuming ADD_BOARD
+        : ContractId Board.Data
+        with
+          boardId : Text
+          title : Text
+        do
+          fetchByKey @App.Semaphore operator
+          oBoardDirectory <- lookupByKey @Board.Directory (operator, party)
+          case oBoardDirectory of
+            None -> create Board.Directory with boards = [boardId]; ..
+            Some bd -> exercise bd Board.Directory_AddBoard with board = boardId
+          create Rules.Board with
+            operator
+            boardId
+            users = [(party, Rules.SignedAdmin)]
+          create Board.Data with
+            _id = boardId
+            operator
+            admins = [party]
+            obs = []
+            title
+            color = "blue"
+            lists = []
+            isPublic = False
+
+      -- Admin access actions
+      nonconsuming ADD_USER
+        : ContractId Board.Data
+        with
+          boardId : Text
+          newUser : Party
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.ADD_USER with admin = party, ..   
+
+      nonconsuming REMOVE_USER
+        : ContractId Board.Data
+        with
+          boardId : Text
+          user : Party
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.REMOVE_USER with admin = party, ..      
+          
+      nonconsuming CHANGE_PERMISSIONS
+        : ContractId Rules.Board
+        with
+          boardId : Text
+          user : Party
+          access : Rules.AccessLevel
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_PERMISSIONS with admin = party, ..
+
+
+      -- Admin board actions
+      nonconsuming TOGGLE_PUBLIC
+        : ContractId Board.Data
+        with
+          boardId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.TOGGLE_PUBLIC with admin = party, ..
+
+      nonconsuming DELETE_BOARD
+        : ()
+        with
+          boardId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.DELETE_BOARD with admin = party, ..
+
+      nonconsuming CHANGE_BOARD_TITLE
+        : ContractId Board.Data
+        with
+          boardId : Text
+          newTitle : Text
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_BOARD_TITLE with admin = party, ..
+
+      nonconsuming CHANGE_BOARD_COLOR
+        : ContractId Board.Data
+        with
+          boardId : Text
+          newColor : Text
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_BOARD_COLOR with admin = party, ..
+
+      nonconsuming ADD_LIST
+        : ContractId Board.CardList
+        with
+          boardId : Text
+          listId : Text
+          title : Text
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.ADD_LIST with admin = party, ..
+
+      nonconsuming DELETE_LIST
+        : ()
+        with
+          boardId : Text
+          listId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.DELETE_LIST with admin = party, ..
+      
+      -- User Actions
+      nonconsuming MOVE_LIST
+        : ContractId Board.Data
+        with
+          boardId : Text
+          oldIdx : Int
+          newIdx : Int
+        do
+          fetchByKey @App.Semaphore operator
+          exerciseByKey @Rules.Board (operator, boardId) Rules.MOVE_LIST with user = party, ..
+      
+      nonconsuming CHANGE_LIST_TITLE
+        : ContractId Board.CardList
+        with
+          listId : Text
+          newTitle : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.CardList{boardId}) <- fetchByKey @Board.CardList (operator, listId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_LIST_TITLE with user = party, ..
+
+      nonconsuming ADD_CARD
+        : ContractId Board.Card
+        with
+          listId : Text
+          cardId : Text
+          text : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.CardList{boardId}) <- fetchByKey @Board.CardList (operator, listId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.ADD_CARD with user = party, ..
+
+      nonconsuming MOVE_CARD
+        : ()
+        with
+          sourceListId : Text
+          destListId : Text
+          oldIdx : Int
+          newIdx : Int
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.CardList{boardId}) <- fetchByKey @Board.CardList (operator, sourceListId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.MOVE_CARD with user = party, ..
+
+      nonconsuming DELETE_CARD
+        : ContractId Board.CardList
+        with
+          listId : Text
+          cardId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.CardList{boardId}) <- fetchByKey @Board.CardList (operator, listId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.DELETE_CARD with user = party, ..
+
+      nonconsuming CHANGE_CARD_TEXT
+        : ContractId Board.Card
+        with
+          cardId : Text
+          newText : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_CARD_TEXT with user = party, ..
+
+      nonconsuming CHANGE_CARD_DATE
+        : ContractId Board.Card
+        with
+          cardId : Text
+          newDate : Optional Time
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_CARD_DATE with user = party, ..
+
+      nonconsuming CHANGE_CARD_COLOR
+        : ContractId Board.Card
+        with
+          cardId : Text
+          newColor : Optional Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_CARD_COLOR with user = party, ..

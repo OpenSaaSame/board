@@ -2,6 +2,17 @@ import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
 import {mapBy} from "../components/utils"
 
+export const appVersions = [
+    "Danban",
+    "Danban.V2"
+];
+
+export const rootErr = err => {
+    while(err.nested)
+      err = err.nested
+    return err;
+  }
+
 export const processResponse = response => {
     if(!response.ok) {
         return response.text().then(body => {
@@ -59,26 +70,25 @@ export const search = (ledgerUrl, jwt, templateId, filter) => callAPI(
         throw new NestedError(`Error fetching ${JSON.stringify(templateId)} contracts: `, err);
     });
 
+const dataTemplates = [
+    ["User", "Profile"],
+    ["Rules", "Board"]
+].concat(
+    ["Data", "CardList", "Card"].map(e => ["Board", e])
+);
+
+const versionedTempates = dataTemplates.flatMap(t => 
+    appVersions.map(v => ({
+        "entityName" : t[1],
+        "moduleName" : `${v}.${t[0]}`
+    })))
+
 export const loadAll = (ledgerUrl, jwt) => callAPI(
         ledgerUrl + "contracts/search",
         jwt,
         "POST",
         {
-            "%templates": [
-                {
-                    "entityName": "Profile",
-                    "moduleName": "Danban.User"
-                },
-                {
-                    "entityName": "Board",
-                    "moduleName": "Danban.Rules"
-                }
-            ].concat(
-                ["Data", "CardList", "Card"].map(entityName => ({
-                    entityName,
-                    "moduleName": "Danban.Board"
-                }))
-            )
+            "%templates": versionedTempates
         }
     )
     .then(processResponse)
@@ -86,20 +96,51 @@ export const loadAll = (ledgerUrl, jwt) => callAPI(
         throw new NestedError(`Error fetching all contracts: `, err);
     });
 
+const templateModule = c => c.templateId instanceof Object
+    ? c.templateId.moduleName
+    : c.templateId.split(":")[0];
+
+const templateEntity = c => c.templateId instanceof Object
+    ? c.templateId.entityName
+    : c.templateId.split("@").split(":")[1];
+
+const templateVersion = c => {
+    const tm = templateModule(c);
+    return tm.substr(0, tm.lastIndexOf("."));
+}
+
+const unversionedModule = c => {
+    const tm = templateModule(c);
+    return tm.substr(tm.lastIndexOf(".") + 1);
+}
+
+const filterGroupAndVersion = (party, cs) => {
+    let ctMap = {};
+    dataTemplates.forEach(t => {
+        if(!ctMap[t[0]]) ctMap[t[0]] = {};
+        ctMap[t[0]][t[1]] = [];
+    });
+    cs.forEach(c => {
+        if(!party || c.observers.includes(party) || c.signatories.includes(party)) {
+            ctMap[unversionedModule(c)][templateEntity(c)].push({
+                ... c.argument,
+                version : templateVersion(c)
+            })
+        }
+    })
+    return ctMap
+}
+
 export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jwt)
   .then(contracts => {
-    const isTemplate = (c, moduleName, entityName) => c.templateId instanceof Object
-        ? c.templateId.entityName === entityName && c.templateId.moduleName === moduleName
-        : c.templateId.startsWith(`${moduleName}:${entityName}@`);
+    const contractMap = filterGroupAndVersion(party, contracts);
 
-    const hasObs = c => !party || c.observers.includes(party) || c.signatories.includes(party);
-
-    const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, "Danban.Board", "Data")).map(c => c.argument));
-    const listsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, "Danban.Board", "CardList")).map(c => c.argument));
-    const cardsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, "Danban.Board", "Card")).map(c => c.argument));
-    const users = contracts.filter(c => isTemplate(c, "Danban.User", "Profile")).map(c => c.argument);
+    const boardsById = mapBy("_id")(contractMap["Board"]["Data"]);
+    const listsById = mapBy("_id")(contractMap["Board"]["CardList"]);
+    const cardsById = mapBy("_id")(contractMap["Board"]["Card"]);
+    const users = (contractMap["User"]["Profile"]);
     users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
-    const boardUsersById = mapBy("boardId")(contracts.filter(c => isTemplate(c, "Danban.Rules", "Board")).map(c => c.argument));
+    const boardUsersById = mapBy("boardId")(contractMap["Rules"]["Board"]);
 
     return {
       boardsById,

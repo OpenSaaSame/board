@@ -1,16 +1,17 @@
 import NestedError from "nested-error-stacks";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import {getUserProfile, getOrCreateUserProfile} from "./ledger";
 
 const configurePassport = ledgerAdmin => {
 
   passport.serializeUser((user, cb) => {
-    cb(null, user._id);
+    console.log(JSON.stringify(user));
+    cb(null, user._id)
   });
+
   passport.deserializeUser((userName, cb) => {
     ledgerAdmin.getUser(userName).then(user => {
-      getUserProfile(user)
+      ledgerAdmin.getUserProfile(user)
       .then(userProfile => {
         cb(null, userProfile);
       })
@@ -33,7 +34,7 @@ const configurePassport = ledgerAdmin => {
       (accessToken, refreshToken, profile, cb) => {
         ledgerAdmin.getUser(profile.id)
         .then(user => {
-          getOrCreateUserProfile(user, profile)
+          ledgerAdmin.getOrCreateUserProfile(user, profile)
           .then(userProfile => {
             cb(null, userProfile);
           })

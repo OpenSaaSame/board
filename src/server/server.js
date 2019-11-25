@@ -39,6 +39,10 @@ app.use("/api", checkToken, proxy(apiHost, {
   }
 }));
 
+
+app.use(publicBoardsInitial(ledgerAdmin));
+app.get("/public", publicBoards);
+
 configurePassport(ledgerAdmin);
 
 app.use(helmet());
@@ -65,9 +69,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(login);
-app.use(publicBoardsInitial(ledgerAdmin));
 app.use("/auth", auth);
-app.get("/public", publicBoards);
 app.get("*", renderPage);
 
 const port = process.env.PORT || "1337";
