@@ -132,6 +132,7 @@ template Card
     color : Optional Text
     text : Text
     date : Optional Time
+    assignee : Optional Party
 
     comments : [Text]
   where

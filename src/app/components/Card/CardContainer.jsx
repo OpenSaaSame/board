@@ -10,13 +10,15 @@ import Textarea from "react-textarea-autosize";
 import slugify from "slugify";
 import { Link } from "react-router-dom";
 import shortid from "shortid";
+import UserList from "./UserList";
 
 class CardContainer extends Component {
   static propTypes = {
     card: PropTypes.shape({
       _id: PropTypes.string.isRequired,
       text: PropTypes.string.isRequired,
-      color: PropTypes.string
+      color: PropTypes.string,
+      assignee: PropTypes.string
     }).isRequired,
     board: PropTypes.shape({
       title: PropTypes.string.isRequired,
@@ -141,7 +143,11 @@ class CardContainer extends Component {
             dangerouslySetInnerHTML={{
               __html: formatMarkdown(card.text)
             }}
-          >
+          />
+
+          <div>
+            Assignee: {allUsers.byParty[card.assignee] ? allUsers.byParty[card.assignee].email : "None"}
+            <UserList cardId={card._id} allUsers={allUsers} assignee={card.assignee} />
           </div>
           
           <div className="class-comments">

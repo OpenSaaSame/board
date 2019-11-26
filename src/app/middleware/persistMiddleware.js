@@ -91,6 +91,7 @@ const payloadTransform = {
   "CHANGE_CARD_TEXT": payload => ({ cardId: payload.cardId, newText: payload.cardText }),
   "CHANGE_CARD_DATE": payload => ({ cardId: payload.cardId, newDate: payload.date }),
   "CHANGE_CARD_COLOR": payload => ({ cardId: payload.cardId, newColor: payload.color }),
+  "CHANGE_CARD_ASSIGNEE": payload => ({ cardId: payload.cardId, assignee: payload.assignee }),
   "ADD_COMMENT": payload => ({ cardId: payload.cardId, commentId: payload.commentId, comment: payload.comment })
 }
 
@@ -182,6 +183,7 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_CARD_TEXT":
       case "CHANGE_CARD_DATE": 
       case "CHANGE_CARD_COLOR":
+      case "CHANGE_CARD_ASSIGNEE":
 
       case "ADD_COMMENT":
         store.dispatch({

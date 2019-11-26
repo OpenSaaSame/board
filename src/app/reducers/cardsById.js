@@ -16,6 +16,10 @@ const cardsById = (state = {}, action) => {
       const { color, cardId } = action.payload;
       return { ...state, [cardId]: { ...state[cardId], color } };
     }
+    case "CHANGE_CARD_ASSIGNEE": {
+      const { cardId, assignee } = action.payload;
+      return { ... state, [cardId]: { ... state[cardId], assignee }}
+    }
     case "DELETE_CARD": {
       const { cardId } = action.payload;
       const { [cardId]: deletedCard, ...restOfCards } = state;

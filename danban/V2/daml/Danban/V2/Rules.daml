@@ -234,6 +234,7 @@ template Board
           text
           color = None
           date = None
+          assignee = None
           comments = []
 
     nonconsuming choice MOVE_CARD
@@ -315,6 +316,19 @@ template Board
         (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
         archive oldCid
         create card with color = newColor
+    
+    nonconsuming choice CHANGE_CARD_ASSIGNEE
+      : ContractId Board.Card
+      with
+        user : Party
+        assignee : Party
+        cardId: Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
+        archive oldCid
+        create card with assignee = Some assignee
 
     nonconsuming choice ADD_COMMENT
       : ContractId Board.Comment
@@ -341,4 +355,4 @@ template Board
           cardId = card._id
           author = user
           createdAt = now
-          
+
