@@ -48,13 +48,9 @@ const ledger = (state = {
         }
       }
     }
-    case "FAIL_READ": {
+    case "CANCEL_READ": {
       return {
         ...state,
-        network: {
-          ...state.network,
-          error: null
-        },
         read: {
           ...state.read,
           queued: true,

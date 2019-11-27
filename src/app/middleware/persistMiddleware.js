@@ -123,7 +123,7 @@ const maybeRead = (store) => {
     //If there are changes in flight, queue another read.
     if(store.getState().ledger.read.cancelled) {
       store.dispatch({
-        type : "FAIL_READ",
+        type : "CANCEL_READ",
         payload: { }
       });
       return;
@@ -145,10 +145,9 @@ const maybeRead = (store) => {
       }), 10000)
     }
     else{
-      store.dispatch({
-        type : "FAIL_READ",
-        payload: { }
-      });
+      // If reading goes wrong for other reasons,
+      // reload to get a fresh UI and token.
+      location.reload();
     }
   })
 }
@@ -198,7 +197,7 @@ const persistMiddleware = store => next => action => {
 
       case "QUEUE_READ":
       case "SUCCEED_READ":
-      case "FAIL_READ":
+      case "CANCEL_READ":
         maybeRead(store);
         break;
       case "SUCCEED_WRITE":
