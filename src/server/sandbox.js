@@ -28,14 +28,32 @@ const sandbox = () => {
 
     const getApp = () => {
         if(appCid == null) appCid = getOrCreateApp(dataURL, adminParty, getToken(adminParty));
-        return appCid
+        return appCid;
     };
+
+    const getSbUser = async user  => {
+        try {
+            const app = await getApp();
+            return getUser(app, user, user, getToken(user), adminParty, getToken(adminParty));
+        } catch (err) {
+            throw new NestedError ("Error getting User from Sandbox", err);
+        }
+    }
+
+    const getOrCreateSbUserProfile = async (user, profile)  => {
+        try {
+            const app = await getApp();
+            return getOrCreateUserProfile(dataURL, app.version, user, profile);
+        } catch (err) {
+            throw new NestedError ("Error getting User from Sandbox", err);
+        }
+    }
 
     return {
         adminToken: () => Promise.resolve(getToken(adminParty)),
-        getUser: user => getApp().then(app => getUser(app, user, user, getToken(user), adminParty, getToken(adminParty))),
+        getUser: getSbUser,
         getUserProfile : user => getUserProfile(dataURL, user),
-        getOrCreateUserProfile : (user, profile) => getApp().then(app => getOrCreateUserProfile(dataURL, app.version, user, profile))
+        getOrCreateUserProfile : getOrCreateSbUserProfile
     }
 }
 

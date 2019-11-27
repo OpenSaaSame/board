@@ -9,19 +9,14 @@ const configurePassport = ledgerAdmin => {
     cb(null, user._id)
   });
 
-  passport.deserializeUser((userName, cb) => {
-    ledgerAdmin.getUser(userName).then(user => {
-      ledgerAdmin.getUserProfile(user)
-      .then(userProfile => {
-        cb(null, userProfile);
-      })
-      .catch(err => {
-        cb(new NestedError("Error fetching user profile for " + userName, err), null);
-      });
-    })
-    .catch(err => {
+  passport.deserializeUser(async (userName, cb) => {
+    try {
+      const user = await ledgerAdmin.getUser(userName);
+      const userProfile = await ledgerAdmin.getUserProfile(user);
+      cb(null, userProfile);
+    } catch(err) {
       cb(new NestedError("Error deserialising user " + userName, err), null);
-    });
+    }
   });
 
   passport.use(
@@ -31,20 +26,14 @@ const configurePassport = ledgerAdmin => {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: `${process.env.ROOT_URL}/auth/google/callback`
       },
-      (accessToken, refreshToken, profile, cb) => {
-        ledgerAdmin.getUser(profile.id)
-        .then(user => {
-          ledgerAdmin.getOrCreateUserProfile(user, profile)
-          .then(userProfile => {
-            cb(null, userProfile);
-          })
-          .catch(err => {
-            cb(new NestedError (`Error getting or creating user profile for ${profile.id}`, err), null);
-          })
-        })
-        .catch(err => {
+      async (accessToken, refreshToken, profile, cb) => {
+        try {
+          const user = await ledgerAdmin.getUser(profile.id);
+          const userProfile = await ledgerAdmin.getOrCreateUserProfile(user, profile);
+          cb(null, userProfile);
+        }catch(err) {
           cb(new NestedError (`Could not log in user ${profile.id}`, err), null);
-        });
+        }
       }
     )
   );

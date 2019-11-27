@@ -29,6 +29,31 @@ const exercise = (user, choice, args) => exerciseUtil(
 const isNetworkError = err =>
   rootErr(err) instanceof TypeError;
 
+const handleAction = async (dispatch, pAction) => {
+  try {
+    await pAction;
+  } catch (err) {
+    {
+      if(isNetworkError(err)) {
+        dispatch({
+          type : "NETWORK_ERROR",
+          payload: { err: rootErr(err)  }
+        });
+        setTimeout(() => dispatch({
+          type : "NETWORK_RETRY",
+          payload: { }
+        }), 10000)
+      }
+      else{
+        dispatch({
+          type : "FAIL_WRITE",
+          payload: { err }
+        });
+      }
+    }
+  }
+}
+
 const maybeWrite = (state, dispatch) => {
   const {
     ledger
@@ -44,31 +69,7 @@ const maybeWrite = (state, dispatch) => {
   const action = ledger.write.queue[0];
   const actionFn = exerciseUserChoice(action.type);
 
-  actionFn(state, action.payload)
-  .then(r => {
-    dispatch({
-      type : "SUCCEED_WRITE",
-      payload: { }
-    });
-  })
-  .catch(err => {
-    if(isNetworkError(err)) {
-      dispatch({
-        type : "NETWORK_ERROR",
-        payload: { err: rootErr(err)  }
-      });
-      setTimeout(() => dispatch({
-        type : "NETWORK_RETRY",
-        payload: { }
-      }), 10000)
-    }
-    else{
-      dispatch({
-        type : "FAIL_WRITE",
-        payload: { err }
-      });
-    }
-  })
+  handleAction(dispatch, actionFn(state, action.payload));
 }
 
 const exerciseUserChoice = (choice) => (state, payload) => exercise (
@@ -98,24 +99,9 @@ const payloadTransform = {
   "CHANGE_CARD_COLOR": payload => ({ cardId: payload.cardId, newColor: payload.color }),
 }
 
-const maybeRead = (store) => {
-  const {
-    ledger,
-    user
-  } = store.getState();
-
-  if((ledger.network.error && !ledger.network.retry) 
-    || ledger.read.inProgress 
-    || ledger.write.queue.length > 0 
-    || !ledger.read.queued) return;
-
-  store.dispatch({
-    type : "START_READ",
-    payload: {  }
-  });
-  
-  Promise.all([loadState(ledgerUrl, user.token, user.party), fetch("/public")])
-  .then(([privateState, publicState]) => {
+const dispatchStates = async (store, pPrivateState, pPublicState) => {
+  const [privateState, publicState] = await Promise.all([pPrivateState, pPublicState]);
+  try {
     const state = {
       ...publicState,
       ...privateState
@@ -132,8 +118,7 @@ const maybeRead = (store) => {
       type : "SUCCEED_READ",
       payload: state
     });
-  })
-  .catch(err => {
+  } catch (err) {
     if(isNetworkError(err)) {
       store.dispatch({
         type : "NETWORK_ERROR",
@@ -149,7 +134,26 @@ const maybeRead = (store) => {
       // reload to get a fresh UI and token.
       location.reload();
     }
-  })
+  }
+}
+
+const maybeRead = (store) => {
+  const {
+    ledger,
+    user
+  } = store.getState();
+
+  if((ledger.network.error && !ledger.network.retry) 
+    || ledger.read.inProgress 
+    || ledger.write.queue.length > 0 
+    || !ledger.read.queued) return;
+
+  store.dispatch({
+    type : "START_READ",
+    payload: {  }
+  });
+  
+  dispatchStates(store, loadState(ledgerUrl, user.token, user.party), fetch("/public"));
 }
 
 // Persist the board to the database after almost every action.
