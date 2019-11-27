@@ -1,0 +1,52 @@
+daml 1.2
+module Danban.V2_1 where
+
+import qualified Danban.V2.App as App
+import qualified Danban.V2.User as User
+import qualified Danban.V2.Role as Role
+
+template Admin
+  with
+    operator: Party
+  where
+    signatory operator
+
+    key operator : Party
+    maintainer key
+
+    controller operator can
+      nonconsuming StartApp
+        : ()
+        do
+          create User.Directory with operator; users = []
+          create App.Semaphore with operator; users = []
+          return ()
+
+      nonconsuming PauseApp
+        : ()
+        do exerciseByKey @App.Semaphore operator Archive
+
+      nonconsuming UnpauseApp
+        : ContractId App.Semaphore
+        do
+          (_, ud) <- fetchByKey @User.Directory operator
+          create App.Semaphore with operator; users = ud.users
+
+      nonconsuming AddUser
+        : ContractId Role.User
+        with
+          party : Party
+        do
+          exerciseByKey @User.Directory operator User.Directory_AddObs with party
+          create Role.User with ..
+
+startApp = scenario do
+  admin <- getParty "Admin"
+  user <- getParty "User"
+  app <- submit admin do
+    create Admin with operator = admin
+  submit admin do
+    exercise app StartApp
+  submit admin do
+    exercise app AddUser with
+      party = user

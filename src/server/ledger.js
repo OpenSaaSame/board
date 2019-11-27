@@ -69,7 +69,7 @@ export const getOrCreateUserProfile = (ledgerUrl, version, user, profile) => {
 const latest = appVersions[appVersions.length - 1];
 
 const appTemplate = version => ({
-    "moduleName": version,
+    "moduleName": version == "Danban.V2" ? "Danban.V2_1" : version, // Hack for the V2 bugfix
     "entityName": "Admin"
 });
 
@@ -135,10 +135,7 @@ export const callApp = (app, jwt, choice, argument) => {
     return exercise(
         app.ledgerUrl,
         jwt,
-        {
-            "moduleName": app.version,
-            "entityName": "Admin"
-        },
+        appTemplate(app.version),
         app.cid,
         choice,
         argument
@@ -185,7 +182,7 @@ const userRole = (app, party, partyJwt, admin, adminJwt) =>
                 .then(() => ret);
             })
             .catch(err => {
-                getAndCallApp("UnpauseApp", {});
+                callApp(app, adminJwt, "UnpauseApp", {});
                 throw new NestedError(`Error creating user role. Unpausing.`, err);
             })
         )

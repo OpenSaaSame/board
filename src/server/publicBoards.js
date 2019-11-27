@@ -34,4 +34,4 @@ export const publicBoards = (req, res) => res.json({
   boardsById: req.initialState.boardsById,
   listsById: req.initialState.listsById,
   cardsById: req.initialState.cardsById
-})
+});
