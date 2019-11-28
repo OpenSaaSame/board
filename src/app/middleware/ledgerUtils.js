@@ -13,16 +13,21 @@ export const rootErr = err => {
     return err;
   }
 
-export const processResponse = response => {
-    if(!response.ok) {
-        return response.text().then(body => {
+export const processResponse = async response => {
+    try{
+        if(!response.ok) {
+            const body = await response.text();
             throw new Error(`Bad response from ledger: ${response.status} ${response.statusText} ${body}`);
-        });
+        }
+        const json = await response.json();
+        return json["result"];
+    } catch (err) {
+        throw new NestedError("Error processing response", err);
     }
-    return response.json().then(response => response["result"]);
 }
 
-export const callAPI = (url, token, method, body) => {
+export const callAPI = async (url, token, method, body) => {
+    try {
         return fetch(
             url,
             {
@@ -37,38 +42,46 @@ export const callAPI = (url, token, method, body) => {
                 "method": method,
                 "mode":"cors"
             }
-        ).catch(err => {
+        );
+    } catch(err) {
             throw new NestedError("Error fetching" + url + " with token " + token + ", method " + method + ", body " + JSON.stringify(body) + ": ", err);
-        });
     };
+}
 
-export const create = (ledgerUrl, jwt, templateId, argument) => callAPI (
-        ledgerUrl + "command/create",
-        jwt,
-        "POST",
-        {
-            templateId,
-            argument
-        }
-    )
-    .then(processResponse)
-    .catch(err => {
-        throw new NestedError(`Error creating ${JSON.stringify({ templateId, argument })}`, err);
-    });
+const callAndProcessAPI = async (url, token, method, body) => {
+    try {
+        const response = await callAPI(url, token, method, body);
+        return processResponse(response);
+    } catch (err) {
+        throw err;
+    }
+}
 
-export const search = (ledgerUrl, jwt, templateId, filter) => callAPI(
-        ledgerUrl + "contracts/search",
-        jwt,
-        "POST",
-        {
-            "%templates": [templateId]
-        }
-    )
-    .then(processResponse)
-    .then(response => response.filter(filter))
-    .catch(err => {
+export const create = async (ledgerUrl, jwt, templateId, argument) => callAndProcessAPI (
+                ledgerUrl + "command/create",
+                jwt,
+                "POST",
+                {
+                    templateId,
+                    argument
+                }
+            );
+
+export const search = async (ledgerUrl, jwt, templateId, filter) => {
+    try {
+        const response = await callAndProcessAPI(
+                ledgerUrl + "contracts/search",
+                jwt,
+                "POST",
+                {
+                    "%templates": [templateId]
+                }
+            )
+        return response.filter(filter);
+    } catch(err) {
         throw new NestedError(`Error fetching ${JSON.stringify(templateId)} contracts: `, err);
-    });
+    }
+}
 
 const dataTemplates = [
     ["User", "Profile"],
@@ -83,18 +96,14 @@ const versionedTempates = dataTemplates.flatMap(t =>
         "moduleName" : `${v}.${t[0]}`
     })))
 
-export const loadAll = (ledgerUrl, jwt) => callAPI(
+export const loadAll = async (ledgerUrl, jwt) => callAndProcessAPI(
         ledgerUrl + "contracts/search",
         jwt,
         "POST",
         {
             "%templates": versionedTempates
         }
-    )
-    .then(processResponse)
-    .catch(err => {
-        throw new NestedError(`Error fetching all contracts: `, err);
-    });
+    );
 
 const templateModule = c => c.templateId instanceof Object
     ? c.templateId.moduleName
@@ -131,31 +140,33 @@ const filterGroupAndVersion = (party, cs) => {
     return ctMap
 }
 
-export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jwt)
-  .then(contracts => {
-    const contractMap = filterGroupAndVersion(party, contracts);
+export const loadState = async (ledgerUrl, jwt, party = null) => {
+    try {
+        const contracts = await loadAll(ledgerUrl, jwt);
 
-    const boardsById = mapBy("_id")(contractMap["Board"]["Data"]);
-    const listsById = mapBy("_id")(contractMap["Board"]["CardList"]);
-    const cardsById = mapBy("_id")(contractMap["Board"]["Card"]);
-    const users = (contractMap["User"]["Profile"]);
-    users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
-    const boardUsersById = mapBy("boardId")(contractMap["Rules"]["Board"]);
+        const contractMap = filterGroupAndVersion(party, contracts);
 
-    return {
-      boardsById,
-      listsById,
-      cardsById,
-      users,
-      boardUsersById
-    }
-  })
-  .catch(err => {
+        const boardsById = mapBy("_id")(contractMap["Board"]["Data"]);
+        const listsById = mapBy("_id")(contractMap["Board"]["CardList"]);
+        const cardsById = mapBy("_id")(contractMap["Board"]["Card"]);
+        const users = (contractMap["User"]["Profile"]);
+        users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
+        const boardUsersById = mapBy("boardId")(contractMap["Rules"]["Board"]);
+
+        return {
+            boardsById,
+            listsById,
+            cardsById,
+            users,
+            boardUsersById
+        }
+    } catch(err) {
       throw new NestedError(`Error processing all contracts: `, err);
-  });
+    }
+}
 
 
-export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => callAPI (
+export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => callAndProcessAPI (
         ledgerUrl + "command/exercise",
         jwt,
         "POST",
@@ -165,8 +176,4 @@ export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argumen
             contractId,
             argument
         }
-    )
-    .then(processResponse)
-    .catch(err => {
-        throw new NestedError(`Error exercising ${JSON.stringify({ contractId, choice, templateId, argument })}`, err);
-    });
+    );

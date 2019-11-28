@@ -5,12 +5,13 @@ import { connect } from "react-redux";
 import { upgrade } from "../../middleware/persistMiddleware"
 import "./Upgrade.scss";
 
-const confirmUpgrade = user => {
-  upgrade(user)
-  .then(() => location.reload())
-  .catch(err => {
+const confirmUpgrade = async user => {
+  try{
+    await upgrade(user);
+    location.reload();
+  } catch (err) {
     console.log(err);
-  })
+  }
 }
 
 const skipUpgrade = dispatch => {
