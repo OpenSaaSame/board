@@ -330,14 +330,14 @@ template Board
       : ContractId Board.Card
       with
         user : Party
-        assignee : Party
+        assignee : Optional Party
         cardId: Text
       controller [operator, user]
       do
         checkAccess user Write
         (oldCid, card) <- fetchByKey @Board.Card (operator, cardId)
         archive oldCid
-        create card with assignee = Some assignee
+        create card with assignee
 
     nonconsuming choice ADD_COMMENT
       : ContractId Board.Comment

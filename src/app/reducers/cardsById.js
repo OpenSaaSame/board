@@ -20,6 +20,10 @@ const cardsById = (state = {}, action) => {
       const { cardId, assignee } = action.payload;
       return { ... state, [cardId]: { ... state[cardId], assignee }}
     }
+    case "REMOVE_CARD_ASSIGNEE": {
+      const { cardId } = action.payload;
+      return { ... state, [cardId]: { ... state[cardId], assignee: undefined }}
+    }
     case "DELETE_CARD": {
       const { cardId } = action.payload;
       const { [cardId]: deletedCard, ...restOfCards } = state;

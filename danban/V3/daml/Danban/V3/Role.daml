@@ -236,8 +236,17 @@ template User
         do
           fetchByKey @App.Semaphore operator
           (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
-          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_CARD_ASSIGNEE with user = party, ..
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_CARD_ASSIGNEE with user = party; assignee = Some assignee, ..
       
+      nonconsuming REMOVE_CARD_ASSIGNEE
+        : ContractId Board.Card
+        with
+          cardId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.CHANGE_CARD_ASSIGNEE with user = party; assignee = None, ..
+
       nonconsuming ADD_COMMENT
           : ContractId Board.Comment
         with

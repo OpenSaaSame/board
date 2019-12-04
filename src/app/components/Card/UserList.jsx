@@ -12,13 +12,22 @@ class UserList extends Component {
 
   handleChange = event => {
     const { cardId, dispatch } = this.props;
-    dispatch({
-      type: "CHANGE_CARD_ASSIGNEE",
-      payload: {
-        cardId,
-        assignee: event.target.value
-      }
-    });
+    if (event.target.value == "None") {
+      dispatch({
+        type: "REMOVE_CARD_ASSIGNEE",
+        payload: {
+          cardId
+        }
+      });
+    } else {
+      dispatch({
+        type: "CHANGE_CARD_ASSIGNEE",
+        payload: {
+          cardId,
+          assignee: event.target.value
+        }
+      });
+    }
   };
 
   render() {
