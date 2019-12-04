@@ -1,11 +1,12 @@
 daml 1.2
-module Danban.V2.Rules where
+module Danban.V3.Rules where
 
+import DA.Action
 import DA.List
 
-import qualified Danban.V2.Board as Board
-import qualified Danban.V2.User as User
-import Danban.V2.Util
+import qualified Danban.V3.Board as Board
+import qualified Danban.V3.User as User
+import Danban.V3.Util
 
 data AccessLevel
   = Read
@@ -87,13 +88,21 @@ template Board
       controller [operator, admin]
       do
         checkAccess admin Admin
-        case lookup user this.users of
+        newThis <- case lookup user this.users of
           None -> abort (show user <> " is not a user.")
           Some currentAccess -> do
             assertMsg
               (show user <> " is a signed administrator and can not be downgraded.")
               (user == admin || currentAccess /= SignedAdmin || access == SignedAdmin)
-            create this with users = map (\(u, r) -> if u == user then (u, access) else (u, r)) users        
+            return (this with users = map (\(u, r) -> if u == user then (u, access) else (u, r)) users)
+        when 
+          (signatory this /= signatory newThis) 
+          (void
+            (exerciseByKey @Board.Data (operator, boardId) 
+              Board.Data_UpdateAdmins with newAdmins = signatory newThis)
+            )
+
+        create newThis
         
     -- Admin Board Actions
     nonconsuming choice TOGGLE_PUBLIC
@@ -121,7 +130,7 @@ template Board
         oOldCid <- lookupByKey @Board.Data (operator, boardId)
         case oOldCid of
           Some oldCid -> do
-            exerciseByKey @Board.Directory operator Board.Directory_RemoveBoard with
+            exerciseByKey @Board.Directory (operator, admin) Board.Directory_RemoveBoard with
               board = boardId
             exercise oldCid Board.Data_Delete
           _ -> return ()

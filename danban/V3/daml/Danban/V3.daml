@@ -1,10 +1,10 @@
 daml 1.2
-module Danban.V2 where
+module Danban.V3 where
 
-import qualified Danban.V2.App as App
-import qualified Danban.V2.User as User
-import Danban.V2.Board as Board
-import qualified Danban.V2.Role as Role
+import qualified Danban.V3.App as App
+import qualified Danban.V3.User as User
+import Danban.V3.Board as Board
+import qualified Danban.V3.Role as Role
 
 template Admin
   with
@@ -20,7 +20,6 @@ template Admin
         : ()
         do
           create User.Directory with operator; users = []
-          create Board.Directory with operator; users = []; boards = []
           create App.Semaphore with operator; users = []
           return ()
 
@@ -40,8 +39,6 @@ template Admin
           party : Party
         do
           exerciseByKey @User.Directory operator User.Directory_AddObs with party
-          (cid, _) <- fetchByKey @Board.Directory operator
-          exerciseByKey @Board.Directory operator Board.Directory_UpdateObs
           create Role.User with ..
 
 startApp = scenario do

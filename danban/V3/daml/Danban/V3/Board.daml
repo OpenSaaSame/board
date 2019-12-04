@@ -1,30 +1,23 @@
 daml 1.2
-module Danban.V2.Board where
+module Danban.V3.Board where
 
 import DA.List
 
-import qualified Danban.V2.User as User
+import qualified Danban.V3.User as User
 
 template Directory
   with
     operator : Party
-    users : [Party]
+    party : Party
     boards : [Text]
   where
-    signatory operator
-    observer users
+    signatory operator, party
+    observer party
 
-    key operator : Party
-    maintainer key
+    key (operator, party) : (Party, Party)
+    maintainer key._1, key._2
 
-    controller operator can
-      Directory_UpdateObs
-        : ContractId Directory
-        do
-          (_, userDirectory) <- fetchByKey @User.Directory operator
-          forA boards (\board -> exerciseByKey @Data (operator, board) Data_UpdatePublic)
-          create this with users = userDirectory.users
-
+    controller [operator, party] can
       Directory_AddBoard
         : ContractId Directory
         with
@@ -38,8 +31,6 @@ template Directory
           board : Text
         do
           create this with boards = delete board boards
-
-type Key = (Party, Text)
 
 template Data
   with
@@ -85,6 +76,15 @@ template Data
           forA lists (\list -> exerciseByKey @CardList (operator, list) List_Delete)
           return ()
 
+    choice Data_UpdateAdmins
+      : ContractId Data
+      with
+        newAdmins : [Party]
+      controller admins ++ newAdmins
+      do
+        forA lists (\list -> exerciseByKey @CardList (operator, list) List_UpdateAdmins with ..)
+        create this with admins = newAdmins
+
 template CardList 
   with
     _id : Text
@@ -118,6 +118,15 @@ template CardList
           forA cards (\card -> exerciseByKey @Card (operator, card) Card_Delete)
           return ()
 
+    choice List_UpdateAdmins
+      : ContractId CardList
+      with
+        newAdmins : [Party]
+      controller admins ++ newAdmins
+      do
+        forA cards (\card -> exerciseByKey @Card (operator, card) Card_UpdateAdmins with ..)
+        create this with admins = newAdmins
+
 type CardKey = (Party, Text, Text, Text)
 
 template Card
@@ -132,8 +141,8 @@ template Card
     color : Optional Text
     text : Text
     date : Optional Time
-    assignee : Optional Party
 
+    assignee : Optional Party
     comments : [Text]
   where
     signatory operator, admins
@@ -155,6 +164,14 @@ template Card
         : ()
         do
           return ()
+
+    choice Card_UpdateAdmins
+      : ContractId Card
+      with
+        newAdmins : [Party]
+      controller admins ++ newAdmins
+      do
+        create this with admins = newAdmins
 
 template Comment
   with

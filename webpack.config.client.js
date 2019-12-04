@@ -10,7 +10,7 @@ const autoprefixer = require("autoprefixer");
 module.exports = {
   name: "client",
   target: "web",
-  entry: "./src/client.jsx",
+  entry: ["./src/client.jsx"],
   output: {
     path: path.join(__dirname, "dist/public"),
     publicPath: "/static/",

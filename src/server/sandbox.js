@@ -1,7 +1,6 @@
 import NestedError from "nested-error-stacks";
-import {modelVersion, exercise, search} from "../app/middleware/ledgerUtils";
 import { JWT, JWK } from "jose"
-import {getOrCreateApp} from "./ledger"
+import {getOrCreateApp, getUser, getUserProfile, getOrCreateUserProfile} from "./ledger"
 
 
 const sandbox = () => {
@@ -27,105 +26,34 @@ const sandbox = () => {
         )
     };
 
-    const adminToken = () => {
-        return getToken(adminParty);
+    const getApp = () => {
+        if(appCid == null) appCid = getOrCreateApp(dataURL, adminParty, getToken(adminParty));
+        return appCid;
     };
 
-    const fetchContracts = (jwt, template, filter) => search (
-            dataURL, jwt, template, filter
-        );        
-
-    const getOrCreateContract = (jwt, template, filter, createCb) => {
-        return fetchContracts(jwt, template, filter)
-        .then(contracts => {
-            if(contracts.length > 0) return contracts[0];
-            else return createCb();
-        })
-        .catch(err => {
-            throw new NestedError(`Error fetching or creating ${JSON.stringify(template)} contracts: `, err);
-        });
+    const getSbUser = async user  => {
+        try {
+            const app = await getApp();
+            return getUser(app, user, user, getToken(user), adminParty, getToken(adminParty));
+        } catch (err) {
+            throw new NestedError ("Error getting User from Sandbox", err);
+        }
     }
 
-    const callApp = (choice, argument) => {
-        if(appCid == null) appCid = getOrCreateApp(adminParty, adminToken());
-        return appCid
-        .then(cid => exercise(
-                dataURL,
-                adminToken(),
-                {
-                    "moduleName": modelVersion,
-                    "entityName": "Admin"
-                },
-                cid,
-                choice,
-                argument
-            )
-            .catch(err => {
-                throw new NestedError(`Error calling app choice ${choice} with ${argument}`, err);
-            })
-        )
-        .catch(err => {
-            throw new NestedError(`Error getting app cid or calling app choice ${choice} with ${argument}`, err);
-        })
+    const getOrCreateSbUserProfile = async (user, profile)  => {
+        try {
+            const app = await getApp();
+            return getOrCreateUserProfile(dataURL, app.version, user, profile);
+        } catch (err) {
+            throw new NestedError ("Error getting User from Sandbox", err);
+        }
     }
-
-    const getUser = user => {
-
-        const userRole = () => getOrCreateContract(
-                getToken(user),
-                {
-                    "moduleName": `${modelVersion}.Role`,
-                    "entityName": "User"
-                },
-                role => role.argument.party == user && role.argument.operator == adminParty,
-                () => 
-                callApp("PauseApp", {})
-                .then(() =>
-                    callApp(
-                        "AddUser",
-                        {
-                            "party": user,
-                            "operator": adminParty
-                        }
-                    )
-                    .then(ret => {
-                        return callApp("UnpauseApp", {})
-                        .then(() => ret);
-                    })
-                    .catch(err => {
-                        callApp("UnpauseApp", {});
-                        throw new NestedError(`Error creating user role. Unpausing.`, err);
-                    })
-                )
-                .then(response => {
-                    return response[response.length - 1].created;
-                })
-                .catch(err => {
-                    throw new NestedError(`Error creating User Role for ${user}`, err)
-                })
-            )
-            .then(contract => contract.contractId)
-            .catch(err => {
-                throw new NestedError(`Error getting or creating User Role for ${user}`, err)
-            });
-
-        return userRole()
-        .then(roleCid => ({
-            "userName": user,
-            "party": user,
-            "token": getToken(user),
-            "cid" : roleCid,
-            "operator" : adminParty
-            })
-        )
-        .catch(err => {
-            throw new NestedError(`Failed to get user ${user}: `, err);
-        });
-    };
 
     return {
-        adminToken,
-        getUser
+        adminToken: () => Promise.resolve(getToken(adminParty)),
+        getUser: getSbUser,
+        getUserProfile : user => getUserProfile(dataURL, user),
+        getOrCreateUserProfile : getOrCreateSbUserProfile
     }
 }
 

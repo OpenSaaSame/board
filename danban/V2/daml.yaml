@@ -1,5 +1,5 @@
-sdk-version: 0.13.34
-name: danban-v3
+sdk-version: 0.13.30
+name: danban-v2
 source: daml
 parties:
   - Admin

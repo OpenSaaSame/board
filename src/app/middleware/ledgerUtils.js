@@ -2,18 +2,33 @@ import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
 import {mapBy} from "../components/utils"
 
-export const modelVersion = "Danban.V2";
+export const appVersions = [
+    "Danban",
+    "Danban.V2",
+    "Danban.V3"
+];
 
-export const processResponse = response => {
-    if(!response.ok) {
-        return response.text().then(body => {
+export const rootErr = err => {
+    while(err.nested)
+      err = err.nested
+    return err;
+  }
+
+export const processResponse = async response => {
+    try{
+        if(!response.ok) {
+            const body = await response.text();
             throw new Error(`Bad response from ledger: ${response.status} ${response.statusText} ${body}`);
-        });
+        }
+        const json = await response.json();
+        return json["result"];
+    } catch (err) {
+        throw new NestedError("Error processing response", err);
     }
-    return response.json().then(response => response["result"]);
 }
 
-export const callAPI = (url, token, method, body) => {
+export const callAPI = async (url, token, method, body) => {
+    try {
         return fetch(
             url,
             {
@@ -28,97 +43,133 @@ export const callAPI = (url, token, method, body) => {
                 "method": method,
                 "mode":"cors"
             }
-        ).catch(err => {
+        );
+    } catch(err) {
             throw new NestedError("Error fetching" + url + " with token " + token + ", method " + method + ", body " + JSON.stringify(body) + ": ", err);
-        });
     };
+}
 
-export const create = (ledgerUrl, jwt, templateId, argument) => callAPI (
-        ledgerUrl + "command/create",
-        jwt,
-        "POST",
-        {
-            templateId,
-            argument
-        }
-    )
-    .then(processResponse)
-    .catch(err => {
-        throw new NestedError(`Error creating ${JSON.stringify({ templateId, argument })}`, err);
-    });
-
-export const search = (ledgerUrl, jwt, templateId, filter) => callAPI(
-        ledgerUrl + "contracts/search",
-        jwt,
-        "POST",
-        {
-            "%templates": [templateId]
-        }
-    )
-    .then(processResponse)
-    .then(response => response.filter(filter))
-    .catch(err => {
-        throw new NestedError(`Error fetching ${JSON.stringify(templateId)} contracts: `, err);
-    });
-
-export const loadAll = (ledgerUrl, jwt) => callAPI(
-        ledgerUrl + "contracts/search",
-        jwt,
-        "POST",
-        {
-            "%templates": [
-                {
-                    "entityName": "Profile",
-                    "moduleName": `${modelVersion}.User`
-                },
-                {
-                    "entityName": "Board",
-                    "moduleName": `${modelVersion}.Rules`
-                }
-            ].concat(
-                ["Data", "CardList", "Card", "Comment"].map(entityName => ({
-                    entityName,
-                    "moduleName": `${modelVersion}.Board`
-                }))
-            )
-        }
-    )
-    .then(processResponse)
-    .catch(err => {
-        throw new NestedError(`Error fetching all contracts: `, err);
-    });
-
-export const loadState = (ledgerUrl, jwt, party = null) => loadAll(ledgerUrl, jwt)
-  .then(contracts => {
-    const isTemplate = (c, moduleName, entityName) => c.templateId instanceof Object
-        ? c.templateId.entityName === entityName && c.templateId.moduleName === moduleName
-        : c.templateId.startsWith(`${moduleName}:${entityName}@`);
-
-    const hasObs = c => !party || c.observers.includes(party) || c.signatories.includes(party);
-
-    const boardsById = mapBy("_id")(contracts.filter(c => hasObs(c) && isTemplate(c, `${modelVersion}.Board`, "Data")).map(c => c.argument));
-    const listsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "CardList")).map(c => c.argument));
-    const cardsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "Card")).map(c => c.argument));
-    const commentsById = mapBy("_id")(contracts.filter(c => hasObs(c) &&isTemplate(c, `${modelVersion}.Board`, "Comment")).map(c => c.argument));
-    const users = contracts.filter(c => isTemplate(c, `${modelVersion}.User`, "Profile")).map(c => c.argument);
-    users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
-    const boardUsersById = mapBy("boardId")(contracts.filter(c => isTemplate(c, `${modelVersion}.Rules`, "Board")).map(c => c.argument));
-
-    return {
-      boardsById,
-      listsById,
-      cardsById,
-      commentsById,
-      users,
-      boardUsersById
+const callAndProcessAPI = async (url, token, method, body) => {
+    try {
+        const response = await callAPI(url, token, method, body);
+        return processResponse(response);
+    } catch (err) {
+        throw err;
     }
-  })
-  .catch(err => {
+}
+
+export const create = async (ledgerUrl, jwt, templateId, argument) => callAndProcessAPI (
+                ledgerUrl + "command/create",
+                jwt,
+                "POST",
+                {
+                    templateId,
+                    argument
+                }
+            );
+
+export const search = async (ledgerUrl, jwt, templateId, filter) => {
+    try {
+        const response = await callAndProcessAPI(
+                ledgerUrl + "contracts/search",
+                jwt,
+                "POST",
+                {
+                    "%templates": [templateId]
+                }
+            )
+        return response.filter(filter);
+    } catch(err) {
+        throw new NestedError(`Error fetching ${JSON.stringify(templateId)} contracts: `, err);
+    }
+}
+
+const dataTemplates = [
+    ["User", "Profile"],
+    ["Rules", "Board"]
+].concat(
+    ["Data", "CardList", "Card", "Comment"].map(e => ["Board", e])
+);
+
+const versionedTempates = dataTemplates.flatMap(t => 
+    appVersions.map(v => ({
+        "entityName" : t[1],
+        "moduleName" : `${v}.${t[0]}`
+    })))
+
+export const loadAll = async (ledgerUrl, jwt) => callAndProcessAPI(
+        ledgerUrl + "contracts/search",
+        jwt,
+        "POST",
+        {
+            "%templates": versionedTempates
+        }
+    );
+
+const templateModule = c => c.templateId instanceof Object
+    ? c.templateId.moduleName
+    : c.templateId.split(":")[0];
+
+const templateEntity = c => c.templateId instanceof Object
+    ? c.templateId.entityName
+    : c.templateId.split("@").split(":")[1];
+
+const templateVersion = c => {
+    const tm = templateModule(c);
+    return tm.substr(0, tm.lastIndexOf("."));
+}
+
+const unversionedModule = c => {
+    const tm = templateModule(c);
+    return tm.substr(tm.lastIndexOf(".") + 1);
+}
+
+const filterGroupAndVersion = (party, cs) => {
+    let ctMap = {};
+    dataTemplates.forEach(t => {
+        if(!ctMap[t[0]]) ctMap[t[0]] = {};
+        ctMap[t[0]][t[1]] = [];
+    });
+    cs.forEach(c => {
+        if(!party || c.observers.includes(party) || c.signatories.includes(party)) {
+            ctMap[unversionedModule(c)][templateEntity(c)].push({
+                ... c.argument,
+                version : templateVersion(c)
+            })
+        }
+    })
+    return ctMap
+}
+
+export const loadState = async (ledgerUrl, jwt, party = null) => {
+    try {
+        const contracts = await loadAll(ledgerUrl, jwt);
+
+        const contractMap = filterGroupAndVersion(party, contracts);
+
+        const boardsById = mapBy("_id")(contractMap["Board"]["Data"]);
+        const listsById = mapBy("_id")(contractMap["Board"]["CardList"]);
+        const cardsById = mapBy("_id")(contractMap["Board"]["Card"]);
+        const commentsById = mapBy("_id")(contractMap["Board"]["Comment"]);
+        const users = (contractMap["User"]["Profile"]);
+        users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
+        const boardUsersById = mapBy("boardId")(contractMap["Rules"]["Board"]);
+
+        return {
+            boardsById,
+            listsById,
+            cardsById,
+            commentsById,
+            users,
+            boardUsersById
+        }
+    } catch(err) {
       throw new NestedError(`Error processing all contracts: `, err);
-  });
+    }
+}
 
 
-export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => callAPI (
+export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => callAndProcessAPI (
         ledgerUrl + "command/exercise",
         jwt,
         "POST",
@@ -128,8 +179,4 @@ export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argumen
             contractId,
             argument
         }
-    )
-    .then(processResponse)
-    .catch(err => {
-        throw new NestedError(`Error exercising ${JSON.stringify({ contractId, choice, templateId, argument })}`, err);
-    });
+    );

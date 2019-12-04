@@ -1,27 +1,58 @@
-import {modelVersion, loadState, exercise as exerciseUtil} from "./ledgerUtils"
+import {loadState, exercise as exerciseUtil, rootErr} from "./ledgerUtils"
 
 const ledgerUrl = "/api/";
 
-const exercise = (user, cid, choice, args) => exerciseUtil(
+export const upgrade = user => exerciseUtil(
+  ledgerUrl,
+  user.token,
+  {
+    "moduleName": `${user.version}.Upgrade`,
+    "entityName": "UpgradeInvite"
+  },
+  user.cid,
+  "Accept_Upgrade",
+  {}
+);
+
+const exercise = (user, choice, args) => exerciseUtil(
     ledgerUrl,
     user.token,
     {
-      "moduleName": `${modelVersion}.Role`,
+      "moduleName": `${user.version}.Role`,
       "entityName": "User"
     },
-    cid,
+    user.cid,
     choice,
     args
   );
 
-const rootErr = err => {
-  while(err.nested)
-    err = err.nested
-  return err;
-}
-
 const isNetworkError = err =>
   rootErr(err) instanceof TypeError;
+
+const handleAction = async (dispatch, pAction) => {
+  try {
+    await pAction;
+  } catch (err) {
+    {
+      if(isNetworkError(err)) {
+        dispatch({
+          type : "NETWORK_ERROR",
+          payload: { err: rootErr(err)  }
+        });
+        setTimeout(() => dispatch({
+          type : "NETWORK_RETRY",
+          payload: { }
+        }), 10000)
+      }
+      else{
+        dispatch({
+          type : "FAIL_WRITE",
+          payload: { err }
+        });
+      }
+    }
+  }
+}
 
 const maybeWrite = (state, dispatch) => {
   const {
@@ -38,36 +69,11 @@ const maybeWrite = (state, dispatch) => {
   const action = ledger.write.queue[0];
   const actionFn = exerciseUserChoice(action.type);
 
-  actionFn(state, action.payload)
-  .then(r => {
-    dispatch({
-      type : "SUCCEED_WRITE",
-      payload: { }
-    });
-  })
-  .catch(err => {
-    if(isNetworkError(err)) {
-      dispatch({
-        type : "NETWORK_ERROR",
-        payload: { err: rootErr(err)  }
-      });
-      setTimeout(() => dispatch({
-        type : "NETWORK_RETRY",
-        payload: { }
-      }), 10000)
-    }
-    else{
-      dispatch({
-        type : "FAIL_WRITE",
-        payload: { err }
-      });
-    }
-  })
+  handleAction(dispatch, actionFn(state, action.payload));
 }
 
 const exerciseUserChoice = (choice) => (state, payload) => exercise (
     state.user,
-    state.user.cid,
     choice,
     payloadTransform[choice](payload)
 )
@@ -95,6 +101,44 @@ const payloadTransform = {
   "ADD_COMMENT": payload => ({ cardId: payload.cardId, commentId: payload.commentId, comment: payload.comment })
 }
 
+const dispatchStates = async (store, pPrivateState, pPublicState) => {
+  const [privateState, publicState] = await Promise.all([pPrivateState, pPublicState]);
+  try {
+    const state = {
+      ...publicState,
+      ...privateState
+    }
+    //If there are changes in flight, queue another read.
+    if(store.getState().ledger.read.cancelled) {
+      store.dispatch({
+        type : "CANCEL_READ",
+        payload: { }
+      });
+      return;
+    }
+    store.dispatch({
+      type : "SUCCEED_READ",
+      payload: state
+    });
+  } catch (err) {
+    if(isNetworkError(err)) {
+      store.dispatch({
+        type : "NETWORK_ERROR",
+        payload: { err: rootErr(err) }
+      });
+      setTimeout(() => store.dispatch({
+        type : "NETWORK_RETRY",
+        payload: { }
+      }), 10000)
+    }
+    else{
+      // If reading goes wrong for other reasons,
+      // reload to get a fresh UI and token.
+      location.reload();
+    }
+  }
+}
+
 const maybeRead = (store) => {
   const {
     ledger,
@@ -111,43 +155,7 @@ const maybeRead = (store) => {
     payload: {  }
   });
   
-  Promise.all([loadState(ledgerUrl, user.token, user.party), fetch("/public")])
-  .then(([privateState, publicState]) => {
-    const state = {
-      ...publicState,
-      ...privateState
-    }
-    //If there are changes in flight, queue another read.
-    if(store.getState().ledger.read.cancelled) {
-      store.dispatch({
-        type : "FAIL_READ",
-        payload: { }
-      });
-      return;
-    }
-    store.dispatch({
-      type : "SUCCEED_READ",
-      payload: state
-    });
-  })
-  .catch(err => {
-    if(isNetworkError(err)) {
-      store.dispatch({
-        type : "NETWORK_ERROR",
-        payload: { err: rootErr(err) }
-      });
-      setTimeout(() => store.dispatch({
-        type : "NETWORK_RETRY",
-        payload: { }
-      }), 10000)
-    }
-    else{
-      store.dispatch({
-        type : "FAIL_READ",
-        payload: { }
-      });
-    }
-  })
+  dispatchStates(store, loadState(ledgerUrl, user.token, user.party), fetch("/public"));
 }
 
 // Persist the board to the database after almost every action.
@@ -158,7 +166,7 @@ const persistMiddleware = store => next => action => {
     user
   } = state;
 
-  // Nothing is persisted for guest users
+  // Nothing is persisted for guest users, or users needing upgrades
   if (user) {
     switch(action.type) {
       case "ADD_BOARD":
@@ -185,19 +193,20 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_CARD_COLOR":
       case "CHANGE_CARD_ASSIGNEE":
 
-      case "ADD_COMMENT":
-        store.dispatch({
-          type: "QUEUE_WRITE",
-          payload: {
-            type: action.type,
-            payload: action.payload
-          }
-        });
+      case "ADD_COMMENT":        
+        if(!user.needsUpgrade)
+          store.dispatch({
+            type: "QUEUE_WRITE",
+            payload: {
+              type: action.type,
+              payload: action.payload
+            }
+          });
         break;
       
       case "QUEUE_READ":
       case "SUCCEED_READ":
-      case "FAIL_READ":
+      case "CANCEL_READ":
         maybeRead(store);
         break;
       case "SUCCEED_WRITE":

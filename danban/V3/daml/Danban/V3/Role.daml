@@ -1,13 +1,13 @@
 daml 1.2
-module Danban.V2.Role where
+module Danban.V3.Role where
 
 import DA.Action
 import DA.Optional
 
-import qualified Danban.V2.App as App
-import qualified Danban.V2.Board as Board
-import qualified Danban.V2.User as User
-import qualified Danban.V2.Rules as Rules
+import qualified Danban.V3.App as App
+import qualified Danban.V3.Board as Board
+import qualified Danban.V3.User as User
+import qualified Danban.V3.Rules as Rules
 
 -- Role.User gives a user the choices to operate on the app
 template User
@@ -42,8 +42,10 @@ template User
           title : Text
         do
           fetchByKey @App.Semaphore operator
-          exerciseByKey @Board.Directory operator Board.Directory_AddBoard with 
-            board = boardId
+          oBoardDirectory <- lookupByKey @Board.Directory (operator, party)
+          case oBoardDirectory of
+            None -> create Board.Directory with boards = [boardId]; ..
+            Some bd -> exercise bd Board.Directory_AddBoard with board = boardId
           create Rules.Board with
             operator
             boardId

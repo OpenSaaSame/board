@@ -7,6 +7,7 @@ import CardContainer from "./Card/CardContainer";
 import "./App.scss";
 import Spinner from "./Spinner/Spinner";
 import Alert from "./Alert/Alert";
+import Upgrade from "./Upgrade/Upgrade";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         </Switch>
         <Spinner />
         <Alert />
+        <Upgrade />
       </div>
   );
 };

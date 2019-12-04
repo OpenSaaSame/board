@@ -14,7 +14,7 @@ export default (state = {loggedIn: false}, action) => {
       ...state,
       loggedIn: true
     };
-  if(action.type !== "@@redux/INIT" && !state.loggedIn) return state;
+  if(action.type !== "@@redux/INIT" && (!state.loggedIn || state.user.skippedUpgrade)) return state;
 
   let {loggedIn, ...others} = state;
 
