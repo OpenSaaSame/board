@@ -103,7 +103,7 @@ class CardContainer extends Component {
     const { newComment } = this.state;
     const checkboxes = findCheckboxes(card.text);
 
-    const commentsList = comments.map(comment => {
+    const commentsList = comments.reverse().map(comment => {
       const dateString = new Date(comment.createdAt).toDateString();
 
       return  <div
@@ -126,44 +126,26 @@ class CardContainer extends Component {
         <Title>Danban</Title>
         <Header />
         <div className="card-container">
-          <Link
-            key={board._id}
-            className=""
-            to={`/b/${board._id}/${slugify(board.title, {
-              lower: true
-            })}`}
-          >
-            Back to board: {board.title}
-          </Link>
-          
-          <h1>Card</h1>
-
-          <div
-            className="card-body"
-            dangerouslySetInnerHTML={{
-              __html: formatMarkdown(card.text)
-            }}
-          />
-
           <div>
             Assignee: {allUsers.byParty[card.assignee] ? allUsers.byParty[card.assignee].email : "None"}
-            <UserList cardId={card._id} allUsers={allUsers} assignee={card.assignee} />
           </div>
+          <UserList cardId={card._id} allUsers={allUsers} assignee={card.assignee} />
+          
           
           <div className="class-comments">
             <h2>Comments</h2>
+            <form onSubmit={this.handleSubmit} className="card-form">
+              <Textarea
+                value={newComment}
+                onChange={this.handleChange}
+                onKeyDown={this.handleKeyDown}
+                minRows={3}
+              />
+              <input type="submit" value="Submit" />
+            </form>
             {commentsList}
           </div>
 
-          <form onSubmit={this.handleSubmit} className="card-form">
-            <Textarea
-              value={newComment}
-              onChange={this.handleChange}
-              onKeyDown={this.handleKeyDown}
-              minRows={3}
-            />
-            <input type="submit" value="Submit" />
-          </form>
         </div>
       </>
     );

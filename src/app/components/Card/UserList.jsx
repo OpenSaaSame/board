@@ -28,9 +28,11 @@ class UserList extends Component {
       return <option key={user.party} value={user.party}>{user.email}</option>
     });
 
-    return  <select value={assignee} onChange={this.handleChange}>
-              {userList}
-            </select>;
+    return  <div>
+              <select value={assignee} onChange={this.handleChange}>
+                {userList}
+              </select>
+            </div>
   }
 }
 
