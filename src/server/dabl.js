@@ -94,13 +94,10 @@ const dabl = () => {
                 const jwt = await getSiteJWT();
                 const response = await fetchFromAPI(
                     "api/ledger",
-                    "parties/token",
+                    `party/${party}/token`,
                     jwt,
                     "POST",
-                    {
-                        "as": party,
-                        "for": 86400
-                    }
+                    {for: 86400}
                 );
                 const json = await response.json();
                 jwts[party].time = Date.now();
