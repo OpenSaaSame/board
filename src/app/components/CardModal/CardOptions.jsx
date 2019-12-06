@@ -4,11 +4,13 @@ import PropTypes from "prop-types";
 import Modal from "react-modal";
 import FaTrash from "react-icons/lib/fa/trash";
 import MdAlarm from "react-icons/lib/md/access-alarm";
+import FaUser from "react-icons/lib/fa/user";
 import Calendar from "./Calendar";
 import ClickOutside from "../ClickOutside/ClickOutside";
 import colorIcon from "../../../assets/images/color-icon.png";
 import "./CardOptions.scss";
 import { Link } from "react-router-dom";
+import UserAssignment from "./UserAssignment";
 
 class CardOptions extends Component {
   static propTypes = {
@@ -104,6 +106,14 @@ class CardOptions extends Component {
             >
               Full task
             </Link>
+        </div>
+        <div>
+          <div className="options-list-button">
+            <div className="modal-icon">
+              <FaUser />
+            </div>
+            <UserAssignment cardId={card._id} assignee={card.assignee} />
+          </div>
         </div>
         <div>
           <button onClick={this.deleteCard} className="options-list-button">

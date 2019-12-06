@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
 
-class UserList extends Component {
+class UserAssignment extends Component {
   static propTypes = {
     cardId: PropTypes.string.isRequired,
     allUsers: PropTypes.object.isRequired,
@@ -38,6 +39,9 @@ class UserList extends Component {
     });
 
     return  <div>
+              <div>
+                {allUsers.byParty[assignee] ? allUsers.byParty[assignee].email : "Not assigned"}
+              </div>
               <select value={assignee} onChange={this.handleChange}>
                 {userList}
               </select>
@@ -45,4 +49,8 @@ class UserList extends Component {
   }
 }
 
-export default connect()(UserList);
+const mapStateToProps = (state, ownProps) => {
+  return {... ownProps, allUsers: state.users};
+}
+
+export default withRouter(connect(mapStateToProps)(UserAssignment));

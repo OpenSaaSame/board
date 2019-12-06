@@ -10,7 +10,6 @@ import Textarea from "react-textarea-autosize";
 import slugify from "slugify";
 import { Link } from "react-router-dom";
 import shortid from "shortid";
-import UserList from "./UserList";
 
 class CardContainer extends Component {
   static propTypes = {
@@ -125,12 +124,7 @@ class CardContainer extends Component {
       <>
         <Title>Danban</Title>
         <Header />
-        <div className="card-container">
-          <div>
-            Assignee: {allUsers.byParty[card.assignee] ? allUsers.byParty[card.assignee].email : "None"}
-          </div>
-          <UserList cardId={card._id} allUsers={allUsers} assignee={card.assignee} />
-          
+        <div className="card-container">          
           
           <div className="class-comments">
             <h2>Comments</h2>
