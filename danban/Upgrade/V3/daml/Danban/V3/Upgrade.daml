@@ -8,7 +8,7 @@ import qualified DA.List as List
 import qualified DA.Next.Map as Map
 import DA.Tuple
 
-import qualified Danban.V2_1 as DanbanV2_1
+-- import qualified Danban.V2_1 as DanbanV2_1
 
 import qualified Danban.V2 as DanbanV2
 import qualified Danban.V2.Board as BoardV2
@@ -21,6 +21,8 @@ import qualified Danban.V3.Board as BoardV3
 import qualified Danban.V3.Role as RoleV3
 import qualified Danban.V3.Rules as RulesV3
 import qualified Danban.V3.User as UserV3
+
+import Danban.V3.Util
 
 forA_ xs f = void (forA xs f)
 
@@ -88,7 +90,7 @@ template UpgradeInitiator
         do
           -- Convert admin contracts
           exerciseIfKey @DanbanV2.Admin operator Archive
-          exerciseIfKey @DanbanV2_1.Admin operator Archive
+          -- exerciseIfKey @DanbanV2_1.Admin operator Archive
           newAdminCid <- create DanbanV3.Admin with operator
           (_, UserV3.Directory{users}) <- upgradeByKey @UserV2.Directory @UserV3.Directory operator
 
