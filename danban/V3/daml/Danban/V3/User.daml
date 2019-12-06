@@ -1,6 +1,8 @@
 daml 1.2
 module Danban.V3.User where
 
+import Danban.V3.Util
+
 import DA.List
 
 template Directory
@@ -21,7 +23,7 @@ template Directory
           party : Party
         do
           ret <- create this with users = dedupSort (party :: users)
-          forA users (\user -> exerciseByKey @Profile (operator, user) Profile_UpdateObs)
+          forA users (\user -> exerciseIfKey @Profile (operator, user) Profile_UpdateObs)
           return ret
 
 template Profile

@@ -3,7 +3,6 @@ import NestedError from "nested-error-stacks";
 import {mapBy} from "../components/utils"
 
 export const appVersions = [
-    "Danban",
     "Danban.V2",
     "Danban.V3"
 ];
@@ -91,11 +90,22 @@ const dataTemplates = [
     ["Data", "CardList", "Card", "Comment"].map(e => ["Board", e])
 );
 
+const exclusions = {
+    "Danban.V2" : {
+        "Board" : "Comment"
+    }
+};
+
 const versionedTempates = dataTemplates.flatMap(t => 
-    appVersions.map(v => ({
-        "entityName" : t[1],
-        "moduleName" : `${v}.${t[0]}`
-    })))
+    appVersions.flatMap(v => 
+        exclusions[v] && exclusions[v][t[0]] == t[1]
+        ? []
+        : {
+            "entityName" : t[1],
+            "moduleName" : `${v}.${t[0]}`
+        }
+    ))
+    
 
 export const loadAll = async (ledgerUrl, jwt) => callAndProcessAPI(
         ledgerUrl + "contracts/search",
