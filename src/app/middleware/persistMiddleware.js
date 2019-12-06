@@ -32,6 +32,10 @@ const isNetworkError = err =>
 const handleAction = async (dispatch, pAction) => {
   try {
     await pAction;
+    dispatch({
+      type : "SUCCEED_WRITE",
+      payload: { }
+    });
   } catch (err) {
     {
       if(isNetworkError(err)) {
