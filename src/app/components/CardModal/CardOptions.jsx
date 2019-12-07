@@ -10,7 +10,7 @@ import ClickOutside from "../ClickOutside/ClickOutside";
 import colorIcon from "../../../assets/images/color-icon.png";
 import "./CardOptions.scss";
 import { Link } from "react-router-dom";
-import UserAssignment from "./UserAssignment";
+import CardUser from "./CardUser";
 
 class CardOptions extends Component {
   static propTypes = {
@@ -112,7 +112,7 @@ class CardOptions extends Component {
             <div className="modal-icon">
               <FaUser />
             </div>
-            <UserAssignment cardId={card._id} assignee={card.assignee} />
+            <CardUser cardId={card._id} assignee={card.assignee} />
           </div>
         </div>
         <div>

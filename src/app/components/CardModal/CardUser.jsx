@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 
-class UserAssignment extends Component {
+class CardUser extends Component {
   static propTypes = {
     cardId: PropTypes.string.isRequired,
     allUsers: PropTypes.object.isRequired,
@@ -53,4 +53,4 @@ const mapStateToProps = (state, ownProps) => {
   return {... ownProps, allUsers: state.users};
 }
 
-export default withRouter(connect(mapStateToProps)(UserAssignment));
+export default withRouter(connect(mapStateToProps)(CardUser));
