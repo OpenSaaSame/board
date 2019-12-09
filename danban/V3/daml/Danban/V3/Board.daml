@@ -43,6 +43,7 @@ template Data
     color : Text
     isPublic : Bool
     lists : [Text]
+    about : Text
   where
     signatory operator, admins
     observer obs

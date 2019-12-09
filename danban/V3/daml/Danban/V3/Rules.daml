@@ -147,6 +147,19 @@ template Board
         archive oldCid
         create oldBoard with title = newTitle
 
+    nonconsuming choice CHANGE_BOARD_ABOUT
+      : ContractId Board.Data
+      with
+        admin : Party
+        newAbout : Text
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (oldCid, oldBoard) <- fetchByKey @Board.Data (operator, boardId)
+        archive oldCid
+        create oldBoard with about = newAbout
+
+
     nonconsuming choice CHANGE_BOARD_COLOR
       : ContractId Board.Data
       with

@@ -87,6 +87,7 @@ const payloadTransform = {
   "DELETE_BOARD": payload => payload,
   "CHANGE_BOARD_TITLE": payload => ({ boardId: payload.boardId, newTitle: payload.boardTitle }),
   "CHANGE_BOARD_COLOR": payload => ({ boardId: payload.boardId, newColor: payload.color }),
+  "CHANGE_BOARD_ABOUT": payload => ({ boardId: payload.boardId, newAbout: payload.about }),
   "ADD_LIST": payload => ({ boardId: payload.boardId, title: payload.listTitle, listId: payload.listId }),
   "DELETE_LIST": payload => ({ boardId: payload.boardId, listId: payload.listId }),
   "MOVE_LIST": payload => ({ boardId: payload.boardId, oldIdx: payload.oldListIndex, newIdx: payload.newListIndex }),
@@ -179,6 +180,7 @@ const persistMiddleware = store => next => action => {
 
       case "CHANGE_BOARD_TITLE":
       case "CHANGE_BOARD_COLOR":
+      case "CHANGE_BOARD_ABOUT":
       
       case "ADD_LIST":
       case "DELETE_LIST":
