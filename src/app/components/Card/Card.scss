@@ -1,33 +1,5 @@
 @import "../../variables.scss";
 
-.card-container {
-  padding-top: 40px;
-  max-width: 50em;
-  margin: auto;
-}
-
-.card-form textarea {
-  display: block;
-}
-
-.card-body {
-  font-size: 200%;
-  padding-bottom: 1em;
-}
-
-.card-comments {
-  font-size: 90%;
-}
-
-.card-comment {
-  padding-bottom: 1em;
-}
-
-.card-comment-metadata {
-  font-size: 80%;
-  color: #666;
-}
-
 .card-title {
   position: relative;
   box-sizing: border-box;

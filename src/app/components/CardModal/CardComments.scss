@@ -1,0 +1,41 @@
+.card-container {
+  background-color: white;
+  padding: 14px;
+  border-radius: 3px;
+
+  textarea {
+    display: block;
+    width: 100%;
+  }
+
+  input[type=submit] {
+      display: flex;
+      align-items: center;
+      height: 34px;
+      margin: 8px 3px 8px 3px;
+      border: 0;
+      border-radius: 3px;
+      color: black;
+      background: #ccc;
+      font-size: inherit;
+    
+    &:hover,
+    &:focus {
+      background: #ddd;
+    }    
+  }
+  
+  .card-comments {
+    font-size: 90%;
+  }
+  
+  .card-comment {
+    padding-bottom: 1em;
+    border-top: 1px solid #eee;
+  }
+  
+  .card-comment-metadata {
+    font-size: 80%;
+    color: #666;
+  }  
+}

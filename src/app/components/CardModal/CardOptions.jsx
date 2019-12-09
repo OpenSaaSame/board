@@ -5,12 +5,13 @@ import Modal from "react-modal";
 import FaTrash from "react-icons/lib/fa/trash";
 import MdAlarm from "react-icons/lib/md/access-alarm";
 import FaUser from "react-icons/lib/fa/user";
+import FaCommentAlt from "react-icons/lib/fa/comment";
 import Calendar from "./Calendar";
 import ClickOutside from "../ClickOutside/ClickOutside";
 import colorIcon from "../../../assets/images/color-icon.png";
 import "./CardOptions.scss";
-import { Link } from "react-router-dom";
 import CardUser from "./CardUser";
+import CardComments from "./CardComments";
 
 class CardOptions extends Component {
   static propTypes = {
@@ -27,6 +28,7 @@ class CardOptions extends Component {
   constructor() {
     super();
     this.state = { isCalendarOpen: false };
+    this.state = { isCommentsOpen: false };
   }
 
   deleteCard = () => {
@@ -66,6 +68,10 @@ class CardOptions extends Component {
     this.setState({ isCalendarOpen: !this.state.isCalendarOpen });
   };
 
+  toggleComments = () => {
+    this.setState({ isCommentsOpen: !this.state.isCommentsOpen });
+  }
+
   render() {
     const {
       isCardNearRightBorder,
@@ -75,7 +81,7 @@ class CardOptions extends Component {
       isThinDisplay,
       boundingRect
     } = this.props;
-    const { isCalendarOpen } = this.state;
+    const { isCalendarOpen, isCommentsOpen } = this.state;
 
     const calendarStyle = {
       content: {
@@ -99,20 +105,27 @@ class CardOptions extends Component {
         }}
       >
         <div>
-          <Link
-              key={card._id}
-              className="options-list-button"
-              to={`/c/${card._id}`}
-            >
-              Full task
-            </Link>
-        </div>
-        <div>
+          <div>
+            <button onClick={this.toggleComments} className="options-list-button">
+              <div className="modal-icon">
+                <FaCommentAlt />
+              </div>&nbsp;Comments
+            </button>
+          </div>
+          <Modal
+            isOpen={isCommentsOpen}
+            onRequestClose={this.toggleComments}
+            overlayClassName="calendar-underlay"
+            className="calendar-modal"
+            style={isThinDisplay ? calendarMobileStyle : calendarStyle}
+          >
+            <CardComments cardId={card._id} />
+          </Modal>
           <div className="options-list-button">
             <div className="modal-icon">
               <FaUser />
             </div>
-            <CardUser cardId={card._id} assignee={card.assignee} />
+            &nbsp;<CardUser cardId={card._id} assignee={card.assignee} />
           </div>
         </div>
         <div>
