@@ -92,11 +92,22 @@ class CardOptions extends Component {
 
     const calendarMobileStyle = {
       content: {
-        top: 110,
+        top: 150,
         left: "50%",
         transform: "translateX(-50%)"
       }
     };
+
+    const commentsMobileStyle = {
+      content: {
+        position: "relative",
+        left: 0,
+        top: 0,
+        marginTop: 150,
+        padding: 8
+      }
+    }
+    
     return (
       <div
         className="options-list"
@@ -105,28 +116,26 @@ class CardOptions extends Component {
         }}
       >
         <div>
-          <div>
-            <button onClick={this.toggleComments} className="options-list-button">
-              <div className="modal-icon">
-                <FaCommentAlt />
-              </div>&nbsp;Comments
-            </button>
-          </div>
-          <Modal
-            isOpen={isCommentsOpen}
-            onRequestClose={this.toggleComments}
-            overlayClassName="calendar-underlay"
-            className="calendar-modal"
-            style={isThinDisplay ? calendarMobileStyle : calendarStyle}
-          >
-            <CardComments cardId={card._id} />
-          </Modal>
-          <div className="options-list-button">
+          <button onClick={this.toggleComments} className="options-list-button">
             <div className="modal-icon">
-              <FaUser />
-            </div>
-            &nbsp;<CardUser cardId={card._id} assignee={card.assignee} />
+              <FaCommentAlt />
+            </div>&nbsp;Comments
+          </button>
+        </div>
+        <Modal
+          isOpen={isCommentsOpen}
+          onRequestClose={this.toggleComments}
+          overlayClassName="calendar-underlay"
+          className="calendar-modal"
+          style={isThinDisplay ? commentsMobileStyle : calendarStyle}
+        >
+          <CardComments cardId={card._id} />
+        </Modal>
+        <div className="options-list-button">
+          <div className="modal-icon">
+            <FaUser />
           </div>
+          &nbsp;<CardUser cardId={card._id} assignee={card.assignee} />
         </div>
         <div>
           <button onClick={this.deleteCard} className="options-list-button">
