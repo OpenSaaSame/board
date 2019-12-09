@@ -158,12 +158,14 @@ template Card
         with
           newObs : [Party]
         do
+          forA comments (\comment -> exerciseByKey @Comment (operator, comment) Comment_UpdateObs with ..)
           create this with obs = newObs
 
     controller admins can
       Card_Delete
         : ()
         do
+          forA comments (\comment -> exerciseByKey @Comment (operator, comment) Comment_Delete)
           return ()
 
     choice Card_UpdateAdmins
@@ -172,6 +174,7 @@ template Card
         newAdmins : [Party]
       controller admins ++ newAdmins
       do
+        forA comments (\comment -> exerciseByKey @Comment (operator, comment) Comment_UpdateAdmins with ..)
         create this with admins = newAdmins
 
 template Comment
@@ -191,3 +194,25 @@ template Comment
 
     key (operator, _id) : (Party, Text)
     maintainer key._1
+
+    controller operator can
+      Comment_UpdateObs
+        : ContractId Comment
+        with
+          newObs : [Party]
+        do
+          create this with obs = newObs
+
+    controller admins can
+      Comment_Delete
+        : ()
+        do
+          return ()
+
+    choice Comment_UpdateAdmins
+      : ContractId Comment
+      with
+        newAdmins : [Party]
+      controller admins ++ newAdmins
+      do
+        create this with admins = newAdmins
