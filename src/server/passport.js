@@ -5,7 +5,6 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 const configurePassport = ledgerAdmin => {
 
   passport.serializeUser((user, cb) => {
-    console.log(JSON.stringify(user));
     cb(null, user._id)
   });
 

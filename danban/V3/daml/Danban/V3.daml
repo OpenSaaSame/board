@@ -3,7 +3,6 @@ module Danban.V3 where
 
 import qualified Danban.V3.App as App
 import qualified Danban.V3.User as User
-import Danban.V3.Board as Board
 import qualified Danban.V3.Role as Role
 
 template Admin

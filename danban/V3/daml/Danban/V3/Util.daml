@@ -1,3 +1,5 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
 daml 1.2
 module Danban.V3.Util where
 
@@ -27,3 +29,10 @@ insertAt idx x xs
   | idx < 0 = error "Only positive indices allowed"
   | idx == 0 = x :: xs
   | otherwise = head xs :: insertAt (idx - 1) x (tail xs)
+
+exerciseIfKey : forall t k c r . (Template t, TemplateKey t k, Choice t c r) => k -> c -> Update (Optional r)
+exerciseIfKey k c = do
+  oCid <- lookupByKey @t k
+  case oCid of
+    None -> return None
+    Some cid -> Some <$> exercise cid c
