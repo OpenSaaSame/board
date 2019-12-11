@@ -13,19 +13,43 @@ const dabl = () => {
     const adminParty = process.env.DABL_ADMIN;
     const dataURL = dablUrl + "data" + ledgerSegment;
 
-    let refreshCookieTime = null;
-    
     let jwts = {};
 
     let appCid = null;
 
+    const getSiteJWTInner = async () => {
+        try {
+            const response = await fetch(
+                'https://login.projectdabl.com/auth/login',
+                {
+                    "credentials":"include",
+                    "headers":{
+                        "sec-fetch-mode":"cors",
+                        "cookie" : refreshCookie 
+                    },
+                    "mode":"cors",
+                    "redirect": 'manual'
+                }
+            );
+            if(response.status === 302) {
+                let raw = response.headers.raw();
+                let redirectURL = url.parse(raw["location"][0], true);
+                if(redirectURL.query["access_token"] === undefined) 
+                    throw new Error("No access_token in response " + raw["location"]);
+                refreshCookie = raw['set-cookie'][0];
+                return redirectURL.query["access_token"];
+            }
+            else {
+                throw new Error("Redirect expected!");
+            }
+        } catch(err) {
+            throw new NestedError("Error getting site JWT: ", err);
+        }
+    }
+
     const getSiteJWT = async () => {
         if(process.env.SITE_JWT) return Promise.resolve(process.env.SITE_JWT);
 
-        // Get a new refresh token every 2 weeks.
-        let need_new_refresh_token
-            = refreshCookieTime == null 
-            || Date.now() > refreshCookieTime + 1000 * 60 * 60 * 24 * 14;
         // Get a new site JWT every 12 hours
         let need_new_site_jwt
             = jwts["site"] == undefined
@@ -33,40 +57,20 @@ const dabl = () => {
             || jwts["site"].time == undefined
             || Date.now() > jwts["site"].time + 1000 * 60 * 60 * 12;
 
-        if(need_new_refresh_token || need_new_site_jwt) {
+        if(need_new_site_jwt) {
             console.log("Refreshing site JWT");
-            jwts["site"] = {};
-            try {
-                const response = await fetch(
-                    'https://login.projectdabl.com/auth/login',
-                    {
-                        "credentials":"include",
-                        "headers":{
-                            "sec-fetch-mode":"cors",
-                            "cookie" : refreshCookie 
-                        },
-                        "mode":"cors",
-                        "redirect": 'manual'
-                    }
-                );
-                if(response.status === 302) {
-                    let raw = response.headers.raw();
-                    let redirectURL = url.parse(raw["location"][0], true);
-                    if(redirectURL.query["access_token"] === undefined) 
-                        throw new Error("No access_token in response " + raw["location"]);
-                    refreshCookie = raw['set-cookie'][0];
-                    refreshCookieTime = Date.now();
-                    jwts["site"].time = Date.now();
-                    jwts["site"].token = redirectURL.query["access_token"];
-                }
-                else {
-                    throw new Error("Redirect expected!");
-                }
-            } catch(err) {
-                throw new NestedError("Error getting site JWT: ", err);
-            }
+            jwts["site"] = {
+                "token": getSiteJWTInner(),
+                "time": Date.now()
+            };
+            
+        } 
+        try{
+            return await jwts["site"].token;
+        } catch (err) {
+            delete jwts["site"];
+            throw new NestedError("Error getting site JWT: ", err);
         }
-        return jwts["site"].token;
     };
 
     const fetchFromAPI = (api, path, token, method, body) => {
@@ -79,6 +83,23 @@ const dabl = () => {
         );
     }
 
+    const getTokenInner = async party => {
+        try {
+            const jwt = await getSiteJWT();
+            const response = await fetchFromAPI(
+                "api/ledger",
+                `party/${party}/token`,
+                jwt,
+                "POST",
+                {for: 86400}
+            );
+            const json = await response.json();
+            return json["access_token"];
+        } catch(err) {
+                throw new NestedError("Error getting JWT for" + party + ": ", err);
+        }
+    }
+
     const getToken = async party => {
         // Get a new Token every 12 hours
         let need_new_party_jwt
@@ -89,24 +110,17 @@ const dabl = () => {
     
         if(need_new_party_jwt) {
             console.log("Getting token for party ", party);
-            jwts[party] = {};
-            try {
-                const jwt = await getSiteJWT();
-                const response = await fetchFromAPI(
-                    "api/ledger",
-                    `party/${party}/token`,
-                    jwt,
-                    "POST",
-                    {for: 86400}
-                );
-                const json = await response.json();
-                jwts[party].time = Date.now();
-                jwts[party].token = json["access_token"];
-            } catch(err) {
-                    throw new NestedError("Error getting JWT for" + party + ": ", err);
-            }
+                jwts[party] = {
+                    "token": getTokenInner(party),
+                    "time": Date.now()
+                };
         }
-        return jwts[party].token;
+        try {
+            return await jwts[party].token;
+        } catch (err) {
+            delete jwts[party];
+            throw new NestedError("Error getting JWT for " + party + ": ", err);
+        }
     };
 
     const adminToken = () => getToken(adminParty);
@@ -137,52 +151,54 @@ const dabl = () => {
         try {
             const jwt = await adminToken();
             if(appCid == null) appCid = getOrCreateApp(dataURL, adminParty, jwt);
-            return await appCid;
+            return appCid;
         } catch (err) {
             throw new Error("Error getting app", err);
         }
     }
 
+    const partyTemplate = {
+        "moduleName": "DABL.Ledger.V2",
+        "entityName": "LedgerParty"
+    };
+
     const getDABLUser = async user => {
         let party_ = null;
 
+        const userPartyInner = async () => {
+            try {
+                const [app, adminJwt] = await Promise.all([getApp(), adminToken()]);
+                const createCb = async () => {
+                    try {
+                        await createUser(user);
+                        const response = await search(
+                            dataURL,
+                            adminJwt,
+                            partyTemplate,
+                            userParty => userParty.argument.partyName == user
+                        );
+                        return response[0];
+                    } catch (err) {
+                        throw new NestedError(`Failed to create party for user ${user}: `, err);
+                    }
+                }
+                const contract = await getOrCreateContract(
+                    app,
+                    adminJwt,
+                    partyTemplate,
+                    userParty => userParty.argument.partyName == user,
+                    createCb
+                );
+                return contract.argument.party;
+            } catch(err) {
+                throw new NestedError(`Failed to get the party for ${user}: `, err);
+            }
+        }
+
         const userParty = async () => {
             if(party_ == null) {
-                console.log("Getting user party");
-
-                try {
-                    const [app, adminJwt] = await Promise.all([getApp(), adminToken()]);
-                    const createCb = async () => {
-                        try {
-                            await createUser(user);
-                            const response = await search(
-                                dataURL,
-                                adminJwt,
-                                {
-                                    "moduleName": "DABL.Ledger",
-                                    "entityName": "LedgerParty"
-                                },
-                                userParty => userParty.argument.partyName == user
-                            );
-                            return response[0];
-                        } catch (err) {
-                            throw new NestedError(`Failed to create party for user ${user}: `, err);
-                        }
-                    }
-                    const contract = await getOrCreateContract(
-                        app,
-                        adminJwt,
-                        {
-                            "moduleName": "DABL.Ledger",
-                            "entityName": "LedgerParty"
-                        },
-                        userParty => userParty.argument.partyName == user,
-                        createCb
-                    );
-                    party_ = contract.argument.party;
-                } catch(err) {
-                    throw new NestedError(`Failed to get the party for ${user}: `, err);
-                }
+                console.log("Getting user party for " + user);
+                party_ = userPartyInner();
             }
             return party_;
         }
@@ -190,7 +206,7 @@ const dabl = () => {
         const userToken = async () => {
             try {
                 const party = await userParty();
-                return await getToken(party);
+                return getToken(party);
             } catch (err) {
                 throw new NestedError(`Error getting user token for ${user}: `, err);
             }
