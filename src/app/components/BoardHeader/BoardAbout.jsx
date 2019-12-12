@@ -92,11 +92,8 @@ class BoardAbout extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const { boardId } = ownProps.match.params;
-
-  console.log(boardId, state.boardsById[boardId].about);
-
   return {
-    boardId, about: state.boardsById[boardId].about
+    boardId, about: state.boardsById[boardId].about || ""
   };
 };
 

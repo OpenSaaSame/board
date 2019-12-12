@@ -16,6 +16,7 @@ class CardModal extends Component {
       date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
       color: PropTypes.string
     }).isRequired,
+    assignee: PropTypes.object,
     listId: PropTypes.string.isRequired,
     cardElement: PropTypes.shape({
       getBoundingClientRect: PropTypes.func.isRequired
@@ -85,7 +86,7 @@ class CardModal extends Component {
 
   render() {
     const { newText, isColorPickerOpen, isTextareaFocused } = this.state;
-    const { cardElement, card, listId, isOpen } = this.props;
+    const { cardElement, card, listId, isOpen, assignee } = this.props;
     if (!cardElement) {
       return null;
     }
@@ -167,8 +168,8 @@ class CardModal extends Component {
             onFocus={() => this.setState({ isTextareaFocused: true })}
             onBlur={() => this.setState({ isTextareaFocused: false })}
           />
-          {(card.date || checkboxes.total > 0) && (
-            <CardBadges date={card.date} checkboxes={checkboxes} />
+          {(card.date || checkboxes.total > 0 || assignee) && (
+            <CardBadges date={card.date} checkboxes={checkboxes} assignee={assignee} />
           )}
         </div>
         <CardOptions

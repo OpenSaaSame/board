@@ -16,6 +16,7 @@ class Card extends Component {
       text: PropTypes.string.isRequired,
       color: PropTypes.string
     }).isRequired,
+    assignee: PropTypes.object,
     listId: PropTypes.string.isRequired,
     isDraggingOver: PropTypes.bool.isRequired,
     index: PropTypes.number.isRequired,
@@ -74,7 +75,7 @@ class Card extends Component {
   };
 
   render() {
-    const { card, index, listId, isDraggingOver } = this.props;
+    const { card, index, listId, isDraggingOver, assignee } = this.props;
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
     return (
@@ -113,8 +114,8 @@ class Card extends Component {
                   }}
                 />
                 {/* eslint-enable */}
-                {(card.date || checkboxes.total > 0) && (
-                  <CardBadges date={card.date} checkboxes={checkboxes} />
+                {(card.date || checkboxes.total > 0 || assignee) && (
+                  <CardBadges date={card.date} checkboxes={checkboxes} assignee={assignee}/>
                 )}
               </div>
               {/* Remove placeholder when not dragging over to reduce snapping */}
@@ -128,14 +129,19 @@ class Card extends Component {
           card={card}
           listId={listId}
           toggleCardEditor={this.toggleCardEditor}
+          assignee={assignee}
         />
       </>
     );
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  card: state.cardsById[ownProps.cardId]
-});
+const mapStateToProps = (state, ownProps) => {
+  const card = state.cardsById[ownProps.cardId]
+  return {
+    card,
+    assignee: state.users.byParty[card.assignee]
+  }
+};
 
 export default connect(mapStateToProps)(Card);
