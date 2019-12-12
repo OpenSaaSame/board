@@ -71,6 +71,10 @@ class BoardAbout extends Component {
       />
     );
 
+    if (about === "" && !hasAdmin) {
+      return null;
+    }
+
     return (
       <Wrapper
         className="board-about-wrapper"
