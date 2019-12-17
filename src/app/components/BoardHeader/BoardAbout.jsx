@@ -12,7 +12,7 @@ class BoardAbout extends Component {
 
   static propTypes = {
     boardId: PropTypes.string.isRequired,
-    about: PropTypes.string.isRequired,
+    about: PropTypes.string,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -51,6 +51,10 @@ class BoardAbout extends Component {
     const { about, hasAdmin } = this.props;
     const { newAbout } = this.state;
 
+    if ((about === "" && !hasAdmin) || about === undefined) {
+      return null;
+    }
+
     const adminContent = (
       <form onSubmit={this.handleSubmit} >
         <Textarea
@@ -70,10 +74,6 @@ class BoardAbout extends Component {
         }}
       />
     );
-
-    if (about === "" && !hasAdmin) {
-      return null;
-    }
 
     return (
       <Wrapper
@@ -97,7 +97,7 @@ class BoardAbout extends Component {
 const mapStateToProps = (state, ownProps) => {
   const { boardId } = ownProps.match.params;
   return {
-    boardId, about: state.boardsById[boardId].about || ""
+    boardId, about: state.boardsById[boardId].about
   };
 };
 
