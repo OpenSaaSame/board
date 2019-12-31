@@ -12,6 +12,7 @@ import colorIcon from "../../../assets/images/color-icon.png";
 import "./CardOptions.scss";
 import CardUser from "./CardUser";
 import CardComments from "./CardComments";
+import CardTags from "./CardTags";
 
 class CardOptions extends Component {
   static propTypes = {
@@ -27,8 +28,11 @@ class CardOptions extends Component {
 
   constructor() {
     super();
-    this.state = { isCalendarOpen: false };
-    this.state = { isCommentsOpen: false };
+    this.state = {
+      isCalendarOpen: false,
+      isCommentsOpen: false,
+      isTagsOpen: false
+    };
   }
 
   deleteCard = () => {
@@ -72,6 +76,10 @@ class CardOptions extends Component {
     this.setState({ isCommentsOpen: !this.state.isCommentsOpen });
   }
 
+  toggleTags = () => {
+    this.setState({ isTagsOpen: !this.state.isTagsOpen });
+  }
+
   render() {
     const {
       isCardNearRightBorder,
@@ -81,7 +89,7 @@ class CardOptions extends Component {
       isThinDisplay,
       boundingRect
     } = this.props;
-    const { isCalendarOpen, isCommentsOpen } = this.state;
+    const { isCalendarOpen, isCommentsOpen, isTagsOpen } = this.state;
 
     const calendarStyle = {
       content: {
@@ -132,6 +140,22 @@ class CardOptions extends Component {
               style={isThinDisplay ? commentsMobileStyle : calendarStyle}
             >
               <CardComments cardId={card._id} />
+            </Modal>
+            <div>
+              <button onClick={this.toggleTags} className="options-list-button">
+                <div className="modal-icon">
+                  <FaCommentAlt />
+                </div>&nbsp;Tags
+              </button>
+            </div>
+            <Modal
+              isOpen={isTagsOpen}
+              onRequestClose={this.toggleTags}
+              overlayClassName="calendar-underlay"
+              className="calendar-modal"
+              style={isThinDisplay ? commentsMobileStyle : calendarStyle}
+            >
+              <CardTags cardId={card._id} />
             </Modal>
             <div className="options-list-button">
               <div className="modal-icon">

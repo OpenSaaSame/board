@@ -3,6 +3,7 @@ import cardsById from "./cardsById";
 import listsById from "./listsById";
 import boardsById from "./boardsById";
 import commentsById from "./commentsById";
+import tagsById from "./tagsById";
 import user from "./user";
 import ledger from "./ledger";
 import users from "./users";
@@ -25,6 +26,7 @@ export default (state = {loggedIn: false}, action) => {
       listsById,
       boardsById,
       commentsById,
+      tagsById,
       user,
       ledger,
       users,

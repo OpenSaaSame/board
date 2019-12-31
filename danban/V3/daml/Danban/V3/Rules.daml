@@ -159,7 +159,6 @@ template Board
         archive oldCid
         create oldBoard with about = newAbout
 
-
     nonconsuming choice CHANGE_BOARD_COLOR
       : ContractId Board.Data
       with
@@ -172,6 +171,27 @@ template Board
         archive oldCid
         create oldBoard with color = newColor
 
+    nonconsuming choice ADD_TAG
+      : ContractId Board.Tag
+      with
+        admin : Party
+        name : Text
+        color : Text
+        tagId : Text
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (oldCid, board) <- fetchByKey @Board.Data (operator, boardId)
+        archive oldCid
+        create board with tags = board.tags ++ [tagId]
+        create Board.Tag with
+          _id = tagId
+          admins = board.admins
+          obs = board.obs
+          operator = board.operator
+          cards = []
+          ..
+    
     nonconsuming choice ADD_LIST
       : ContractId Board.CardList
       with
@@ -258,6 +278,7 @@ template Board
           date = None
           assignee = None
           comments = []
+          tags = []
 
     nonconsuming choice MOVE_CARD
       : ()

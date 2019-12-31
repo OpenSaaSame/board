@@ -43,6 +43,10 @@ const cardsById = (state = {}, action) => {
       const { commentId, cardId } = action.payload;
       return { ... state, [cardId]: { ... state[cardId], comments: [...state[cardId].comments, commentId] }};
     }
+    // case "ADD_TAG": {
+    //   const { tagId, cardId } = action.payload;
+    //   return { ...state, [cardId]: { ...state[cardId], tags: [ ...state[cardId].tags, tagId ]}};
+    // }
     case "SUCCEED_READ": {
       return action.payload.cardsById;
     }

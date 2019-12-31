@@ -87,12 +87,13 @@ const dataTemplates = [
     ["User", "Profile"],
     ["Rules", "Board"]
 ].concat(
-    ["Data", "CardList", "Card", "Comment"].map(e => ["Board", e])
+    ["Data", "CardList", "Card", "Comment", "Tag"].map(e => ["Board", e])
 );
 
 const exclusions = {
     "Danban.V2" : {
-        "Board" : "Comment"
+        "Board" : "Comment",
+        "Board" : "Tag"
     }
 };
 
@@ -161,6 +162,7 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
         const listsById = mapBy("_id")(contractMap["Board"]["CardList"]);
         const cardsById = mapBy("_id")(contractMap["Board"]["Card"]);
         const commentsById = mapBy("_id")(contractMap["Board"]["Comment"]);
+        const tagsById = mapBy("_id")(contractMap["Board"]["Tag"]);
         const users = (contractMap["User"]["Profile"]);
         users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
         const boardUsersById = mapBy("boardId")(contractMap["Rules"]["Board"]);
@@ -170,6 +172,7 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
             listsById,
             cardsById,
             commentsById,
+            tagsById,
             users,
             boardUsersById
         }

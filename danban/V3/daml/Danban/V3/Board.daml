@@ -43,6 +43,7 @@ template Data
     color : Text
     isPublic : Bool
     lists : [Text]
+    tags : [Text]
     about : Text
   where
     signatory operator, admins
@@ -145,6 +146,7 @@ template Card
 
     assignee : Optional Party
     comments : [Text]
+    tags : [Text]
   where
     signatory operator, admins
     observer obs
@@ -211,6 +213,46 @@ template Comment
 
     choice Comment_UpdateAdmins
       : ContractId Comment
+      with
+        newAdmins : [Party]
+      controller admins ++ newAdmins
+      do
+        create this with admins = newAdmins
+
+template Tag
+  with
+    _id : Text
+    operator : Party
+    admins : [Party]
+    obs : [Party]
+
+    boardId : Text
+    cards : [Text]
+    
+    name : Text
+    color : Text
+  where
+    signatory operator, admins
+
+    key (operator, _id) : (Party, Text)
+    maintainer key._1
+
+    controller operator can
+      Tag_UpdateObs
+        : ContractId Tag
+        with
+          newObs : [Party]
+        do
+          create this with obs = newObs
+
+    controller admins can
+      Tag_Delete
+        : ()
+        do
+          return ()
+
+    choice Tag_UpdateAdmins
+      : ContractId Tag
       with
         newAdmins : [Party]
       controller admins ++ newAdmins

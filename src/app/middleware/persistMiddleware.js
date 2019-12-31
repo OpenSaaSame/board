@@ -104,7 +104,8 @@ const payloadTransform = {
   "CHANGE_CARD_COLOR": payload => ({ cardId: payload.cardId, newColor: payload.color }),
   "CHANGE_CARD_ASSIGNEE": payload => ({ cardId: payload.cardId, assignee: payload.assignee }),
   "REMOVE_CARD_ASSIGNEE": payload => ({ cardId: payload.cardId }),
-  "ADD_COMMENT": payload => ({ cardId: payload.cardId, commentId: payload.commentId, comment: payload.comment })
+  "ADD_COMMENT": payload => ({ cardId: payload.cardId, commentId: payload.commentId, comment: payload.comment }),
+  "ADD_TAG": payload => ({ boardId: payload.boardId, tagId: payload.tagId, name: payload.name, color: payload.color })
 }
 
 const dispatchStates = async (store, pPrivateState, pPublicState) => {
@@ -185,6 +186,7 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_BOARD_TITLE":
       case "CHANGE_BOARD_COLOR":
       case "CHANGE_BOARD_ABOUT":
+      case "ADD_TAG":
       
       case "ADD_LIST":
       case "DELETE_LIST":
