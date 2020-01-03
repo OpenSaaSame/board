@@ -47,13 +47,13 @@ instance Upgradable BoardV2.Directory BoardV3.Directory where
   upgrade BoardV2.Directory{..} = BoardV3.Directory{..}
 
 instance Upgradable BoardV2.Data BoardV3.Data where
-  upgrade BoardV2.Data{..} = BoardV3.Data{..}
+  upgrade BoardV2.Data{..} = BoardV3.Data{tags = [], about = "", ..}
 
 instance Upgradable BoardV2.CardList BoardV3.CardList where
   upgrade BoardV2.CardList{..} = BoardV3.CardList{..}
 
 instance Upgradable BoardV2.Card BoardV3.Card where
-  upgrade BoardV2.Card{..} = BoardV3.Card{assignee = None, comments = [], ..}
+  upgrade BoardV2.Card{..} = BoardV3.Card{assignee = None, comments = [], tags = [], ..}
 
 instance Upgradable RulesV2.Board RulesV3.Board where
   upgrade RulesV2.Board{..} = RulesV3.Board{users = newUsers; ..}
