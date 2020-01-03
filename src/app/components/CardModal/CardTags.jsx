@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import shortid from "shortid";
+import isHexColor from "validate.io-color-hexadecimal";
+
 import "./CardTags.scss"
 
 class CardTags extends Component {
@@ -39,7 +41,7 @@ class CardTags extends Component {
     const { dispatch, boardId } = this.props;
     const tagId = shortid.generate();
 
-    if (newTagName != "") {
+    if (newTagName != "" && isHexColor(newTagColor, 'either')) {
       dispatch({
         type: "ADD_TAG",
         payload: {
