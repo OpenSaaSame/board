@@ -113,7 +113,7 @@ class CardTags extends Component {
       <div className="card-container tag-container">
         {tagList}
         <form onSubmit={this.handleSubmit} className="card-form">
-          <div>
+          <div className="form-row">
             <label>Tag name:</label>
             <input
               type="text"
@@ -122,7 +122,7 @@ class CardTags extends Component {
               onKeyDown={this.handleKeyDown}
             />
           </div>
-          <div>
+          <div className="form-row">
             <label>Tag color (hex):</label>
             <input
               type="text"
@@ -131,7 +131,7 @@ class CardTags extends Component {
               onKeyDown={this.handleKeyDown}
             />
           </div>
-          <input type="submit" value="Save" />
+          <input type="submit" value="Add tag" />
         </form>
       </div>
     );

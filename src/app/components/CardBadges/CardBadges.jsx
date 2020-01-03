@@ -84,7 +84,7 @@ class CardBadges extends Component {
         <img
           src={assignee.imageUrl}
           alt={assignee.displayName}
-          className="user-thumbnail"
+          className="user-thumbnail-badge"
           title={assignee.displayName}
         />
       );
