@@ -6,6 +6,7 @@ import FaTrash from "react-icons/lib/fa/trash";
 import MdAlarm from "react-icons/lib/md/access-alarm";
 import FaUser from "react-icons/lib/fa/user";
 import FaCommentAlt from "react-icons/lib/fa/comment";
+import FaTags from "react-icons/lib/fa/tag";
 import Calendar from "./Calendar";
 import ClickOutside from "../ClickOutside/ClickOutside";
 import colorIcon from "../../../assets/images/color-icon.png";
@@ -144,7 +145,7 @@ class CardOptions extends Component {
             <div>
               <button onClick={this.toggleTags} className="options-list-button">
                 <div className="modal-icon">
-                  <FaCommentAlt />
+                  <FaTags />
                 </div>&nbsp;Tags
               </button>
             </div>

@@ -21,6 +21,7 @@ export const publicBoardsInitial = ledgerConn => {
     const publicCommentIds = Object.entries(publicCards).flatMap(([_id, card]) => card.comments);
     const publicUserIds = Object.entries(publicCards).flatMap(([_id, card]) => card.assignee);
     const publicUsers = Object.entries(filterObject(state.users, user => publicUserIds.includes(user.party))).map(([_id, user]) => user);
+    const publicTagIds = Object.entries(publicCards).flatMap(([_id, card]) => card.tags);
 
     req.initialState = { 
       ...req.initialState,
@@ -28,6 +29,7 @@ export const publicBoardsInitial = ledgerConn => {
       listsById: filterObject(state.listsById, list => state.boardsById[list.boardId].isPublic),
       cardsById: publicCards,
       commentsById: filterObject(state.commentsById, comment => publicCommentIds.includes(comment._id)),
+      tagsById: filterObject(state.tagsById, tag => publicTagIds.includes(tag._id)),
       users: {list: publicUsers, byParty: mapBy("party")(publicUsers)}
       };
     next();

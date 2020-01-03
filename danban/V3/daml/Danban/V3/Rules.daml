@@ -399,3 +399,36 @@ template Board
           author = user
           createdAt = now
 
+    nonconsuming choice ASSIGN_TAG
+      : ContractId Board.Tag
+      with
+        user : Party
+        cardId : Text
+        tagId : Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCardCid, card) <- fetchByKey @Board.Card (operator, cardId)
+        (oldTagCid, tag) <- fetchByKey @Board.Tag (operator, tagId)
+        
+        archive oldCardCid
+        archive oldTagCid
+        create card with tags = card.tags ++ [tagId]
+        create tag with cards = tag.cards ++ [cardId]
+    
+    nonconsuming choice UNASSIGN_TAG
+      : ContractId Board.Tag
+      with
+        user : Party
+        cardId : Text
+        tagId : Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCardCid, card) <- fetchByKey @Board.Card (operator, cardId)
+        (oldTagCid, tag) <- fetchByKey @Board.Tag (operator, tagId)
+        
+        archive oldCardCid
+        archive oldTagCid
+        create card with tags = (delete tagId card.tags)
+        create tag with cards = (delete cardId tag.cards)

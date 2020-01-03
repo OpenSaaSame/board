@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import shortid from "shortid";
-import Textarea from "react-textarea-autosize";
+import "./CardTags.scss"
 
 class CardTags extends Component {
   static propTypes = {
@@ -15,73 +15,124 @@ class CardTags extends Component {
         color: PropTypes.string.isRequired
       })
     ),
+    cardTags: PropTypes.arrayOf(
+      PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        color: PropTypes.string.isRequired
+      })
+    ),
     dispatch: PropTypes.func.isRequired
   };
 
   constructor() {
     super();
     this.state = {
-      newTag: ""
+      newTagName: "",
+      newTagColor: ""
     };
   }
 
   handleSubmit = event => {
     event.preventDefault();
-    const { newTag } = this.state;
+    const { newTagName, newTagColor } = this.state;
     const { dispatch, boardId } = this.props;
     const tagId = shortid.generate();
 
-    if (newTag != "") {
+    if (newTagName != "") {
       dispatch({
         type: "ADD_TAG",
         payload: {
-          name: newTag,
-          color: "#ccc",
+          name: newTagName,
+          color: newTagColor,
           tagId,
           boardId
         }
       });
     }
 
-    this.setState({ newTag: ""});
+    this.setState({ newTagName: "", newTagColor: ""});
   };
 
-  handleChange = event => {
-    this.setState({ newTag: event.target.value });
+  handleSelect = (event, tag) => {
+    event.preventDefault();
+    const { cardId, cardTags, dispatch } = this.props;
+
+    if (cardTags.includes(tag)) {
+      console.log("Unassigning");
+      dispatch({
+        type: "UNASSIGN_TAG",
+        payload: {
+          cardId,
+          tagId: tag._id
+        }
+      });
+    } else {
+      dispatch({
+        type: "ASSIGN_TAG",
+        payload: {
+          cardId,
+          tagId: tag._id
+        }
+      });
+    }
+  }
+
+  handleNameChange = event => {
+    this.setState({ newTagName: event.target.value });
+  };
+
+  handleColorChange = event => {
+    this.setState({ newTagColor: event.target.value });
   };
 
   handleKeyDown = event => {
-    if (event.keyCode === 13 && event.shiftKey === false) {
+    if (event.keyCode === 13) {
       this.handleSubmit(event);
     }
   };
 
   render() {
     const { tags } = this.props;
-    const { newTag } = this.state;
-
-    console.log(tags);
+    const { newTagName, newTagColor } = this.state;
 
     const tagList = tags.map(tag => {
-      return  <div
-                key={tag._id}
-                className="card-comment"
-              >
-                {tag.name}
+      return  <div>
+                <button
+                  className="tag-button"
+                  key={tag._id}
+                  style={{backgroundColor: "#" + tag.color}}                
+                  onClick={event => this.handleSelect(event, tag)}
+                >
+                  {tag.name}
+                </button>
               </div>
     });
     
     return (
-      <div className="card-container">
+      <div className="card-container tag-container">
+        {tagList}
         <form onSubmit={this.handleSubmit} className="card-form">
-          <Textarea
-            value={newTag}
-            onChange={this.handleChange}
-            onKeyDown={this.handleKeyDown}
-          />
+          <div>
+            <label>Tag name:</label>
+            <input
+              type="text"
+              value={newTagName}
+              onChange={this.handleNameChange}
+              onKeyDown={this.handleKeyDown}
+            />
+          </div>
+          <div>
+            <label>Tag color (hex):</label>
+            <input
+              type="text"
+              value={newTagColor}
+              onChange={this.handleColorChange}
+              onKeyDown={this.handleKeyDown}
+            />
+          </div>
           <input type="submit" value="Save" />
         </form>
-        {tagList}
       </div>
     );
   }
@@ -89,10 +140,10 @@ class CardTags extends Component {
 
 const mapStateToProps = (state, { cardId }) => {
   const boardId = state.cardsById[cardId].boardId;
+  const cardTags = state.cardsById[cardId].tags.map(tagId => state.tagsById[tagId]);
   const board = state.boardsById[boardId];
-  console.log(board);
   const tags = board.tags.map(tagId => state.tagsById[tagId]);
-  return { cardId, boardId, tags };
+  return { cardId, boardId, tags, cardTags };
 };
 
 export default connect(mapStateToProps)(CardTags);

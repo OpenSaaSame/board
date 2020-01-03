@@ -105,7 +105,9 @@ const payloadTransform = {
   "CHANGE_CARD_ASSIGNEE": payload => ({ cardId: payload.cardId, assignee: payload.assignee }),
   "REMOVE_CARD_ASSIGNEE": payload => ({ cardId: payload.cardId }),
   "ADD_COMMENT": payload => ({ cardId: payload.cardId, commentId: payload.commentId, comment: payload.comment }),
-  "ADD_TAG": payload => ({ boardId: payload.boardId, tagId: payload.tagId, name: payload.name, color: payload.color })
+  "ADD_TAG": payload => ({ boardId: payload.boardId, tagId: payload.tagId, name: payload.name, color: payload.color }),
+  "ASSIGN_TAG": payload => ({ cardId: payload.cardId, tagId: payload.tagId }),
+  "UNASSIGN_TAG": payload => ({ cardId: payload.cardId, tagId: payload.tagId })
 }
 
 const dispatchStates = async (store, pPrivateState, pPublicState) => {
@@ -202,6 +204,8 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_CARD_COLOR":
       case "CHANGE_CARD_ASSIGNEE":
       case "REMOVE_CARD_ASSIGNEE":
+      case "ASSIGN_TAG":
+      case "UNASSIGN_TAG":
 
       case "ADD_COMMENT":        
         if(!user.needsUpgrade)

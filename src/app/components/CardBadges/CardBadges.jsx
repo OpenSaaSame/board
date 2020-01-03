@@ -13,7 +13,14 @@ class CardBadges extends Component {
       total: PropTypes.number.isRequired,
       checked: PropTypes.number.isRequired
     }).isRequired,
-    assignee: PropTypes.object
+    assignee: PropTypes.object,
+    tags: PropTypes.arrayOf(
+      PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        color: PropTypes.string.isRequired
+      })
+    )
   };
 
   renderDueDate = () => {
@@ -86,12 +93,29 @@ class CardBadges extends Component {
     }
   };
 
+  renderTags = () => {
+    const { tags } = this.props;
+
+    const tagList = tags.map(tag =>
+      <div
+        className="badge"
+        key={tag._id}
+        style={{backgroundColor: "#" + tag.color}}
+      >
+        {tag.name}
+      </div>
+    );
+
+    return tagList;
+  };
+
   render() {
     return (
       <div className="card-badges">
         {this.renderDueDate()}
         {this.renderTaskProgress()}
         {this.renderAssignee()}
+        {this.renderTags()}
       </div>
     );
   }

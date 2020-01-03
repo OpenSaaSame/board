@@ -279,3 +279,23 @@ template User
         do
           fetchByKey @App.Semaphore operator
           exerciseByKey @Rules.Board (operator, boardId) Rules.ADD_TAG with admin = party; ..
+
+      nonconsuming ASSIGN_TAG
+          : ContractId Board.Tag
+        with
+          tagId : Text
+          cardId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.ASSIGN_TAG with user = party; ..
+
+      nonconsuming UNASSIGN_TAG
+          : ContractId Board.Tag
+        with
+          tagId : Text
+          cardId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.UNASSIGN_TAG with user = party; ..
