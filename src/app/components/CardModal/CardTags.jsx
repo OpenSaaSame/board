@@ -61,7 +61,6 @@ class CardTags extends Component {
     const { cardId, cardTags, dispatch } = this.props;
 
     if (cardTags.includes(tag)) {
-      console.log("Unassigning");
       dispatch({
         type: "UNASSIGN_TAG",
         payload: {

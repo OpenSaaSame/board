@@ -152,8 +152,6 @@ const mapStateToProps = (state, ownProps) => {
   const tags = card.tags.map(tagId => state.tagsById[tagId]);
   const isSignedIn = state.user || false;
 
-  console.log(state.user);
-
   return {
     card,
     tags,
