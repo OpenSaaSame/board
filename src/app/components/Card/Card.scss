@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .card-title {
   position: relative;
@@ -13,6 +13,7 @@
   transition: box-shadow 0.15s;
   user-select: none;
   cursor: pointer !important;
+  background-color: #d3e9e5;
 }
 
 .card-title:focus {
@@ -47,7 +48,7 @@
     margin: 4px 0;
     padding: 8px;
   }
-  
+
   a {
     text-decoration: none;
   }
@@ -61,5 +62,4 @@
     padding: 4px 2px;
     background: rgba(100, 100, 100, 0.08);
   }
-
 }

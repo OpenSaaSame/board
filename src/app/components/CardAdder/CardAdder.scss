@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .card-adder-textarea-wrapper {
   margin: 6px 13px 0 13px;
@@ -15,6 +15,7 @@
   font-family: inherit;
   font-size: 16px;
   resize: none;
+  background: #d3e9e5;
 }
 
 .add-card-button {

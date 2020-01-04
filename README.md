@@ -2,7 +2,8 @@
 
 # Danban
 
-A Kanban board backed by a DAML Ledger, inspired by [Trello](https://trello.com/home) and based on [react-kanban](https://github.com/markusenglund/react-kanban).
+A Kanban board backed by a DAML Ledger, inspired by [Trello](https://trello.com/home) and based on
+[react-kanban](https://github.com/markusenglund/react-kanban).
 
 ![react kanban example](https://github.com/digital-asset/danban/blob/master/example.gif?raw=true)
 
@@ -10,25 +11,24 @@ A Kanban board backed by a DAML Ledger, inspired by [Trello](https://trello.com/
 
 ### Features
 
-* It has most of the features available on Trello, like creating and editing new cards, dragging around cards and so on.
-* Supports GitHub flavored markdown, which enables stuff like headings and checklists on the cards.
-* Works great on touch devices.
-* Public and private boards, with sharing functionality
-* Fully backed by a DAML Ledger
+- It has most of the features available on Trello, like creating and editing new cards, dragging around cards and so on.
+- Supports GitHub flavored markdown, which enables stuff like headings and checklists on the cards.
+- Works great on touch devices.
+- Public and private boards, with sharing functionality
+- Fully backed by a DAML Ledger
 
 ### Tech stack
 
-* [React](https://github.com/facebook/react)
-* [Redux](https://github.com/reactjs/redux)
-* [React-beautiful-dnd](https://github.com/atlassian/react-beautiful-dnd)
-* [Sass](https://github.com/sass/sass)
-* [Webpack](https://github.com/webpack/webpack)
-* [Babel](https://github.com/babel/babel)
-* [Express](https://github.com/expressjs/express)
-* [Passport](https://github.com/jaredhanson/passport)
-* [DAML](https://daml.com)
-* [project : DABL](https://projectdabl.com)
-
+- [React](https://github.com/facebook/react)
+- [Redux](https://github.com/reactjs/redux)
+- [React-beautiful-dnd](https://github.com/atlassian/react-beautiful-dnd)
+- [Sass](https://github.com/sass/sass)
+- [Webpack](https://github.com/webpack/webpack)
+- [Babel](https://github.com/babel/babel)
+- [Express](https://github.com/expressjs/express)
+- [Passport](https://github.com/jaredhanson/passport)
+- [DAML](https://daml.com)
+- [project : DABL](https://projectdabl.com)
 
 ### Development
 
@@ -40,24 +40,27 @@ You need
 
 #### Clone & Install Dependencies
 
-```shell
+````shell
 git clone https://github.com/digital-asset/danban.git
 
 cd danban
 
 npm install
-```
-
+``__
 #### Start DAML Sandbox
 
 ```shell
-cd danban
+cd danban/v3
 
 daml start --sandbox-option="--ledgerid=danban" --sandbox-option="-w"
-```
+````
+
+**you will need Java installed on your computer**
 
 #### Set up Environment
-You need auth credentials for the Google sign in. You need to create a file with the name `.env` in the root directory with the following variables:
+
+You need auth credentials for the Google sign in. You need to create a file with the name `.env` in the root directory
+with the following variables:
 
 ```
 GOOGLE_CLIENT_ID
@@ -94,11 +97,11 @@ npm run start:prod
 
 ### Run on Project DABL
 
-To run on DABL, you need to login, create an account, and deploy a DABL Ledger with the DAML model deployed. You also need the refresh cookie for the ledger admin account. Then add the following two
-variables to your environment and remove `USE_SANDBOX`:
+To run on DABL, you need to login, create an account, and deploy a DABL Ledger with the DAML model deployed. You also
+need the refresh cookie for the ledger admin account. Then add the following two variables to your environment and
+remove `USE_SANDBOX`:
 
 ```shell
 REFRESH_COOKIE="__DABL_SESSION={YOUR_COOKIE}"
 DABL_LEDGER="{DABL_LEDGER_ID}"
 ```
-
