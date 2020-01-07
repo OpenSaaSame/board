@@ -7,6 +7,6 @@ version: 3.0.0
 dependencies:
   - daml-prim
   - daml-stdlib
-  - ../../V2/danban-2.0.0.dar
-  - ../../V2Bugfix/danban-2.0.1.dar
-  - ../../V3/danban-3.0.0.dar
+  - ../../V2/.daml/dist/danban-v2-2.0.0.dar
+  - ../../V2Bugfix/.daml/dist/danban-v2-bugfix-2.0.1.dar
+  - ../../V3/.daml/dist/danban-v3-3.0.0.dar

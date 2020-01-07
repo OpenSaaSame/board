@@ -8,7 +8,7 @@ import qualified DA.List as List
 import qualified DA.Next.Map as Map
 import DA.Tuple
 
--- import qualified Danban.V2_1 as DanbanV2_1
+import qualified Danban.V2_1 as DanbanV2_1
 
 import qualified Danban.V2 as DanbanV2
 import qualified Danban.V2.Board as BoardV2
@@ -54,7 +54,6 @@ instance Upgradable BoardV2.CardList BoardV3.CardList where
 
 instance Upgradable BoardV2.Card BoardV3.Card where
   upgrade BoardV2.Card{..} = BoardV3.Card{assignee = None, comments = [], tags = [], ..}
-
 instance Upgradable RulesV2.Board RulesV3.Board where
   upgrade RulesV2.Board{..} = RulesV3.Board{users = newUsers; ..}
     where
@@ -90,6 +89,7 @@ template UpgradeInitiator
         do
           -- Convert admin contracts
           exerciseIfKey @DanbanV2.Admin operator Archive
+          exerciseIfKey @DanbanV2_1.Admin operator Archive
           -- exerciseIfKey @DanbanV2_1.Admin operator Archive
           newAdminCid <- create DanbanV3.Admin with operator
           (_, UserV3.Directory{users}) <- upgradeByKey @UserV2.Directory @UserV3.Directory operator

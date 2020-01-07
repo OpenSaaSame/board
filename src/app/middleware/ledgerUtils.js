@@ -92,14 +92,13 @@ const dataTemplates = [
 
 const exclusions = {
     "Danban.V2" : {
-        "Board" : "Comment",
-        "Board" : "Tag"
+        "Board" : ["Comment", "Tag"]
     }
 };
 
 const versionedTempates = dataTemplates.flatMap(t => 
     appVersions.flatMap(v => 
-        exclusions[v] && exclusions[v][t[0]] == t[1]
+        exclusions[v] && exclusions[v][t[0]] && exclusions[v][t[0]].includes(t[1])
         ? []
         : {
             "entityName" : t[1],
