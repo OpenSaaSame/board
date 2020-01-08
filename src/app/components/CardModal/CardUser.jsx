@@ -42,7 +42,7 @@ class CardUser extends Component {
               <div>
                 {allUsers.byParty[assignee] ? allUsers.byParty[assignee].email : "Not assigned"}
               </div>
-              <select value={assignee} onChange={this.handleChange}>
+              <select value={assignee || "None"} onChange={this.handleChange}>
                 {userList}
               </select>
             </div>
