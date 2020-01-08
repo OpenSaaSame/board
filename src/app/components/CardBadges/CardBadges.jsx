@@ -96,17 +96,19 @@ class CardBadges extends Component {
   renderTags = () => {
     const { tags } = this.props;
 
-    const tagList = tags.map(tag =>
-      <div
-        className="badge"
-        key={tag._id}
-        style={{backgroundColor: "#" + tag.color}}
-      >
-        {tag.name}
-      </div>
-    );
-
-    return tagList;
+    if (tags !== undefined) {
+      return tags.map(tag =>
+        <div
+          className="badge"
+          key={tag._id}
+          style={{backgroundColor: "#" + tag.color}}
+        >
+          {tag.name}
+        </div>
+      )
+    } else {
+      return null;
+    }
   };
 
   render() {

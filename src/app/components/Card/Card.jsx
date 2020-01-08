@@ -149,7 +149,7 @@ class Card extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const card = state.cardsById[ownProps.cardId]
-  const tags = card.tags.map(tagId => state.tagsById[tagId]);
+  const tags = card.tags ? card.tags.map(tagId => state.tagsById[tagId]) : undefined;
   const isSignedIn = state.user !== null;
 
   return {
