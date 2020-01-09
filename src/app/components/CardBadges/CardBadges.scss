@@ -1,17 +1,27 @@
 .card-badges {
   display: flex;
+  flex-wrap: wrap;
   padding: 0px 8px 6px 8px;
   font-size: 14px;
 }
 
 .badge {
-  margin-right: 5px;
+  margin: 0 5px 3px 0;
   padding: 3px 4px 1px 3px;
   border-radius: 3px;
   color: white;
   transition: background 0.15s;
+  height: 16px;
 }
 
 .badge-icon {
   margin-bottom: 2px;
 }
+
+.user-thumbnail-badge {
+  margin: 0 5px 3px 0;
+  border-radius: 3px;
+  transition: background 0.15s;
+  height: 20px;
+}
+

@@ -12,7 +12,15 @@ class CardBadges extends Component {
     checkboxes: PropTypes.shape({
       total: PropTypes.number.isRequired,
       checked: PropTypes.number.isRequired
-    }).isRequired
+    }).isRequired,
+    assignee: PropTypes.object,
+    tags: PropTypes.arrayOf(
+      PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        color: PropTypes.string.isRequired
+      })
+    )
   };
 
   renderDueDate = () => {
@@ -69,11 +77,47 @@ class CardBadges extends Component {
     );
   };
 
+  renderAssignee = () => {
+    const { assignee } = this.props;
+    if (assignee !== undefined) {
+      return (
+        <img
+          src={assignee.imageUrl}
+          alt={assignee.displayName}
+          className="user-thumbnail-badge"
+          title={assignee.displayName}
+        />
+      );
+    } else {
+      return null;
+    }
+  };
+
+  renderTags = () => {
+    const { tags } = this.props;
+
+    if (tags !== undefined) {
+      return tags.map(tag =>
+        <div
+          className="badge"
+          key={tag._id}
+          style={{backgroundColor: "#" + tag.color}}
+        >
+          {tag.name}
+        </div>
+      )
+    } else {
+      return null;
+    }
+  };
+
   render() {
     return (
       <div className="card-badges">
         {this.renderDueDate()}
         {this.renderTaskProgress()}
+        {this.renderAssignee()}
+        {this.renderTags()}
       </div>
     );
   }

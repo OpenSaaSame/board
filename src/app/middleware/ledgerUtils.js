@@ -3,8 +3,8 @@ import NestedError from "nested-error-stacks";
 import {mapBy} from "../components/utils"
 
 export const appVersions = [
-    "Danban",
-    "Danban.V2"
+    "Danban.V2",
+    "Danban.V3"
 ];
 
 export const rootErr = err => {
@@ -87,14 +87,25 @@ const dataTemplates = [
     ["User", "Profile"],
     ["Rules", "Board"]
 ].concat(
-    ["Data", "CardList", "Card"].map(e => ["Board", e])
+    ["Data", "CardList", "Card", "Comment", "Tag"].map(e => ["Board", e])
 );
 
+const exclusions = {
+    "Danban.V2" : {
+        "Board" : ["Comment", "Tag"]
+    }
+};
+
 const versionedTempates = dataTemplates.flatMap(t => 
-    appVersions.map(v => ({
-        "entityName" : t[1],
-        "moduleName" : `${v}.${t[0]}`
-    })))
+    appVersions.flatMap(v => 
+        exclusions[v] && exclusions[v][t[0]] && exclusions[v][t[0]].includes(t[1])
+        ? []
+        : {
+            "entityName" : t[1],
+            "moduleName" : `${v}.${t[0]}`
+        }
+    ))
+    
 
 export const loadAll = async (ledgerUrl, jwt) => callAndProcessAPI(
         ledgerUrl + "contracts/search",
@@ -149,6 +160,8 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
         const boardsById = mapBy("_id")(contractMap["Board"]["Data"]);
         const listsById = mapBy("_id")(contractMap["Board"]["CardList"]);
         const cardsById = mapBy("_id")(contractMap["Board"]["Card"]);
+        const commentsById = mapBy("_id")(contractMap["Board"]["Comment"]);
+        const tagsById = mapBy("_id")(contractMap["Board"]["Tag"]);
         const users = (contractMap["User"]["Profile"]);
         users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
         const boardUsersById = mapBy("boardId")(contractMap["Rules"]["Board"]);
@@ -157,6 +170,8 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
             boardsById,
             listsById,
             cardsById,
+            commentsById,
+            tagsById,
             users,
             boardUsersById
         }

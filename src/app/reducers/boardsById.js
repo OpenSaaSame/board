@@ -76,6 +76,16 @@ const boardsById = (state = {}, action) => {
         }
       };
     }
+    case "CHANGE_BOARD_ABOUT": {
+      const { boardId, about } = action.payload;
+      return {
+        ...state,
+        [boardId]: {
+          ...state[boardId],
+          about
+        }
+      };
+    }
     case "DELETE_BOARD": {
       const { boardId } = action.payload;
       const { [boardId]: deletedBoard, ...restOfBoards } = state;

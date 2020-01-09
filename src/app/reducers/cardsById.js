@@ -16,6 +16,14 @@ const cardsById = (state = {}, action) => {
       const { color, cardId } = action.payload;
       return { ...state, [cardId]: { ...state[cardId], color } };
     }
+    case "CHANGE_CARD_ASSIGNEE": {
+      const { cardId, assignee } = action.payload;
+      return { ... state, [cardId]: { ... state[cardId], assignee }}
+    }
+    case "REMOVE_CARD_ASSIGNEE": {
+      const { cardId } = action.payload;
+      return { ... state, [cardId]: { ... state[cardId], assignee: undefined }}
+    }
     case "DELETE_CARD": {
       const { cardId } = action.payload;
       const { [cardId]: deletedCard, ...restOfCards } = state;
@@ -30,7 +38,15 @@ const cardsById = (state = {}, action) => {
           (newState, cardId) => ({ ...newState, [cardId]: state[cardId] }),
           {}
         );
-    }    
+    }
+    case "ADD_COMMENT": {
+      const { commentId, cardId } = action.payload;
+      return { ... state, [cardId]: { ... state[cardId], comments: [...state[cardId].comments, commentId] }};
+    }
+    // case "ADD_TAG": {
+    //   const { tagId, cardId } = action.payload;
+    //   return { ...state, [cardId]: { ...state[cardId], tags: [ ...state[cardId].tags, tagId ]}};
+    // }
     case "SUCCEED_READ": {
       return action.payload.cardsById;
     }

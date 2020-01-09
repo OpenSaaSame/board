@@ -91,6 +91,7 @@ const payloadTransform = {
   "DELETE_BOARD": payload => payload,
   "CHANGE_BOARD_TITLE": payload => ({ boardId: payload.boardId, newTitle: payload.boardTitle }),
   "CHANGE_BOARD_COLOR": payload => ({ boardId: payload.boardId, newColor: payload.color }),
+  "CHANGE_BOARD_ABOUT": payload => ({ boardId: payload.boardId, newAbout: payload.about }),
   "ADD_LIST": payload => ({ boardId: payload.boardId, title: payload.listTitle, listId: payload.listId }),
   "DELETE_LIST": payload => ({ boardId: payload.boardId, listId: payload.listId }),
   "MOVE_LIST": payload => ({ boardId: payload.boardId, oldIdx: payload.oldListIndex, newIdx: payload.newListIndex }),
@@ -101,6 +102,12 @@ const payloadTransform = {
   "CHANGE_CARD_TEXT": payload => ({ cardId: payload.cardId, newText: payload.cardText }),
   "CHANGE_CARD_DATE": payload => ({ cardId: payload.cardId, newDate: payload.date }),
   "CHANGE_CARD_COLOR": payload => ({ cardId: payload.cardId, newColor: payload.color }),
+  "CHANGE_CARD_ASSIGNEE": payload => ({ cardId: payload.cardId, assignee: payload.assignee }),
+  "REMOVE_CARD_ASSIGNEE": payload => ({ cardId: payload.cardId }),
+  "ADD_COMMENT": payload => ({ cardId: payload.cardId, commentId: payload.commentId, comment: payload.comment }),
+  "ADD_TAG": payload => ({ boardId: payload.boardId, tagId: payload.tagId, name: payload.name, color: payload.color }),
+  "ASSIGN_TAG": payload => ({ cardId: payload.cardId, tagId: payload.tagId }),
+  "UNASSIGN_TAG": payload => ({ cardId: payload.cardId, tagId: payload.tagId })
 }
 
 const dispatchStates = async (store, pPrivateState, pPublicState) => {
@@ -180,6 +187,8 @@ const persistMiddleware = store => next => action => {
 
       case "CHANGE_BOARD_TITLE":
       case "CHANGE_BOARD_COLOR":
+      case "CHANGE_BOARD_ABOUT":
+      case "ADD_TAG":
       
       case "ADD_LIST":
       case "DELETE_LIST":
@@ -193,6 +202,12 @@ const persistMiddleware = store => next => action => {
       case "CHANGE_CARD_TEXT":
       case "CHANGE_CARD_DATE": 
       case "CHANGE_CARD_COLOR":
+      case "CHANGE_CARD_ASSIGNEE":
+      case "REMOVE_CARD_ASSIGNEE":
+      case "ASSIGN_TAG":
+      case "UNASSIGN_TAG":
+
+      case "ADD_COMMENT":        
         if(!user.needsUpgrade)
           store.dispatch({
             type: "QUEUE_WRITE",
@@ -202,7 +217,7 @@ const persistMiddleware = store => next => action => {
             }
           });
         break;
-
+      
       case "QUEUE_READ":
       case "SUCCEED_READ":
       case "CANCEL_READ":

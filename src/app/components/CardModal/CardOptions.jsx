@@ -4,10 +4,16 @@ import PropTypes from "prop-types";
 import Modal from "react-modal";
 import FaTrash from "react-icons/lib/fa/trash";
 import MdAlarm from "react-icons/lib/md/access-alarm";
+import FaUser from "react-icons/lib/fa/user";
+import FaCommentAlt from "react-icons/lib/fa/comment";
+import FaTags from "react-icons/lib/fa/tag";
 import Calendar from "./Calendar";
 import ClickOutside from "../ClickOutside/ClickOutside";
 import colorIcon from "../../../assets/images/color-icon.png";
 import "./CardOptions.scss";
+import CardUser from "./CardUser";
+import CardComments from "./CardComments";
+import CardTags from "./CardTags";
 
 class CardOptions extends Component {
   static propTypes = {
@@ -23,7 +29,11 @@ class CardOptions extends Component {
 
   constructor() {
     super();
-    this.state = { isCalendarOpen: false };
+    this.state = {
+      isCalendarOpen: false,
+      isCommentsOpen: false,
+      isTagsOpen: false
+    };
   }
 
   deleteCard = () => {
@@ -63,6 +73,14 @@ class CardOptions extends Component {
     this.setState({ isCalendarOpen: !this.state.isCalendarOpen });
   };
 
+  toggleComments = () => {
+    this.setState({ isCommentsOpen: !this.state.isCommentsOpen });
+  }
+
+  toggleTags = () => {
+    this.setState({ isTagsOpen: !this.state.isTagsOpen });
+  }
+
   render() {
     const {
       isCardNearRightBorder,
@@ -72,7 +90,7 @@ class CardOptions extends Component {
       isThinDisplay,
       boundingRect
     } = this.props;
-    const { isCalendarOpen } = this.state;
+    const { isCalendarOpen, isCommentsOpen, isTagsOpen } = this.state;
 
     const calendarStyle = {
       content: {
@@ -83,11 +101,22 @@ class CardOptions extends Component {
 
     const calendarMobileStyle = {
       content: {
-        top: 110,
+        top: 150,
         left: "50%",
         transform: "translateX(-50%)"
       }
     };
+
+    const commentsMobileStyle = {
+      content: {
+        position: "relative",
+        left: 0,
+        top: 0,
+        marginTop: 150,
+        padding: 8
+      }
+    }
+    
     return (
       <div
         className="options-list"
@@ -95,6 +124,48 @@ class CardOptions extends Component {
           alignItems: isCardNearRightBorder ? "flex-end" : "flex-start"
         }}
       >
+        {card.comments !== undefined &&
+          <>
+            <div>
+              <button onClick={this.toggleComments} className="options-list-button">
+                <div className="modal-icon">
+                  <FaCommentAlt />
+                </div>&nbsp;Comments
+              </button>
+            </div>
+            <Modal
+              isOpen={isCommentsOpen}
+              onRequestClose={this.toggleComments}
+              overlayClassName="calendar-underlay"
+              className="calendar-modal"
+              style={isThinDisplay ? commentsMobileStyle : calendarStyle}
+            >
+              <CardComments cardId={card._id} />
+            </Modal>
+            <div>
+              <button onClick={this.toggleTags} className="options-list-button">
+                <div className="modal-icon">
+                  <FaTags />
+                </div>&nbsp;Tags
+              </button>
+            </div>
+            <Modal
+              isOpen={isTagsOpen}
+              onRequestClose={this.toggleTags}
+              overlayClassName="calendar-underlay"
+              className="calendar-modal"
+              style={isThinDisplay ? commentsMobileStyle : calendarStyle}
+            >
+              <CardTags cardId={card._id} />
+            </Modal>
+            <div className="options-list-button">
+              <div className="modal-icon">
+                <FaUser />
+              </div>
+              &nbsp;<CardUser cardId={card._id} assignee={card.assignee} />
+            </div>
+          </>
+        }
         <div>
           <button onClick={this.deleteCard} className="options-list-button">
             <div className="modal-icon">
