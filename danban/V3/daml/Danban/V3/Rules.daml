@@ -79,7 +79,7 @@ template Board
             newSelf <- create this with users = filter (\u -> u._1 /= user) this.users
             exercise newSelf UPDATE_OBS
        
-    choice CHANGE_PERMISSIONS
+    nonconsuming choice CHANGE_PERMISSIONS
       : ContractId Board
       with
         admin : Party
@@ -88,21 +88,33 @@ template Board
       controller [operator, admin]
       do
         checkAccess admin Admin
-        newThis <- case lookup user this.users of
+        needsUpdate <- case lookup user this.users of
           None -> abort (show user <> " is not a user.")
-          Some currentAccess -> do
-            assertMsg
-              (show user <> " is a signed administrator and can not be downgraded.")
-              (user == admin || currentAccess /= SignedAdmin || access == SignedAdmin)
-            return (this with users = map (\(u, r) -> if u == user then (u, access) else (u, r)) users)
-        when 
-          (signatory this /= signatory newThis) 
-          (void
-            (exerciseByKey @Board.Data (operator, boardId) 
-              Board.Data_UpdateAdmins with newAdmins = signatory newThis)
-            )
-
-        create newThis
+          Some currentAccess
+            | currentAccess == access -> return False
+            | currentAccess == SignedAdmin -> do
+              assertMsg
+                (show user <> " is a signed administrator and can not be downgraded.")
+                (user == admin)
+              exerciseByKey @Board.Directory (operator, user) Board.Directory_RemoveBoard with
+                board = boardId
+              return True
+            | otherwise -> do
+              when (access == SignedAdmin) do
+                oBoardDirectory <- lookupByKey @Board.Directory (operator, user)
+                case oBoardDirectory of
+                  None -> void $ create Board.Directory with boards = [boardId]; party = user; ..
+                  Some bd -> void $ exercise bd Board.Directory_AddBoard with board = boardId
+              return True
+        if needsUpdate
+          then do
+            let newThis = this with users = map (\(u, r) -> if u == user then (u, access) else (u, r)) users
+            when (signatory this /= signatory newThis) do
+              void $ exerciseByKey @Board.Data (operator, boardId) Board.Data_UpdateAdmins with 
+                newAdmins = signatory newThis
+            archive self
+            create newThis
+          else return self
         
     -- Admin Board Actions
     nonconsuming choice TOGGLE_PUBLIC

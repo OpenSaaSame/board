@@ -69,6 +69,7 @@ template Data
           newObs : [Party]
         do
           forA lists (\list -> exerciseByKey @CardList (operator, list) List_UpdateObs with newObs)
+          forA tags (\tag -> exerciseByKey @Tag (operator, tag) Tag_UpdateObs with ..)
           create this with obs = newObs
 
     controller admins can
@@ -76,6 +77,7 @@ template Data
         : ()
         do
           forA lists (\list -> exerciseByKey @CardList (operator, list) List_Delete)
+          forA tags (\tag -> exerciseByKey @Tag (operator, tag) Tag_Delete)
           return ()
 
     choice Data_UpdateAdmins
@@ -85,6 +87,7 @@ template Data
       controller admins ++ newAdmins
       do
         forA lists (\list -> exerciseByKey @CardList (operator, list) List_UpdateAdmins with ..)
+        forA tags (\tag -> exerciseByKey @Tag (operator, tag) Tag_UpdateAdmins with ..)
         create this with admins = newAdmins
 
 template CardList 
@@ -193,6 +196,7 @@ template Comment
     author : Party
   where
     signatory operator, admins
+    observer obs
 
     key (operator, _id) : (Party, Text)
     maintainer key._1
@@ -233,6 +237,7 @@ template Tag
     color : Text
   where
     signatory operator, admins
+    observer obs
 
     key (operator, _id) : (Party, Text)
     maintainer key._1

@@ -80,7 +80,7 @@ export const getOrCreateUserProfile = async (ledgerUrl, version, user, profile) 
 const latest = appVersions[appVersions.length - 1];
 
 const appTemplate = version => ({
-    "moduleName": version ,
+    "moduleName": version == "Danban.V2" ? "Danban.V2_1" : version, // Hack for the V2 bugfix
     "entityName": "Admin"
 });
 

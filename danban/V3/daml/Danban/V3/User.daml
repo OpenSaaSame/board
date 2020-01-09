@@ -40,7 +40,7 @@ template Profile
     observer obs
 
     key (operator, party) : (Party, Party)
-    maintainer key._1, key._2
+    maintainer key._1
 
     controller operator can
       Profile_UpdateObs
