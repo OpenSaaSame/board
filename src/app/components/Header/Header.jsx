@@ -15,8 +15,8 @@ class Header extends Component {
     return (
       <header>
         <Link to="/" className="header-title">
-          <img src={openworkLogo} alt="Openwork logo" />
-          &nbsp;Openwork
+          <img src={openworkLogo} alt="OpenWork logo" />
+          &nbsp;<b>Open</b>Work
         </Link>
         <div className="header-right-side">
           {user ? (

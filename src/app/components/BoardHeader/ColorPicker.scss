@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .color-picker-wrapper {
   position: relative;
@@ -66,6 +66,18 @@
     background: $pink;
     &:focus {
       background: $dark-pink;
+    }
+  }
+  &.light-green {
+    background: $light-green;
+    &:focus {
+      background: $dark-light-green;
+    }
+  }
+  &.light-blue {
+    background: $light-blue;
+    &:focus {
+      background: $dark-light-blue;
     }
   }
 }

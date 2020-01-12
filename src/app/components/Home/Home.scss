@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 $board-width: 260px;
 $board-height: 140px;
 $board-margin: 5px;
@@ -82,6 +82,12 @@ $add-board-focus-bg: #ccc;
   }
   &.pink {
     background: $pink;
+  }
+  &.light-blue {
+    background: $light-blue;
+  }
+  &.light-green {
+    background: $light-green;
   }
 }
 

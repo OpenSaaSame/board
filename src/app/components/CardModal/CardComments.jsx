@@ -83,7 +83,7 @@ class CardComments extends Component {
                 </div>
               </div>
     });
-    
+
     return (
       <div className="card-container">
         <form onSubmit={this.handleSubmit} className="card-form">
@@ -92,6 +92,7 @@ class CardComments extends Component {
             onChange={this.handleChange}
             onKeyDown={this.handleKeyDown}
             minRows={3}
+            placeholder="Comment..."
           />
           <input type="submit" value="Save" />
         </form>

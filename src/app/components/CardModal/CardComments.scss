@@ -4,39 +4,52 @@
   border-radius: 3px;
   width: 256px;
 
-  textarea {
-    display: block;
-    width: 98%;
+  form {
+    display: flex;
+    flex-flow: row wrap;
   }
 
-  input[type=submit] {
-      display: flex;
-      align-items: center;
-      height: 34px;
-      margin: 8px 3px 8px 3px;
-      border: 0;
-      border-radius: 3px;
-      color: black;
-      background: #ccc;
-      font-size: inherit;
-    
+  textarea {
+    display: block;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    flex: 1 1 100%;
+    padding: 5px;
+    width: auto;
+    font-family: 'Roboto Mono', monospace;
+    color: black;
+    font-size: 14px;
+  }
+
+  input[type='submit'] {
+    display: flex;
+    align-items: center;
+    height: 34px;
+    margin: 8px 3px 8px 3px;
+    border: 0;
+    border-radius: 3px;
+    color: black;
+    background: #ccc;
+    font-size: inherit;
+    flex: 0 0 auto;
+    margin-left: 0;
+
     &:hover,
     &:focus {
       background: #ddd;
-    }    
+    }
   }
-  
+
   .card-comments {
     font-size: 90%;
   }
-  
+
   .card-comment {
     padding-bottom: 1em;
     border-top: 1px solid #eee;
   }
-  
+
   .card-comment-metadata {
     font-size: 80%;
     color: #666;
-  }  
+  }
 }

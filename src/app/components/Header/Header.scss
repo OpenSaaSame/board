@@ -3,7 +3,27 @@
 // Header position has to fixed as the user scrolls to the right. Because of a limitation in react-beautiful-dnd library
 // the drag-drop context can only have one scroll container so the entire board has to be scrolled. Therefore,
 // header has to be part of the page that is being scrolled and as a workaround we use position:fixed.
+
+@font-face {
+  font-family: 'PxGrotesk';
+  src: url('./fonts/Px-Grotesk-Regular.eot');
+  src: url('./fonts/Px-Grotesk-Regular.eot') format('embedded-opentype'),
+    url('./fonts/Px-Grotesk-Regular.woff') format('woff'), url('./fonts/Px-Grotesk-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'PxGrotesk';
+  src: url('./fonts/Px-Grotesk-Bold.eot');
+  src: url('./fonts/Px-Grotesk-Bold.eot') format('embedded-opentype'),
+    url('./fonts/Px-Grotesk-Bold.woff') format('woff'), url('./fonts/Px-Grotesk-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
 header {
+  font-family: 'PxGrotesk';
+  font-weight: normal;
   position: fixed;
   display: flex;
   justify-content: space-between;
@@ -36,8 +56,11 @@ header {
   align-items: center;
   color: white;
   font-size: 22px;
-  font-weight: 700;
   text-decoration: none;
+
+  b {
+    font-weight: 700;
+  }
 }
 
 .header-title img {
