@@ -11,9 +11,7 @@ const BoardHeader = (props) => (
     <BoardTitle />
     <div className="board-header-right">
       { props.hasAdmin &&  <SharingModal /> }
-      { props.hasAdmin &&  <div className="vertical-line" /> }
       <ColorPicker />
-      <div className="vertical-line" />
       <BoardAbout hasAdmin={props.hasAdmin} />
       <BoardDeleter />
     </div>

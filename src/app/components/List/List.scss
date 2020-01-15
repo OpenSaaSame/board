@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .list-wrapper {
   display: inline-flex;
@@ -22,9 +22,44 @@
   transition: box-shadow 0.15s, background 0.3s;
 }
 
-.blue .list {
-  background: $transparent-blue;
+.board-title-text,
+.access-modal,
+.color-picker,
+.board-about,
+.signout-link,
+.board-header-right-text,
+.board-header-right {
+  font-family: 'PxGrotesk';
+  color: #63686b !important;
+  svg {
+    fill: #63686b;
+  }
 }
+.list-title-button {
+  color: #63686b !important;
+}
+.delete-list-button {
+  svg {
+    fill: #63686b;
+  }
+}
+
+.blue {
+  .list {
+    background: $transparent-blue;
+  }
+}
+.light-blue {
+  .list {
+    background: #daecf7;
+  }
+}
+.light-green {
+  .list {
+    background: #e0e3ef;
+  }
+}
+
 .green .list {
   background: $transparent-green;
 }

@@ -88,6 +88,8 @@ class Card extends Component {
     const { card, index, listId, isDraggingOver, assignee, tags } = this.props;
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
+    console.log(tags);
+    console.log(card);
     return (
       <>
         <Draggable draggableId={card._id} index={index}>
@@ -114,11 +116,12 @@ class Card extends Component {
                 }}
                 style={{
                   ...provided.draggableProps.style,
-                  background: card.color
                 }}
               >
                 <div
-                  className="card-title-html"
+                  className={classnames('card-title-html', `color-${card.color ? card.color.replace(/#/ig, '') : ''}`, {
+                    'with-border': !!card.color
+                  })}
                   dangerouslySetInnerHTML={{
                     __html: formatMarkdown(card.text)
                   }}

@@ -180,7 +180,7 @@ class Board extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const { board } = ownProps;
-  const boardUsersKnown = !(typeof state.boardUsersById[board._id] == 'undefined');
+  const boardUsersKnown = !(typeof state.boardUsersById[board._id] === 'undefined');
   const boardUser = boardUsersKnown && state.boardUsersById[board._id].users.filter(user => user._1 == state.user.party);
   const hasAdmin = boardUsersKnown && boardUser.length > 0 && ["Admin", "SignedAdmin"].includes(boardUser[0]._2);
   const hasWrite = boardUsersKnown && boardUser.length > 0 && ["Write", "Admin", "SignedAdmin"].includes(boardUser[0]._2);

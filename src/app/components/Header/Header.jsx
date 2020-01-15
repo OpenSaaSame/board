@@ -2,21 +2,21 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import FaUserSecret from "react-icons/lib/fa/user-secret";
 import FaSignOut from "react-icons/lib/fa/sign-out";
 import FaSignIn from "react-icons/lib/fa/sign-in";
+import BoardHeader from "../BoardHeader/BoardHeader";
 import openworkLogo from "../../../assets/images/openwork.png";
 import "./Header.scss";
 
 class Header extends Component {
   static propTypes = { user: PropTypes.object, dispatch: PropTypes.func.isRequired };
   render = () => {
-    const { user } = this.props;
+    const { user, hasAdmin } = this.props;
     return (
       <header>
         <Link to="/" className="header-title">
           <img src={openworkLogo} alt="OpenWork logo" />
-          &nbsp;<b>Open</b>Work
+          &nbsp;<b>Open</b>Work <span>board</span>
         </Link>
         <div className="header-right-side">
           {user ? (
@@ -27,16 +27,21 @@ class Header extends Component {
               title={user.displayName}
             />
           ) : (
-            <FaUserSecret className="guest-icon" />
+            <div />
           )}
+
+          {/* {user && (
+            <BoardHeader hasAdmin={hasAdmin} />
+          )} */}
+
           {user ? (
-            <a className="signout-link" href="/auth/signout">
-              <FaSignOut className="signout-icon" />
+            <a className="signout-link" href="/auth/signout" >
+              <FaSignOut className="signout-icon" fill="#63686b" />
               &nbsp;Sign out
             </a>
           ) : (
-            <a className="signout-link" href="/auth/google">
-              <FaSignIn className="signout-icon" />
+            <a className="signout-link" href="/auth/google" >
+              <FaSignIn className="signout-icon" fill="#63686b" />
               &nbsp;Sign in
             </a>
           )}
