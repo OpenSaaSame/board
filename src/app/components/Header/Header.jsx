@@ -4,14 +4,13 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import FaSignOut from "react-icons/lib/fa/sign-out";
 import FaSignIn from "react-icons/lib/fa/sign-in";
-import BoardHeader from "../BoardHeader/BoardHeader";
 import openworkLogo from "../../../assets/images/openwork.png";
 import "./Header.scss";
 
 class Header extends Component {
   static propTypes = { user: PropTypes.object, dispatch: PropTypes.func.isRequired };
   render = () => {
-    const { user, hasAdmin } = this.props;
+    const { user } = this.props;
     return (
       <header>
         <Link to="/" className="header-title">
@@ -29,10 +28,6 @@ class Header extends Component {
           ) : (
             <div />
           )}
-
-          {/* {user && (
-            <BoardHeader hasAdmin={hasAdmin} />
-          )} */}
 
           {user ? (
             <a className="signout-link" href="/auth/signout" >

@@ -88,8 +88,6 @@ class Card extends Component {
     const { card, index, listId, isDraggingOver, assignee, tags } = this.props;
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
-    console.log(tags);
-    console.log(card);
     return (
       <>
         <Draggable draggableId={card._id} index={index}>
