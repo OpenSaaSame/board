@@ -152,6 +152,9 @@ template UpgradeInvite
   where
     signatory operator
 
+    key (operator, party) : (Party, Party)
+    maintainer key._1
+
     controller party can
       Accept_Upgrade
         : ()
