@@ -72,6 +72,13 @@ upgradeByKey k = do
   bcid <- create @b b
   return (bcid, b)
 
+upgradeIfKey : forall a b k . (Template b, TemplateKey a k, Upgradable a b) => k -> Update (Optional (ContractId b, b))
+upgradeIfKey k = do
+  oCid <- lookupByKey @a k
+  case oCid of
+    Some cid -> Some <$> upgradeByKey @a k
+    None -> return None
+
 updateMap : (Map.MapKey k) => k -> (v -> v) -> Map.Map k v -> Map.Map k v
 updateMap k fn m = case Map.lookup k m of
   None -> m
@@ -98,18 +105,6 @@ template UpgradeInitiator
           forA_ users (\party -> do
             exerciseByKey @RoleV2.User (operator, party) Archive
             create UpgradeInvite with ..
-            (_, bd) <- fetchByKey @BoardV2.Directory (operator, party)
-            forA_ bd.boards (\boardId -> do
-              oCid <- lookupByKey @BoardUpgrader (operator, boardId)
-              case oCid of
-                Some _ -> return ()
-                None -> do
-                  (_, board) <- fetchByKey @RulesV2.Board (operator, boardId)
-                  void $ create BoardUpgrader with
-                    requiredSigs = signatory board
-                    sigs = [operator]
-                    ..
-              )
             )
 
           exercise newAdminCid DanbanV3.UnpauseApp
@@ -157,11 +152,27 @@ template UpgradeInvite
   where
     signatory operator
 
+    key (operator, party) : (Party, Party)
+    maintainer key._1
+
     controller party can
       Accept_Upgrade
         : ()
         do
           upgradeProfile operator party
           create RoleV3.User with ..
-          (_, bd) <- upgradeByKey @BoardV2.Directory @BoardV3.Directory (operator, party)
-          forA_ bd.boards (\boardId -> exerciseByKey @BoardUpgrader (operator, boardId) Sign with ..)
+          o <- upgradeIfKey @BoardV2.Directory @BoardV3.Directory (operator, party)
+          case o of
+            Some (_, bd) ->  forA_ bd.boards (\boardId -> do
+              oCid <- lookupByKey @BoardUpgrader (operator, boardId)
+              cid <- case oCid of
+                Some cid -> return cid
+                None -> do
+                  (_, board) <- fetchByKey @RulesV2.Board (operator, boardId)
+                  create BoardUpgrader with
+                    requiredSigs = List.dedupSort $ signatory board
+                    sigs = [operator]
+                    ..
+              void $ exercise cid Sign with ..
+              )
+            None -> return ()
