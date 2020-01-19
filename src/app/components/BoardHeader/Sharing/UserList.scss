@@ -1,40 +1,44 @@
-@import "../../../variables.scss";
+@import '../../../variables.scss';
 
 .user-list {
-    color: black;
+  color: black;
 }
 
-.user-list-autocomplete{
-    width:100%;
-    padding: 5px;
-    input {
-        width: calc(100% - 6px);
-        padding: 6px 0;
-    }
-    
-    .item {
-        padding: 2px 4px;
-        cursor: default;
-        border-radius: 11px;
+.user-list-autocomplete {
+  width: 100%;
+  padding: 5px;
+  color: $grey;
+  input {
+    width: calc(100% - 24px);
+    padding: 6px;
+    color: $grey;
+  }
 
-        .user-thumbnail{
-            vertical-align: middle;
-            height: 22px;
-            border-radius: 11px;
-          }
+  .item {
+    padding: 2px 4px;
+    cursor: default;
+    border-radius: 11px;
 
-        .user-name{
-            display: inline-block;
-            vertical-align: middle;
-            text-overflow: ellipsis;
-            padding:5px;
-            max-width: 200px;
-            overflow: hidden;
-        }
+    .user-thumbnail {
+      vertical-align: middle;
+      height: 22px;
+      border-radius: 11px;
     }
+
+    .user-name {
+      display: inline-block;
+      vertical-align: middle;
+      text-overflow: ellipsis;
+      padding: 5px;
+      max-width: 200px;
+      overflow: hidden;
+      color: $grey;
+      font-size: 11px;
+    }
+  }
 }
 
 .user-list-users {
-    margin-top: 5px;
-    margin-bottom: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }

@@ -36,8 +36,15 @@
   background: $transparent-white;
 }
 
-@media (max-width: 700px) {
-  .board-header-right-text {
+@media (max-width: 1024px) {
+  .board-header-right {
+    top: auto;
+    right: auto;
+  }
+  .board-about-wrapper {
+    display: none;
+  }
+  .board-deleter-wrapper {
     display: none;
   }
   .vertical-line {

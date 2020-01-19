@@ -97,16 +97,15 @@ class CardTags extends Component {
     const { tags } = this.props;
     const { newTagName, newTagColor } = this.state;
 
-    const tagList = tags.map(tag => <div>
-                <button
-                  className="tag-button"
-                  key={tag._id}
-                  style={{backgroundColor: `#${  tag.color}`}}
-                  onClick={event => this.handleSelect(event, tag)}
-                >
-                  {tag.name}
-                </button>
-              </div>);
+    const tagList = tags.map(tag => <div key={tag._id}>
+      <button
+        className="tag-button"
+        style={{ backgroundColor: `#${tag.color}` }}
+        onClick={event => this.handleSelect(event, tag)}
+      >
+        {tag.name}
+      </button>
+    </div>);
 
     return (
       <div className="card-container tag-container">

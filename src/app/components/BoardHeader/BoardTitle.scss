@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .board-title-button {
   display: flex;
@@ -9,6 +9,7 @@
   background: transparent;
   transition: background 0.1s;
   cursor: pointer;
+  font-family: 'Roboto Mono', monospace;
 }
 
 .board-title-button:hover,
@@ -24,6 +25,8 @@
   text-overflow: ellipsis;
   overflow-wrap: break-word;
   white-space: nowrap;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .board-title-input {
