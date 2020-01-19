@@ -3,8 +3,8 @@ $board-width: 260px;
 $board-height: 140px;
 $board-margin: 5px;
 $main-margin: 40px;
-$add-board-bg: #c0f2e7;
-$add-board-focus-bg: #c0f2e7;
+$add-board-bg: #a7e4d5;
+$add-board-focus-bg: #a7e4d5;
 
 @mixin board-button {
   box-sizing: border-box;
@@ -72,25 +72,7 @@ $add-board-focus-bg: #c0f2e7;
   color: white;
   overflow-wrap: break-word;
   text-decoration: none;
-
-  &.green {
-    background: $green;
-  }
-  &.blue {
-    background: $blue;
-  }
-  &.red {
-    background: $red;
-  }
-  &.pink {
-    background: $pink;
-  }
-  &.light-blue {
-    background: $light-blue;
-  }
-  &.light-green {
-    background: $light-green;
-  }
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .board-link-title {
@@ -117,13 +99,13 @@ $add-board-focus-bg: #c0f2e7;
   @include board-button;
   margin-bottom: 20px;
   border: 0;
-  background: $add-board-bg;
+  background: rgba(255, 255, 255, 0.3);
   color: $grey;
 }
 
 .add-board-button:hover,
 .add-board-button:focus {
-  background: $add-board-focus-bg;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .board-adder {

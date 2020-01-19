@@ -52,7 +52,9 @@ const renderPage = (req, res) => {
         <link rel="icon" type="image/png" href="/static/favicons/favicon.png"" />
         <meta name="msapplication-TileColor" content="#FFFFFF" />
         <meta name="msapplication-TileImage" content="/static/favicons/favicon.png" />
-        <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet" />
+
 
         <style>${css}</style>
         ${renderToString(headTags)}

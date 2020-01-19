@@ -24,8 +24,9 @@
 }
 
 .card-title-html {
-  padding: 6px 8px;
+  padding: 6px 15px;
   position: relative;
+  color: $grey;
   &.color-fa4 {
     &::after {
       background: #fa4;
@@ -55,8 +56,8 @@
     &::after {
       content: '';
       position: absolute;
-      top: 20px;
-      bottom: 18px;
+      top: 12px;
+      bottom: 7px;
       width: 4px;
       left: 5px;
       border-radius: 4px;
@@ -70,8 +71,8 @@
   h5,
   h6 {
     font-weight: 400;
-    padding: 8px;
-    margin: 8px 0;
+    margin: 6px 0;
+    font-size: 18px;
   }
 
   img {
@@ -84,6 +85,10 @@
     padding: 8px;
   }
 
+  ul {
+    margin: 0;
+    padding: 0 20px;
+  }
   a {
     text-decoration: none;
   }

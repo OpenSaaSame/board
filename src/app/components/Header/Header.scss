@@ -4,25 +4,9 @@
 // the drag-drop context can only have one scroll container so the entire board has to be scrolled. Therefore,
 // header has to be part of the page that is being scrolled and as a workaround we use position:fixed.
 
-@font-face {
-  font-family: 'PxGrotesk';
-  src: url('./fonts/Px-Grotesk-Regular.eot');
-  src: url('./fonts/Px-Grotesk-Regular.eot') format('embedded-opentype'),
-    url('./fonts/Px-Grotesk-Regular.woff') format('woff'), url('./fonts/Px-Grotesk-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'PxGrotesk';
-  src: url('./fonts/Px-Grotesk-Bold.eot');
-  src: url('./fonts/Px-Grotesk-Bold.eot') format('embedded-opentype'),
-    url('./fonts/Px-Grotesk-Bold.woff') format('woff'), url('./fonts/Px-Grotesk-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-}
-
 header {
-  font-family: 'PxGrotesk';
+  font-family: 'Lato', sans-serif;
+
   font-weight: normal;
   position: fixed;
   display: flex;
@@ -33,7 +17,7 @@ header {
   width: 100%;
   height: 80px;
   padding: 5px;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.3);
   z-index: 1;
   transition: background 0.3s;
 }
