@@ -25,7 +25,7 @@ class ColorPicker extends Component {
 
   render() {
     const { boardColor } = this.props;
-    const colors = ["blue", "light-blue", "light-green"];
+    const colors = ["blue", "light-blue", "light-green", "red"];
     return (
       <Wrapper
         className="color-picker-wrapper"
