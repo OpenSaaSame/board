@@ -22,11 +22,6 @@
   top: -70px;
   right: 158px;
   z-index: 991;
-
-  svg,
-  img {
-    display: none;
-  }
 }
 
 .vertical-line {
@@ -41,10 +36,7 @@
     top: auto;
     right: auto;
   }
-  .board-about-wrapper {
-    display: none;
-  }
-  .board-deleter-wrapper {
+  .board-header-right-text {
     display: none;
   }
   .vertical-line {
