@@ -19,9 +19,15 @@ export const processResponse = async response => {
             const body = await response.text();
             throw new Error(`Bad response from ledger: ${response.status} ${response.statusText} ${body}`);
         }
-        const json = await response.json();
-        return json["result"];
+        try{
+            const json = await response.json();
+            return json["result"];
+        } catch (err) {
+            console.log(err);
+            throw new Error(`Non-JSON response from ledger: ${response.status} ${response.statusText} ${err}`);
+        }
     } catch (err) {
+        console.log(response);
         throw new NestedError("Error processing response", err);
     }
 }

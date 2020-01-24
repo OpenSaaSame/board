@@ -33,11 +33,18 @@ const dabl = () => {
             );
             if(response.status === 302) {
                 let raw = response.headers.raw();
-                let redirectURL = url.parse(raw["location"][0], true);
-                if(redirectURL.query["access_token"] === undefined) 
-                    throw new Error("No access_token in response " + raw["location"]);
                 refreshCookie = raw['set-cookie'][0];
-                return redirectURL.query["access_token"];
+                const response2 = await fetch(raw["location"][0], {"redirect": 'manual'});
+                if(response2.status === 302) {
+                    let raw2 = response2.headers.raw();
+                    let redirectURL = url.parse(raw2["location"][0], true);
+                    if(redirectURL.query["access_token"] === undefined) 
+                        throw new Error("No access_token in response " + raw["location"]);
+                    return redirectURL.query["access_token"];
+                }
+                else {
+                    throw new Error("Second redirect expected!");
+                }
             }
             else {
                 throw new Error("Redirect expected!");
@@ -50,12 +57,12 @@ const dabl = () => {
     const getSiteJWT = async () => {
         if(process.env.SITE_JWT) return Promise.resolve(process.env.SITE_JWT);
 
-        // Get a new site JWT every 12 hours
+        // Get a new site JWT every 10 minutes
         let need_new_site_jwt
             = jwts["site"] == undefined
             || jwts["site"].token == undefined
             || jwts["site"].time == undefined
-            || Date.now() > jwts["site"].time + 1000 * 60 * 60 * 12;
+            || Date.now() > jwts["site"].time + 1000 * 60 * 10;
 
         if(need_new_site_jwt) {
             console.log("Refreshing site JWT");
@@ -83,9 +90,48 @@ const dabl = () => {
         );
     }
 
-    const getTokenInner = async party => {
+    const getUserGrantInner = async party => {
         try {
             const jwt = await getSiteJWT();
+            const response = await fetchFromAPI(
+                "api/ledger",
+                `admin/user_grants`,
+                jwt,
+                "POST"
+            );
+            const json = await response.json();
+            return json["access_token"];
+        } catch(err) {
+                throw new NestedError("Error user grant: ", err);
+        }
+    }
+
+    const getUserGrant = async () => {
+        // Get a new user grant every 10 minutes
+        let need_new_user_grant
+            = jwts["user_grant"] == undefined
+            || jwts["user_grant"].token == undefined
+            || jwts["user_grant"].time == undefined
+            || Date.now() > jwts["user_grant"].time + 1000 * 60 * 10;
+
+        if(need_new_user_grant) {
+            jwts["user_grant"] = {
+                "token": getUserGrantInner(),
+                "time": Date.now()
+            };
+            
+        } 
+        try{
+            return await jwts["user_grant"].token;
+        } catch (err) {
+            delete jwts["user_grant"];
+            throw new NestedError("Error getting user_grant JWT: ", err);
+        }
+    };
+
+    const getTokenInner = async party => {
+        try {
+            const jwt = await getUserGrant();
             const response = await fetchFromAPI(
                 "api/ledger",
                 `party/${party}/token`,
@@ -128,7 +174,7 @@ const dabl = () => {
     const createUser = async user => {
         try {
             console.log("Creating user");
-            const jwt = await getSiteJWT();
+            const jwt = await getUserGrant();
             const response = await fetchFromAPI(
                     "api/ledger",
                     "parties",
