@@ -1,10 +1,10 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 $board-width: 260px;
 $board-height: 140px;
 $board-margin: 5px;
 $main-margin: 40px;
-$add-board-bg: #ddd;
-$add-board-focus-bg: #ccc;
+$add-board-bg: #a7e4d5;
+$add-board-focus-bg: #a7e4d5;
 
 @mixin board-button {
   box-sizing: border-box;
@@ -24,7 +24,7 @@ $add-board-focus-bg: #ccc;
   justify-content: center;
   height: 100%;
   width: 100%;
-  background: #eee;
+  background: #a7e4d5;
   overflow: auto;
 }
 
@@ -33,6 +33,7 @@ $add-board-focus-bg: #ccc;
   flex-direction: column;
   width: 4 * $board-width + 8 * $board-margin;
   margin: $main-margin;
+  margin-top: 100px;
 }
 
 @media (max-width: 4 * $board-width + 8 * $board-margin + 2 * $main-margin) {
@@ -56,6 +57,11 @@ $add-board-focus-bg: #ccc;
 .main-content h1 {
   margin: 20px 5px;
   font-size: 22px;
+  color: $grey;
+
+  @media (max-width: 1024px) {
+    margin-top: 63px;
+  }
 }
 
 .boards {
@@ -70,39 +76,12 @@ $add-board-focus-bg: #ccc;
   color: white;
   overflow-wrap: break-word;
   text-decoration: none;
-
-  &.green {
-    background: $green;
-  }
-  &.blue {
-    background: $blue;
-  }
-  &.red {
-    background: $red;
-  }
-  &.pink {
-    background: $pink;
-  }
-}
-
-.board-link:hover,
-.board-link:focus {
-  &.green {
-    background: $dark-green;
-  }
-  &.blue {
-    background: $dark-blue;
-  }
-  &.pink {
-    background: $dark-pink;
-  }
-  &.red {
-    background: $dark-red;
-  }
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .board-link-title {
   padding-bottom: 5px;
+  color: $grey;
 }
 
 .mini-board {
@@ -124,13 +103,13 @@ $add-board-focus-bg: #ccc;
   @include board-button;
   margin-bottom: 20px;
   border: 0;
-  background: $add-board-bg;
-  color: #444;
+  background: rgba(255, 255, 255, 0.3);
+  color: $grey;
 }
 
 .add-board-button:hover,
 .add-board-button:focus {
-  background: $add-board-focus-bg;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .board-adder {

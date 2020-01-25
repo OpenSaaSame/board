@@ -114,11 +114,12 @@ class Card extends Component {
                 }}
                 style={{
                   ...provided.draggableProps.style,
-                  background: card.color
                 }}
               >
                 <div
-                  className="card-title-html"
+                  className={classnames('card-title-html', `color-${card.color ? card.color.replace(/#/ig, '') : ''}`, {
+                    'with-border': !!card.color
+                  })}
                   dangerouslySetInnerHTML={{
                     __html: formatMarkdown(card.text)
                   }}

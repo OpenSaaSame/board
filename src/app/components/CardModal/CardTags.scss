@@ -4,10 +4,22 @@
 
     .form-row {
       margin-bottom: 10px;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+      flex: 0 0 100%;
     }
 
-    input[type=text] {
-      float: right;
+    label {
+      flex: 0 1 auto;
+      height: 25px;
+      line-height: 23px;
+    }
+
+    input[type='text'] {
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      flex: 0 0 auto;
+      padding: 5px;
     }
   }
 }

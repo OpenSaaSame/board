@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .board-about-wrapper {
   position: relative;
@@ -33,6 +33,11 @@
   color: black;
   background: rgba(255, 255, 255, 0.9);
 }
+@media (max-width: 1024px) {
+  .board-about-menu {
+    width: 60vw;
+  }
+}
 
 textarea {
   display: block;
@@ -40,19 +45,19 @@ textarea {
   margin-top: 10px;
 }
 
-input[type=submit] {
-    display: flex;
-    align-items: center;
-    height: 34px;
-    margin: 8px 3px 8px 3px;
-    border: 0;
-    border-radius: 3px;
-    color: black;
-    background: #ccc;
-    font-size: inherit;
-  
+input[type='submit'] {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  margin: 8px 3px 8px 3px;
+  border: 0;
+  border-radius: 3px;
+  color: black;
+  background: #ccc;
+  font-size: inherit;
+
   &:hover,
   &:focus {
     background: #ddd;
-  }    
+  }
 }

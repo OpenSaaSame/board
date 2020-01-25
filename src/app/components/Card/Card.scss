@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .card-title {
   position: relative;
@@ -7,7 +7,6 @@
   border-radius: 3px;
   color: $black-text;
   background: $white;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
   font-size: 16px;
   overflow-wrap: break-word;
   transition: box-shadow 0.15s;
@@ -25,7 +24,45 @@
 }
 
 .card-title-html {
-  padding: 6px 8px;
+  padding: 6px 15px;
+  position: relative;
+  color: $grey;
+  &.color-fa4 {
+    &::after {
+      background: #fa4;
+    }
+  }
+  &.color-6f6 {
+    &::after {
+      background: #6f6;
+    }
+  }
+  &.color-ff6 {
+    &::after {
+      background: #ff6;
+    }
+  }
+  &.color-f66 {
+    &::after {
+      background: #f66;
+    }
+  }
+  &.color-6df {
+    &::after {
+      background: #6df;
+    }
+  }
+  &.with-border {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      bottom: 7px;
+      width: 4px;
+      left: 5px;
+      border-radius: 4px;
+    }
+  }
 
   h1,
   h2,
@@ -34,8 +71,23 @@
   h5,
   h6 {
     font-weight: 400;
-    padding: 8px;
-    margin: 8px 0;
+    margin: 6px 0;
+    font-size: 18px;
+    padding-left: 0;
+  }
+
+  h2 {
+    font-size: 17px;
+  }
+  h3 {
+    font-size: 16px;
+  }
+  h4 {
+    font-size: 15px;
+  }
+  h5,
+  h6 {
+    font-size: 14px;
   }
 
   img {
@@ -47,7 +99,11 @@
     margin: 4px 0;
     padding: 8px;
   }
-  
+
+  ul {
+    margin: 0;
+    padding: 0 20px;
+  }
   a {
     text-decoration: none;
   }
@@ -61,5 +117,4 @@
     padding: 4px 2px;
     background: rgba(100, 100, 100, 0.08);
   }
-
 }

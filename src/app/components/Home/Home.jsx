@@ -26,7 +26,7 @@ class Home extends Component {
     const { boards, listsById, history } = this.props;
     return (
       <>
-        <Title>Home | Danban</Title>
+        <Title>Home | OpenWork</Title>
         <Header />
         <div className="home">
           <div className="main-content">

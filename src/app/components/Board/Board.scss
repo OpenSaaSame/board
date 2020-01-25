@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .board {
   display: inline-flex;
@@ -27,12 +27,19 @@
 .pink .board-underlay {
   background: $pink;
 }
+.light-blue .board-underlay {
+  background: $light-blue;
+}
+
+.light-green .board-underlay {
+  background: $light-green;
+}
 
 .lists-wrapper {
   display: inline-flex;
   box-sizing: border-box;
   height: 100%;
-  padding: 85px 5px 8px 5px;
+  padding: 145px 5px 8px 5px;
 }
 
 .lists {

@@ -1,4 +1,4 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 
 .list-wrapper {
   display: inline-flex;
@@ -20,19 +20,29 @@
   border-radius: $list-radius;
   font-size: 14px;
   transition: box-shadow 0.15s, background 0.3s;
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.blue .list {
-  background: $transparent-blue;
+.board-title-text,
+.access-modal,
+.color-picker,
+.board-about,
+.signout-link,
+.board-header-right-text,
+.board-header-right {
+  font-family: 'Lato', sans-serif;
+  color: #63686b !important;
+  svg {
+    fill: #63686b;
+  }
 }
-.green .list {
-  background: $transparent-green;
+.list-title-button {
+  color: #63686b !important;
 }
-.red .list {
-  background: $transparent-red;
-}
-.pink .list {
-  background: $transparent-pink;
+.delete-list-button {
+  svg {
+    fill: #63686b;
+  }
 }
 
 .list--drag {
