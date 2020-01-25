@@ -138,7 +138,7 @@ class Board extends Component {
     return (
       <>
         <div className={classnames("board", boardColor)}>
-          <Title>{boardTitle} | Danban</Title>
+          <Title>{boardTitle} | OpenWork</Title>
           <Header />
           <BoardHeader hasAdmin={this.props.hasAdmin} />
           {/* eslint-disable jsx-a11y/no-static-element-interactions */}
