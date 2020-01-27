@@ -126,7 +126,7 @@ export const getOrCreateApp = async (ledgerUrl, admin, jwt) => {
                 appTemplate(latest),
                 { "operator": admin }
               );
-            const appCid = process.env.USE_SANDBOX ? response.contractId : response[0].created.contractId;
+            const appCid = process.env.USE_SANDBOX ? response.contractId : response.created.contractId;
             await exercise(
                 ledgerUrl,
                 jwt,
