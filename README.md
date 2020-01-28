@@ -1,21 +1,20 @@
-<!-- Description: A Trello-like application built with React and Redux. Take a look at the live website:  -->
+# OpenWork board
 
-# Danban
-
-A Kanban board backed by a DAML Ledger, inspired by [Trello](https://trello.com/home) and based on
+A Kanban board backed by a DAML ledger, inspired by
+[Trello](https://trello.com/home) and based on
 [react-kanban](https://github.com/markusenglund/react-kanban).
 
-![react kanban example](https://github.com/digital-asset/danban/blob/master/example.gif?raw=true)
-
-[Check out the live website](https://danban.daml.com)
+[Check out the live website](https://board.opensaasame.org)
 
 ### Features
 
-- It has most of the features available on Trello, like creating and editing new cards, dragging around cards and so on.
-- Supports GitHub flavored markdown, which enables stuff like headings and checklists on the cards.
+- It has most of the features available on Trello, like creating and editing new
+  cards, dragging around cards and so on.
+- Supports GitHub flavored markdown, which enables stuff like headings and
+  checklists on the cards.
 - Works great on touch devices.
 - Public and private boards, with sharing functionality
-- Fully backed by a DAML Ledger
+- Fully backed by a DAML ledger
 
 ### Tech stack
 
@@ -40,36 +39,37 @@ You need
 
 #### Clone & Install Dependencies
 
-````shell
+```shell
 git clone https://github.com/digital-asset/danban.git
-
 cd danban
-
 npm install
-``__
+```
+
 #### Start DAML Sandbox
 
 ```shell
-cd danban/v3
+daml build --project-root danban/V2
+daml build --project-root danban/V2Bugfix
+daml build --project-root danban/V3
+
+cd danban/Upgrade/V3
 
 daml start --sandbox-option="--ledgerid=danban" --sandbox-option="-w"
-````
-
-**you will need Java installed on your computer**
+```
 
 #### Set up Environment
 
-You need auth credentials for the Google sign in. You need to create a file with the name `.env` in the root directory
-with the following variables:
+You need auth credentials for the Google sign in. You need to create a file with
+the name `.env` in the root directory with the following variables:
 
 ```
-GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
 
 # Has to be True for Sandbox mode
 USE_SANDBOX="True"
 
-# Has to be port 1337
+# If $PORT is unset it will default to 1337
 ROOT_URL=http://127.0.0.1:1337
 
 ```
@@ -97,11 +97,28 @@ npm run start:prod
 
 ### Run on Project DABL
 
-To run on DABL, you need to login, create an account, and deploy a DABL Ledger with the DAML model deployed. You also
-need the refresh cookie for the ledger admin account. Then add the following two variables to your environment and
-remove `USE_SANDBOX`:
+[DABL](https://projectdabl.com/) is a cloud hosted runtime for DAML code. To
+deploy your models create an account, log in, and create a new ledger. You'll
+need to create a .dar of the DAML model:
+
+```
+cd danban/Upgrade/V3
+daml build
+```
+
+Upload the .dar `danban/Upgrade/V3/.daml/dist/danban-upgrade-3.0.0.dar` to the
+new ledger.
+
+Using the `Dockerfile` generate a Docker image and upload to your preferred host
+(for example, GCP Run). The environment variables should be as follows:
 
 ```shell
-REFRESH_COOKIE="__DABL_SESSION={YOUR_COOKIE}"
+GOOGLE_CLIENT_ID="{GOOGLE_CLIENT_ID}"
+GOOGLE_CLIENT_SECRET="{GOOGLE_CLIENT_SECRET}"
 DABL_LEDGER="{DABL_LEDGER_ID}"
+DABL_ADMIN="{DABL_PARTY_ID}"
+REFRESH_COOKIE="DABL_SESSION={YOUR_COOKIE}"
 ```
+The `REFRESH_COOKIE` can be found by inspecting your browser cookies for
+`login.projectdabl.com`. If there are 2, it will be the one for the `/auth`
+path.
