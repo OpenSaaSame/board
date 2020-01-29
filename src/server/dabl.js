@@ -203,7 +203,6 @@ const dabl = () => {
         }
     }
 
-
     const partyTemplate = {
         "moduleName": "DABL.Ledger.V2",
         "entityName": "LedgerParty"
