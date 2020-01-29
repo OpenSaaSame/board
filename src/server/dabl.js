@@ -210,6 +210,9 @@ const dabl = () => {
 
     const getDABLUser = async user => {
         let party_ = null;
+        const sleep = (milliseconds) => {
+            return new Promise(resolve => setTimeout(resolve, milliseconds))
+        };        
 
         const userPartyInner = async () => {
             try {
@@ -217,6 +220,11 @@ const dabl = () => {
                 const createCb = async () => {
                     try {
                         await createUser(user);
+                        
+                        // Required as there's a delay between the above call returning
+                        // and when the part contract appears on the ledger...
+                        await sleep(2000);
+
                         const response = await search(
                             dataURL,
                             adminJwt,
