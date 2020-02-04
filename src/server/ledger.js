@@ -6,10 +6,7 @@ const createProfile = async (ledgerUrl, version, user, profile) => {
         const response = await exercise(
             ledgerUrl,
             user.token,
-            {
-                "moduleName": `${version}.Role`,
-                "entityName": "User"
-            },
+            `${version}.Role:User`,
             user.cid,
             "PutProfile",
             {
@@ -25,10 +22,7 @@ const createProfile = async (ledgerUrl, version, user, profile) => {
     }
 }
 
-const profileTemplate = version => ({
-    "moduleName": `${version}.User`,
-    "entityName": "Profile"
-});
+const profileTemplate = version => `${version}.User:Profile`;
     
 const getNewestUserProfile = async (ledgerUrl, user, remainingVersions) => {
     try {
@@ -42,7 +36,7 @@ const getNewestUserProfile = async (ledgerUrl, user, remainingVersions) => {
                 ledgerUrl,
                 user.token,
                 profileTemplate(head),
-                profile => profile.argument.operator == user.operator && profile.argument.party == user.party
+                profile => profile.payload.operator == user.operator && profile.payload.party == user.party
             );
     } catch (err) {
         throw err;
@@ -54,7 +48,7 @@ export const getUserProfile = async (ledgerUrl, user) => {
         const profiles = await getNewestUserProfile(ledgerUrl, user, appVersions);
         if(profiles.length == 0) throw new Error("No profiles found for party " + user.party)
         else return {
-                ... profiles[0].argument,
+                ... profiles[0].payload,
                 ... user
         }
     } catch (err) {
@@ -69,7 +63,7 @@ export const getOrCreateUserProfile = async (ledgerUrl, version, user, profile) 
             ? await createProfile(ledgerUrl, version, user, profile)
             : profiles[0];
         return {
-            ... userProfile.argument,
+            ... userProfile.payload,
             ... user
         }
     } catch (err) {
@@ -79,10 +73,7 @@ export const getOrCreateUserProfile = async (ledgerUrl, version, user, profile) 
 
 const latest = appVersions[appVersions.length - 1];
 
-const appTemplate = version => ({
-    "moduleName": version == "Danban.V2" ? "Danban.V2_1" : version, // Hack for the V2 bugfix
-    "entityName": "Admin"
-});
+const appTemplate = version => `${version == "Danban.V2" ? "Danban.V2_1" : version}:Admin`;
 
 const getApp = async (ledgerUrl, admin, jwt, remainingVersions) => {
     try {
@@ -97,7 +88,7 @@ const getApp = async (ledgerUrl, admin, jwt, remainingVersions) => {
                 ledgerUrl,
                 jwt,
                 appTemplate(head),
-                app => app.argument.operator == admin
+                app => app.payload.operator == admin
             );
             return foundApps.map(c => {
                 c.version = head;
@@ -200,11 +191,8 @@ const userRole = async (app, party, partyJwt, admin, adminJwt) => {
         const contract = await getOrCreateContract(
             app,
             partyJwt,
-            {
-                "moduleName": `${app.version}.Role`,
-                "entityName": "User"
-            },
-            role => role.argument.party == party && role.argument.operator == admin,
+            `${app.version}.Role:User`,
+            role => role.payload.party == party && role.payload.operator == admin,
             createCb
         )
         return contract.contractId;
@@ -216,11 +204,8 @@ const userRole = async (app, party, partyJwt, admin, adminJwt) => {
 const userUpgrades = async (app, party, partyJwt, admin) => search(
         app.ledgerUrl,
         partyJwt,
-        {
-            "moduleName": `${app.version}.Upgrade`,
-            "entityName": "UpgradeInvite"
-        },
-        upg => upg.argument.party == party && upg.argument.operator == admin
+        `${app.version}.Upgrade:UpgradeInvite`,
+        upg => upg.payload.party == party && upg.payload.operator == admin
     );
 
 const upgradeOrRole = async (app, party, partyJwt, admin, adminJwt) => {

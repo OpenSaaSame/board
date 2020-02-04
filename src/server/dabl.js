@@ -203,10 +203,7 @@ const dabl = () => {
         }
     }
 
-    const partyTemplate = {
-        "moduleName": "DABL.Ledger.V2",
-        "entityName": "LedgerParty"
-    };
+    const partyTemplate = "DABL.Ledger.V2:LedgerParty";
 
     const getDABLUser = async user => {
         let party_ = null;
@@ -229,7 +226,7 @@ const dabl = () => {
                             dataURL,
                             adminJwt,
                             partyTemplate,
-                            userParty => userParty.argument.partyName == user
+                            userParty => userParty.payload.partyName == user
                         );
                         return response[0];
                     } catch (err) {
@@ -240,10 +237,10 @@ const dabl = () => {
                     app,
                     adminJwt,
                     partyTemplate,
-                    userParty => userParty.argument.partyName == user,
+                    userParty => userParty.payload.partyName == user,
                     createCb
                 );
-                return contract.argument.party;
+                return contract.payload.party;
             } catch(err) {
                 throw new NestedError(`Failed to get the party for ${user}: `, err);
             }

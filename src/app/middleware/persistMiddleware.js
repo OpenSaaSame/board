@@ -5,10 +5,7 @@ const ledgerUrl = "/api/";
 export const upgrade = user => exerciseUtil(
   ledgerUrl,
   user.token,
-  {
-    "moduleName": `${user.version}.Upgrade`,
-    "entityName": "UpgradeInvite"
-  },
+  `${user.version}.Upgrade:UpgradeInvite`,
   user.cid,
   "Accept_Upgrade",
   {}
@@ -17,10 +14,7 @@ export const upgrade = user => exerciseUtil(
 const exercise = (user, choice, args) => exerciseUtil(
     ledgerUrl,
     user.token,
-    {
-      "moduleName": `${user.version}.Role`,
-      "entityName": "User"
-    },
+    `${user.version}.Role:User`,
     user.cid,
     choice,
     args
