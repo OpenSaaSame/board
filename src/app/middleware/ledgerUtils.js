@@ -80,7 +80,7 @@ export const search = async (ledgerUrl, jwt, templateId, filter) => {
                 jwt,
                 "POST",
                 {
-                    "%templates": [templateId]
+                    "templateIds": [templateId]
                 }
             )
         return response.filter(filter);
@@ -106,10 +106,7 @@ const versionedTempates = dataTemplates.flatMap(t =>
     appVersions.flatMap(v => 
         exclusions[v] && exclusions[v][t[0]] && exclusions[v][t[0]].includes(t[1])
         ? []
-        : {
-            "entityName" : t[1],
-            "moduleName" : `${v}.${t[0]}`
-        }
+        : `${v}.${t[0]}:${t[1]}`
     ))
     
 
@@ -118,17 +115,17 @@ export const loadAll = async (ledgerUrl, jwt) => callAndProcessAPI(
         jwt,
         "POST",
         {
-            "%templates": versionedTempates
+            "templateIds": versionedTempates
         }
     );
 
 const templateModule = c => c.templateId instanceof Object
     ? c.templateId.moduleName
-    : c.templateId.split(":")[0];
+    : c.templateId.split(":")[1];
 
 const templateEntity = c => c.templateId instanceof Object
     ? c.templateId.entityName
-    : c.templateId.split("@").split(":")[1];
+    : c.templateId.split(":")[2];
 
 const templateVersion = c => {
     const tm = templateModule(c);
@@ -149,7 +146,7 @@ const filterGroupAndVersion = (party, cs) => {
     cs.forEach(c => {
         if(!party || c.observers.includes(party) || c.signatories.includes(party)) {
             ctMap[unversionedModule(c)][templateEntity(c)].push({
-                ... c.argument,
+                ... c.payload,
                 version : templateVersion(c)
             })
         }
