@@ -16,7 +16,7 @@ const createProfile = async (ledgerUrl, version, user, profile) => {
                 "domain": profile._json.domain
             }
         )
-        return response[response.length - 1].created;
+        return response.contracts[response.contracts.length - 1].created;
     } catch (err) {
         throw new NestedError("Error creating profile", err);
     }
@@ -117,7 +117,7 @@ export const getOrCreateApp = async (ledgerUrl, admin, jwt) => {
                 appTemplate(latest),
                 { "operator": admin }
               );
-            const appCid = process.env.USE_SANDBOX ? response.contractId : response.created.contractId;
+            const appCid = response.contractId;
             await exercise(
                 ledgerUrl,
                 jwt,
@@ -178,7 +178,7 @@ const userRole = async (app, party, partyJwt, admin, adminJwt) => {
                         }
                     );
                 await callApp(app, adminJwt, "UnpauseApp", {});
-                return ret[ret.length - 1].created;
+                return ret.contracts[ret.contracts.length - 1].created;
             } catch (err) {
                 try {
                     callApp(app, adminJwt, "UnpauseApp", {});
