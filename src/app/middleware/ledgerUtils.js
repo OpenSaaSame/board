@@ -63,13 +63,13 @@ const callAndProcessAPI = async (url, token, method, body) => {
     }
 }
 
-export const create = async (ledgerUrl, jwt, templateId, argument) => callAndProcessAPI (
+export const create = async (ledgerUrl, jwt, templateId, payload) => callAndProcessAPI (
                 ledgerUrl + "command/create",
                 jwt,
                 "POST",
                 {
                     templateId,
-                    argument
+                    payload
                 }
             );
 
