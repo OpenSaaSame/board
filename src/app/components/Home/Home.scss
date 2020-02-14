@@ -33,7 +33,7 @@ $add-board-focus-bg: #a7e4d5;
   flex-direction: column;
   width: 4 * $board-width + 8 * $board-margin;
   margin: $main-margin;
-  margin-top: 100px;
+  margin-top: 120px;
 }
 
 @media (max-width: 4 * $board-width + 8 * $board-margin + 2 * $main-margin) {
@@ -155,4 +155,19 @@ $add-board-focus-bg: #a7e4d5;
   font-weight: 700;
   overflow: hidden;
   resize: none;
+}
+
+a.banner {
+  position: fixed;
+  top: 80px;
+  text-align: center;
+  background-color: #f18f01;
+  padding: 10px 0;
+  width: 100%;  
+  color: white;
+  text-decoration: none;
+}
+
+a.banner:hover {
+  background-color: #feaf39;
 }

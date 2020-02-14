@@ -28,6 +28,12 @@ class Home extends Component {
       <>
         <Title>Home | OpenWork</Title>
         <Header />
+        <a
+          href="https://opensaasame.org"
+          className="banner"
+        >
+          OpenWork is a suite of radically transparent SaaS apps &rarr;
+        </a>
         <div className="home">
           <div className="main-content">
             <h1>Boards</h1>
