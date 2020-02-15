@@ -41,7 +41,7 @@ const renderPage = (req, res) => {
 
   const analyticsString =
     process.env.GA_ID !== undefined ? `
-        <script async src={"https://www.googletagmanager.com/gtag/js?id=${process.env.GA_ID}"}></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=${process.env.GA_ID}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
