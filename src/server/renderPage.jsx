@@ -39,6 +39,16 @@ const renderPage = (req, res) => {
 
   const preloadedState = store.getState();
 
+  const analyticsString =
+    process.env.GA_ID !== undefined ? `
+        <script async src={"https://www.googletagmanager.com/gtag/js?id=${process.env.GA_ID}"}></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${process.env.GA_ID}');
+        </script>` : "";
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -65,6 +75,7 @@ const renderPage = (req, res) => {
         window.PRELOADED_STATE = ${JSON.stringify(preloadedState)}
       </script>
       <script src=${manifest["main.js"]}></script>
+      ${analyticsString}
     </html>
   `;
   res.send(html);
