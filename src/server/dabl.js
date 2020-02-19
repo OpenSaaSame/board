@@ -31,24 +31,11 @@ const dabl = () => {
                     "redirect": 'manual'
                 }
             );
-            if(response.status === 302) {
-                let raw = response.headers.raw();
-                refreshCookie = raw['set-cookie'][0];
-                const response2 = await fetch(raw["location"][0], {"redirect": 'manual'});
-                if(response2.status === 302) {
-                    let raw2 = response2.headers.raw();
-                    let redirectURL = url.parse(raw2["location"][0], true);
-                    if(redirectURL.query["access_token"] === undefined) 
-                        throw new Error("No access_token in response " + raw["location"]);
-                    return redirectURL.query["access_token"];
-                }
-                else {
-                    throw new Error("Second redirect expected!");
-                }
-            }
-            else {
-                throw new Error("Redirect expected!");
-            }
+            let raw = response.headers.raw();
+            let redirectURL = url.parse(raw["location"][0], true);
+            if(redirectURL.query["access_token"] === undefined) 
+                throw new Error("No access_token in response " + raw["location"]);
+            return redirectURL.query["access_token"];
         } catch(err) {
             throw new NestedError("Error getting site JWT: ", err);
         }
