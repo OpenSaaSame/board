@@ -190,7 +190,7 @@ const dabl = () => {
         }
     }
 
-    const partyTemplate = "DABL.Ledger.V2:LedgerParty";
+    const partyTemplate = "DABL.Ledger.V3:LedgerParty";
 
     const getDABLUser = async user => {
         let party_ = null;
