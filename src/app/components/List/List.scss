@@ -31,17 +31,17 @@
 .board-header-right-text,
 .board-header-right {
   font-family: 'Lato', sans-serif;
-  color: #63686b !important;
+  color: $grey !important;
   svg {
-    fill: #63686b;
+    fill: $grey;
   }
 }
 .list-title-button {
-  color: #63686b !important;
+  color: $grey !important;
 }
 .delete-list-button {
   svg {
-    fill: #63686b;
+    fill: $grey;
   }
 }
 

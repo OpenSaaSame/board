@@ -47,37 +47,37 @@
   &.blue {
     background: $blue;
     &:focus {
-      background: $dark-blue;
+      background: $blue;
     }
   }
   &.green {
     background: $green;
     &:focus {
-      background: $dark-green;
+      background: $green;
     }
   }
   &.red {
     background: $red;
     &:focus {
-      background: $dark-red;
+      background: $red;
     }
   }
   &.pink {
     background: $pink;
     &:focus {
-      background: $dark-pink;
+      background: $pink;
     }
   }
-  &.light-green {
-    background: $light-green;
+  &.yellow {
+    background: $yellow;
     &:focus {
-      background: $dark-light-green;
+      background: $yellow;
     }
   }
-  &.light-blue {
-    background: $light-blue;
+  &.purple {
+    background: $purple;
     &:focus {
-      background: $dark-light-blue;
+      background: $purple;
     }
   }
 }
