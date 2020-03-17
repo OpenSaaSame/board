@@ -4,6 +4,8 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import FaSignOut from "react-icons/lib/fa/sign-out";
 import openworkLogo from "../../../assets/images/openwork.png";
+import googleSignInImg from "../../../assets/images/btn_google_signin_light_normal_web.png";
+import googleSignInImg2x from "../../../assets/images/btn_google_signin_light_normal_web@2x.png"
 import "./Header.scss";
 
 class Header extends Component {
@@ -34,9 +36,13 @@ class Header extends Component {
               &nbsp;Sign out
             </a>
           ) : (
-            <a className="signout-link" href="/auth/google" >
-              <FaSignIn className="signout-icon" fill="#303132" />
-              &nbsp;Sign in
+            <a className="" href="/auth/google" >
+              <img
+                className="google-sign-in"
+                alt="Sign in with Google"
+                src={googleSignInImg}
+                srcSet={`${googleSignInImg} 1x, ${googleSignInImg2x} 2x`}
+              />
             </a>
           )}
         </div>
