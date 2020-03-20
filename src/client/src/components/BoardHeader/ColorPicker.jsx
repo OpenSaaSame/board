@@ -5,7 +5,6 @@ import { withRouter } from "react-router-dom";
 import { Button, Wrapper, Menu, MenuItem } from "react-aria-menubutton";
 import classnames from "classnames";
 import FaCheck from "react-icons/lib/fa/check";
-import colorIcon from "../../../assets/images/color-icon.png";
 import "./ColorPicker.scss";
 
 class ColorPicker extends Component {
@@ -32,7 +31,7 @@ class ColorPicker extends Component {
         onSelection={this.handleSelection}
       >
         <Button className="color-picker">
-          <img src={colorIcon} alt="colorwheel" className="modal-icon" />
+          <img src={'/images/color-icon.png'} alt="colorwheel" className="modal-icon" />
           <div className="board-header-right-text">
             &nbsp;Color &nbsp;&#9662;
           </div>

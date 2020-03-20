@@ -1,19 +1,20 @@
 import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
-import {callAPI, search} from "../app/middleware/ledgerUtils";
+import {callAPI, search} from "./middleware/ledgerUtils";
 import {getOrCreateApp, getOrCreateContract, getUser, getUserProfile, getOrCreateUserProfile} from "./ledger"
+
 const url = require("url");
 
 const dabl = () => {
-    let refreshCookie = process.env.REFRESH_COOKIE;
+    const refreshCookie = process.env.REFRESH_COOKIE;
     const dablUrl = "https://api.projectdabl.com/";
     const ledgerId = process.env.DABL_LEDGER;
-    
+
     const ledgerSegment = `/${ledgerId}/`;
     const adminParty = process.env.DABL_ADMIN;
-    const dataURL = dablUrl + "data" + ledgerSegment;
+    const dataURL = `${dablUrl  }data${  ledgerSegment}`;
 
-    let jwts = {};
+    const jwts = {};
 
     let appCid = null;
 
@@ -25,17 +26,17 @@ const dabl = () => {
                     "credentials":"include",
                     "headers":{
                         "sec-fetch-mode":"cors",
-                        "cookie" : refreshCookie 
+                        "cookie" : refreshCookie
                     },
                     "mode":"cors",
                     "redirect": 'manual'
                 }
             );
-            let raw = response.headers.raw();
-            let redirectURL = url.parse(raw["location"][0], true);
-            if(redirectURL.query["access_token"] === undefined) 
-                throw new Error("No access_token in response " + raw["location"]);
-            return redirectURL.query["access_token"];
+            const raw = response.headers.raw();
+            const redirectURL = url.parse(raw.location[0], true);
+            if(redirectURL.query.access_token === undefined)
+                throw new Error(`No access_token in response ${  raw.location}`);
+            return redirectURL.query.access_token;
         } catch(err) {
             throw new NestedError("Error getting site JWT: ", err);
         }
@@ -45,24 +46,24 @@ const dabl = () => {
         if(process.env.SITE_JWT) return Promise.resolve(process.env.SITE_JWT);
 
         // Get a new site JWT every 10 minutes
-        let need_new_site_jwt
-            = jwts["site"] == undefined
-            || jwts["site"].token == undefined
-            || jwts["site"].time == undefined
-            || Date.now() > jwts["site"].time + 1000 * 60 * 10;
+        const need_new_site_jwt
+            = jwts.site == undefined
+            || jwts.site.token == undefined
+            || jwts.site.time == undefined
+            || Date.now() > jwts.site.time + 1000 * 60 * 10;
 
         if(need_new_site_jwt) {
             console.log("Refreshing site JWT");
-            jwts["site"] = {
+            jwts.site = {
                 "token": getSiteJWTInner(),
                 "time": Date.now()
             };
-            
-        } 
+
+        }
         try{
-            return await jwts["site"].token;
+            return await jwts.site.token;
         } catch (err) {
-            delete jwts["site"];
+            delete jwts.site;
             throw new NestedError("Error getting site JWT: ", err);
         }
     };
@@ -87,7 +88,7 @@ const dabl = () => {
                 "POST"
             );
             const json = await response.json();
-            return json["access_token"];
+            return json.access_token;
         } catch(err) {
                 throw new NestedError("Error user grant: ", err);
         }
@@ -95,23 +96,23 @@ const dabl = () => {
 
     const getUserGrant = async () => {
         // Get a new user grant every 10 minutes
-        let need_new_user_grant
-            = jwts["user_grant"] == undefined
-            || jwts["user_grant"].token == undefined
-            || jwts["user_grant"].time == undefined
-            || Date.now() > jwts["user_grant"].time + 1000 * 60 * 10;
+        const need_new_user_grant
+            = jwts.user_grant == undefined
+            || jwts.user_grant.token == undefined
+            || jwts.user_grant.time == undefined
+            || Date.now() > jwts.user_grant.time + 1000 * 60 * 10;
 
         if(need_new_user_grant) {
-            jwts["user_grant"] = {
+            jwts.user_grant = {
                 "token": getUserGrantInner(),
                 "time": Date.now()
             };
-            
-        } 
+
+        }
         try{
-            return await jwts["user_grant"].token;
+            return await jwts.user_grant.token;
         } catch (err) {
-            delete jwts["user_grant"];
+            delete jwts.user_grant;
             throw new NestedError("Error getting user_grant JWT: ", err);
         }
     };
@@ -127,20 +128,20 @@ const dabl = () => {
                 {for: 86400}
             );
             const json = await response.json();
-            return json["access_token"];
+            return json.access_token;
         } catch(err) {
-                throw new NestedError("Error getting JWT for" + party + ": ", err);
+                throw new NestedError(`Error getting JWT for${  party  }: `, err);
         }
     }
 
     const getToken = async party => {
         // Get a new Token every 12 hours
-        let need_new_party_jwt
+        const need_new_party_jwt
             = jwts[party] == undefined
             || jwts[party].token == undefined
             || jwts[party].time == undefined
             || Date.now() > jwts[party].time + 1000 * 60 * 60 * 12;
-    
+
         if(need_new_party_jwt) {
             console.log("Getting token for party ", party);
                 jwts[party] = {
@@ -152,7 +153,7 @@ const dabl = () => {
             return await jwts[party].token;
         } catch (err) {
             delete jwts[party];
-            throw new NestedError("Error getting JWT for " + party + ": ", err);
+            throw new NestedError(`Error getting JWT for ${  party  }: `, err);
         }
     };
 
@@ -194,9 +195,7 @@ const dabl = () => {
 
     const getDABLUser = async user => {
         let party_ = null;
-        const sleep = (milliseconds) => {
-            return new Promise(resolve => setTimeout(resolve, milliseconds))
-        };        
+        const sleep = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
         const userPartyInner = async () => {
             try {
@@ -204,7 +203,7 @@ const dabl = () => {
                 const createCb = async () => {
                     try {
                         await createUser(user);
-                        
+
                         // Required as there's a delay between the above call returning
                         // and when the part contract appears on the ledger...
                         await sleep(2000);
@@ -235,12 +234,12 @@ const dabl = () => {
 
         const userParty = async () => {
             if(party_ == null) {
-                console.log("Getting user party for " + user);
+                console.log(`Getting user party for ${  user}`);
                 party_ = userPartyInner();
             }
             return party_;
         }
-    
+
         const userToken = async () => {
             try {
                 const party = await userParty();
@@ -264,7 +263,7 @@ const dabl = () => {
             return getOrCreateUserProfile(dataURL, app.version, user, profile);
         } catch (err) {
             throw new NestedError(`Failed to get or create DABL user profile for ${user}: `, err);
-            
+
         }
     }
 

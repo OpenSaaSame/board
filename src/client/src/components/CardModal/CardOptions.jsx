@@ -9,7 +9,6 @@ import FaCommentAlt from "react-icons/lib/fa/comment";
 import FaTags from "react-icons/lib/fa/tag";
 import Calendar from "./Calendar";
 import ClickOutside from "../ClickOutside/ClickOutside";
-import colorIcon from "../../../assets/images/color-icon.png";
 import "./CardOptions.scss";
 import CardUser from "./CardUser";
 import CardComments from "./CardComments";
@@ -116,7 +115,7 @@ class CardOptions extends Component {
         padding: 8
       }
     }
-    
+
     return (
       <div
         className="options-list"
@@ -184,7 +183,7 @@ class CardOptions extends Component {
             aria-haspopup
             aria-expanded={isColorPickerOpen}
           >
-            <img src={colorIcon} alt="colorwheel" className="modal-icon" />
+            <img src={'/images/color-icon.png'} alt="colorwheel" className="modal-icon" />
             &nbsp;Color
           </button>
           {isColorPickerOpen && (

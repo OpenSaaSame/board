@@ -1,4 +1,4 @@
-import {create, exercise, search, appVersions} from "../app/middleware/ledgerUtils";
+import {create, exercise, search, appVersions} from "./middleware/ledgerUtils";
 import NestedError from "nested-error-stacks";
 
 const createProfile = async (ledgerUrl, version, user, profile) => {
@@ -23,12 +23,12 @@ const createProfile = async (ledgerUrl, version, user, profile) => {
 }
 
 const profileTemplate = version => `${version}.User:Profile`;
-    
+
 const getNewestUserProfile = async (ledgerUrl, user, remainingVersions) => {
     try {
         const head = remainingVersions[0];
         const tail = remainingVersions.slice(1);
-        var profiles = [];
+        let profiles = [];
         if(tail.length > 0) profiles = await getNewestUserProfile(ledgerUrl, user, tail);
         return profiles.length > 0
             ? profiles
@@ -46,7 +46,7 @@ const getNewestUserProfile = async (ledgerUrl, user, remainingVersions) => {
 export const getUserProfile = async (ledgerUrl, user) => {
     try {
         const profiles = await getNewestUserProfile(ledgerUrl, user, appVersions);
-        if(profiles.length == 0) throw new Error("No profiles found for party " + user.party)
+        if(profiles.length == 0) throw new Error(`No profiles found for party ${  user.party}`)
         else return {
                 ... profiles[0].payload,
                 ... user
@@ -59,7 +59,7 @@ export const getUserProfile = async (ledgerUrl, user) => {
 export const getOrCreateUserProfile = async (ledgerUrl, version, user, profile) => {
     try {
         const profiles = await getNewestUserProfile(ledgerUrl, user, appVersions);
-        var userProfile = profiles.length == 0
+        const userProfile = profiles.length == 0
             ? await createProfile(ledgerUrl, version, user, profile)
             : profiles[0];
         return {
@@ -79,11 +79,11 @@ const getApp = async (ledgerUrl, admin, jwt, remainingVersions) => {
     try {
         const head = remainingVersions[0];
         const tail = remainingVersions.slice(1);
-        var apps = tail.length > 0
+        const apps = tail.length > 0
             ? await getApp(ledgerUrl, admin, jwt, tail)
             : [];
         if (apps.length > 0) return apps;
-        else {
+        
             const foundApps = await search(
                 ledgerUrl,
                 jwt,
@@ -95,7 +95,7 @@ const getApp = async (ledgerUrl, admin, jwt, remainingVersions) => {
                 c.ledgerUrl = ledgerUrl;
                 return c;
             });
-        }
+        
     } catch (err) {
         throw new NestedError("Error getting App contract", err);
     }
@@ -107,10 +107,10 @@ export const getOrCreateApp = async (ledgerUrl, admin, jwt) => {
         if(apps.length > 0)
             return {
                 version : apps[0].version,
-                ledgerUrl: ledgerUrl,
+                ledgerUrl,
                 cid : apps[0].contractId
             }
-        else {
+        
             const response = await create (
                 ledgerUrl,
                 jwt,
@@ -128,15 +128,15 @@ export const getOrCreateApp = async (ledgerUrl, admin, jwt) => {
             )
             return {
                 cid : appCid,
-                ledgerUrl : ledgerUrl,
+                ledgerUrl,
                 version: latest
             };
-        }
+        
     } catch (err) {
         throw new NestedError(`Error creating app`, err);
     }
 }
-    
+
 export const callApp = async (app, jwt, choice, argument) => {
     console.log(`Making app call ${choice} with ${JSON.stringify(argument)}`)
     try {
@@ -157,7 +157,7 @@ export const getOrCreateContract = async (app, jwt, template, filter, createCb) 
     try {
         const contracts = await search(app.ledgerUrl, jwt, template, filter);
         if(contracts.length > 0) return contracts[0];
-        else return createCb();
+        return createCb();
     } catch(err) {
         throw new NestedError(`Error fetching or creating ${JSON.stringify(template)} contracts: `, err);
     }
