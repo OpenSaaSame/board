@@ -2,17 +2,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { upgrade } from "../../middleware/persistMiddleware"
+// import { upgrade } from "../../../../server/middleware/persistMiddleware"
 import "./Upgrade.scss";
 
-const confirmUpgrade = async user => {
-  try{
-    await upgrade(user);
-    location.reload();
-  } catch (err) {
-    console.log(err);
-  }
-}
+// const confirmUpgrade = async user => {
+//   try{
+//     await upgrade(user);
+//     location.reload();
+//   } catch (err) {
+//     console.log(err);
+//   }
+// }
 
 const skipUpgrade = dispatch => {
   dispatch({
@@ -23,7 +23,7 @@ const skipUpgrade = dispatch => {
 
 const Upgrade = ({dispatch, user}) => {
   let className = "upgrade"
-  if (!user || !user.needsUpgrade || user.skippedUpgrade) className += " hide" 
+  if (!user || !user.needsUpgrade || user.skippedUpgrade) className += " hide"
   return <div className={className}>
     <div className="upgrade-modal">
       <h1>It's Upgrade Time!</h1>
@@ -38,7 +38,7 @@ const Upgrade = ({dispatch, user}) => {
       </p>
       <div className="buttons">
         <span className="skip-button" onClick={() => skipUpgrade(dispatch)}>Not yet</span>
-        <span className="confirm-button" onClick={() => confirmUpgrade(user)}>Upgrade</span>
+        {/* <span className="confirm-button" onClick={() => confirmUpgrade(user)}>Upgrade</span> */}
       </div>
     </div>
   </div>

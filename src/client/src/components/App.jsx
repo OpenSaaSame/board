@@ -10,7 +10,7 @@ import Upgrade from "./Upgrade/Upgrade";
 
 const App = () => {
   return (
-      <div className="app">
+      <div id="app" className="app">
       <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/b/:boardId" component={BoardContainer} />

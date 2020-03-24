@@ -1,13 +1,13 @@
-import {loadState} from "../app/middleware/ledgerUtils"; 
-import {mapBy, filterObject} from "../app/components/utils"
+import {loadState} from "./middleware/ledgerUtils";
+import {mapBy, filterObject} from "../client/app/components/utils"
 
 export const publicBoardsInitial = ledgerConn => {
   const ledgerURL = process.env.USE_SANDBOX
     ? "http://localhost:7575/"
     : `https://api.projectdabl.com/data/${process.env.DABL_LEDGER}/`;
 
-  var _state = null;
-  var _stateAt = 0;
+  let _state = null;
+  let _stateAt = 0;
 
   return async (req, res, next) => {
     if (Date.now() >= _stateAt + 1000 * 10) {
@@ -23,7 +23,7 @@ export const publicBoardsInitial = ledgerConn => {
     const publicUsers = Object.entries(filterObject(state.users, user => publicUserIds.includes(user.party))).map(([_id, user]) => user);
     const publicTagIds = Object.entries(publicCards).flatMap(([_id, card]) => card.tags);
 
-    req.initialState = { 
+    req.initialState = {
       ...req.initialState,
       boardsById: filterObject(state.boardsById, board => board.isPublic),
       listsById: filterObject(state.listsById, list => state.boardsById[list.boardId].isPublic),

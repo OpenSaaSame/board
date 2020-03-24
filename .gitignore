@@ -3,3 +3,4 @@ dist
 stats.json
 .env
 .DS_STORE
+server/dist

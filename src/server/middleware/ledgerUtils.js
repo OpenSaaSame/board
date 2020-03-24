@@ -1,6 +1,12 @@
+/* eslint-disable no-return-assign */
 import fetch from "node-fetch";
 import NestedError from "nested-error-stacks";
-import {mapBy} from "../components/utils"
+
+const mapBy = field => list => {
+  const ret = {};
+  list.forEach(item => ret[item[field]] = item);
+  return ret;
+}
 
 export const appVersions = [
     "Danban.V2",
@@ -21,7 +27,7 @@ export const processResponse = async response => {
         }
         try{
             const json = await response.json();
-            return json["result"];
+            return json.result;
         } catch (err) {
             console.log(err);
             throw new Error(`Non-JSON response from ledger: ${response.status} ${response.statusText} ${err}`);
@@ -40,7 +46,7 @@ export const callAPI = async (url, token, method, body) => {
                 "credentials":"include",
                 "headers":{
                     "accept":"application/json",
-                    "authorization":"Bearer " + token,
+                    "authorization":`Bearer ${  token}`,
                     "content-type":"application/json",
                     "sec-fetch-mode":"cors"
                 },
@@ -50,7 +56,7 @@ export const callAPI = async (url, token, method, body) => {
             }
         );
     } catch(err) {
-            throw new NestedError("Error fetching" + url + " with token " + token + ", method " + method + ", body " + JSON.stringify(body) + ": ", err);
+            throw new NestedError(`Error fetching${  url  } with token ${  token  }, method ${  method  }, body ${  JSON.stringify(body)  }: `, err);
     };
 }
 
@@ -64,7 +70,7 @@ const callAndProcessAPI = async (url, token, method, body) => {
 }
 
 export const create = async (ledgerUrl, jwt, templateId, payload) => callAndProcessAPI (
-                ledgerUrl + "command/create",
+                `${ledgerUrl  }command/create`,
                 jwt,
                 "POST",
                 {
@@ -76,7 +82,7 @@ export const create = async (ledgerUrl, jwt, templateId, payload) => callAndProc
 export const search = async (ledgerUrl, jwt, templateId, filter) => {
     try {
         const response = await callAndProcessAPI(
-                ledgerUrl + "contracts/search",
+                `${ledgerUrl  }contracts/search`,
                 jwt,
                 "POST",
                 {
@@ -102,16 +108,16 @@ const exclusions = {
     }
 };
 
-const versionedTempates = dataTemplates.flatMap(t => 
-    appVersions.flatMap(v => 
+const versionedTempates = dataTemplates.flatMap(t =>
+    appVersions.flatMap(v =>
         exclusions[v] && exclusions[v][t[0]] && exclusions[v][t[0]].includes(t[1])
         ? []
         : `${v}.${t[0]}:${t[1]}`
     ))
-    
+
 
 export const loadAll = async (ledgerUrl, jwt) => callAndProcessAPI(
-        ledgerUrl + "contracts/search",
+        `${ledgerUrl  }contracts/search`,
         jwt,
         "POST",
         {
@@ -138,7 +144,7 @@ const unversionedModule = c => {
 }
 
 const filterGroupAndVersion = (party, cs) => {
-    let ctMap = {};
+    const ctMap = {};
     dataTemplates.forEach(t => {
         if(!ctMap[t[0]]) ctMap[t[0]] = {};
         ctMap[t[0]][t[1]] = [];
@@ -160,14 +166,14 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
 
         const contractMap = filterGroupAndVersion(party, contracts);
 
-        const boardsById = mapBy("_id")(contractMap["Board"]["Data"]);
-        const listsById = mapBy("_id")(contractMap["Board"]["CardList"]);
-        const cardsById = mapBy("_id")(contractMap["Board"]["Card"]);
-        const commentsById = mapBy("_id")(contractMap["Board"]["Comment"]);
-        const tagsById = mapBy("_id")(contractMap["Board"]["Tag"]);
-        const users = (contractMap["User"]["Profile"]);
-        users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)); 
-        const boardUsersById = mapBy("boardId")(contractMap["Rules"]["Board"]);
+        const boardsById = mapBy("_id")(contractMap.Board.Data);
+        const listsById = mapBy("_id")(contractMap.Board.CardList);
+        const cardsById = mapBy("_id")(contractMap.Board.Card);
+        const commentsById = mapBy("_id")(contractMap.Board.Comment);
+        const tagsById = mapBy("_id")(contractMap.Board.Tag);
+        const users = (contractMap.User.Profile);
+        users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0));
+        const boardUsersById = mapBy("boardId")(contractMap.Rules.Board);
 
         return {
             boardsById,
@@ -185,7 +191,7 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
 
 
 export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => callAndProcessAPI (
-        ledgerUrl + "command/exercise",
+        `${ledgerUrl  }command/exercise`,
         jwt,
         "POST",
         {
