@@ -17,8 +17,8 @@ class Home extends Component {
         color: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired
       }).isRequired
-    ).isRequired,
-    listsById: PropTypes.object.isRequired,
+    ),
+    listsById: PropTypes.object,
     history: PropTypes.object.isRequired,
     user: PropTypes.object
   };
@@ -60,37 +60,31 @@ class Home extends Component {
       <>
         <Title>Home | OpenWork</Title>
         <Header />
-        <a
-          href="https://opensaasame.org"
-          className="banner"
-        >
-          OpenWork is a suite of radically transparent SaaS apps &rarr;
-        </a>
         <div className="home">
           <div className="main-content">
             {user === undefined
             ? <form onSubmit={this.handleSubmit}>
                 <h1>Login</h1>
                 <div>
-                  <label>
-                    Party
-                    <input
-                      type="text"
-                      name="party"
-                      onChange={this.handleChange}
-                    />
-                  </label>
+                  <label>Party</label>
                 </div>
                 <div>
-                  <label>
-                    JWT
-                    <input
-                      type="password"
-                      name="jwt"
-                      onChange={this.handleChange}
-                    />
-                  </label>
-                  </div>
+                  <input
+                    type="text"
+                    name="party"
+                    onChange={this.handleChange}
+                  />
+                </div>
+                <div>
+                  <label>JWT</label>
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    name="jwt"
+                    onChange={this.handleChange}
+                  />
+                </div>
                 <input
                   type="submit"
                   value="Submit"
