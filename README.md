@@ -47,10 +47,11 @@ cd danban
 cd danban/V2 && daml build
 cd danban/V2Bugfix && daml build
 cd danban/V3 && daml build
+cd danban/Upgrade/V3 && daml build
 
-cd danban/Upgrade/V3
-
-daml start --sandbox-option="--ledgerid=danban" --sandbox-option="-w"
+daml sanbox --ledgerid=danban -w danban/.daml/dist/danban-upgrade-3.0.0.dar
+daml json-api --ledger-host=localhost --ledger-port=6865 --http-port=7575
+daml navigator server
 ```
 
 #### Run the client
