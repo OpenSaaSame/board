@@ -10,7 +10,7 @@ export const upgrade = user => exerciseUtil(
     "Accept_Upgrade", {}
 );
 
-const exercise = (user, choice, args) => {
+export const exercise = (user, choice, args) => {
     if (user.cid) {
         exerciseUtil(
             ledgerUrl,
@@ -82,6 +82,7 @@ const payloadTransform = {
     "CHANGE_PERMISSIONS": payload => payload,
     "ADD_USER": payload => payload,
     "REMOVE_USER": payload => payload,
+    "PutProfile": payload => ({ displayName: payload.displayName, imageUrl: "" }),
     "DELETE_BOARD": payload => payload,
     "CHANGE_BOARD_TITLE": payload => ({ boardId: payload.boardId, newTitle: payload.boardTitle }),
     "CHANGE_BOARD_COLOR": payload => ({ boardId: payload.boardId, newColor: payload.color }),
@@ -175,6 +176,7 @@ const persistMiddleware = store => next => action => {
             case "TOGGLE_PUBLIC":
             case "ADD_USER":
             case "REMOVE_USER":
+            case "PutProfile":
             case "CHANGE_PERMISSIONS":
             case "DELETE_BOARD":
 

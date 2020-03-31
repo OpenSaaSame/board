@@ -166,9 +166,6 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
     const contracts = await loadAll(ledgerUrl, jwt);
     const contractMap = filterGroupAndVersion(party, contracts);
 
-    console.log(contracts);
-
-    const user = (contractMap.Role.User)[0];
     const boardsById = mapBy("_id")(contractMap.Board.Data);
     const listsById = mapBy("_id")(contractMap.Board.CardList);
     const cardsById = mapBy("_id")(contractMap.Board.Card);
@@ -176,6 +173,9 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
     const tagsById = mapBy("_id")(contractMap.Board.Tag);
     const users = (contractMap.User.Profile);
     users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0));
+    const userRole = (contractMap.Role.User)[0];
+    const userProfile = users.filter(user => user.party === userRole.party)[0];
+    const user = { ...userProfile, ...userRole };
     const boardUsersById = mapBy("boardId")(contractMap.Rules.Board);
 
     return {
@@ -195,6 +195,7 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
 
 
 export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => {
+  console.log(choice, argument)
   callAndProcessAPI (
     `${ledgerUrl}exercise`,
     jwt,
