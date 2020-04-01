@@ -81,12 +81,11 @@ class CardBadges extends Component {
     const { assignee } = this.props;
     if (assignee !== undefined) {
       return (
-        <img
-          src={assignee.imageUrl}
-          alt={assignee.displayName}
-          className="user-thumbnail-badge"
-          title={assignee.displayName}
-        />
+        <span
+          className="badge user-badge"
+        >
+          {assignee.displayName}
+        </span>
       );
     } else {
       return null;
