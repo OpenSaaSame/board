@@ -150,13 +150,11 @@ const filterGroupAndVersion = (party, cs) => {
     ctMap[t[0]][t[1]] = [];
   });
   cs.forEach(c => {
-    if(!party || c.observers.includes(party) || c.signatories.includes(party)) {
-      ctMap[unversionedModule(c)][templateEntity(c)].push({
-        ...c.payload,
-        version : templateVersion(c),
-        cid: c.contractId
-      })
-    }
+    ctMap[unversionedModule(c)][templateEntity(c)].push({
+      ...c.payload,
+      version : templateVersion(c),
+      cid: c.contractId
+    })
   })
   return ctMap
 }
