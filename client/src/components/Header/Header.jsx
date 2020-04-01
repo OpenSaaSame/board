@@ -17,7 +17,7 @@ class Header extends Component {
   }
 
   render = () => {
-    const { user } = this.props;
+    const { loggedIn } = this.props;
     return (
       <header>
         <Link to="/" className="header-title">
@@ -25,16 +25,18 @@ class Header extends Component {
           &nbsp;<b>Open</b>Work <span>Board</span>
         </Link>
         <div className="header-right-side">
-          <button className="signout-link" onClick={this.handleSignOut}>
-            <FaSignOut className="signout-icon" fill="#303132" />
-            &nbsp;Log Out
-          </button>
+          { loggedIn &&
+            <button className="signout-link" onClick={this.handleSignOut}>
+              <FaSignOut className="signout-icon" fill="#303132" />
+              &nbsp;Log Out
+            </button>
+          }
         </div>
       </header>
     );
   };
 }
 
-const mapStateToProps = ({ user }) => ({ user });
+const mapStateToProps = ({ loggedIn }) => ({ loggedIn });
 
 export default connect(mapStateToProps)(Header);
