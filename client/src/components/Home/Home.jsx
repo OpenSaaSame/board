@@ -17,14 +17,12 @@ class Home extends Component {
     ).isRequired,
     listsById: PropTypes.object,
     history: PropTypes.object.isRequired,
-    user: PropTypes.object
+    user: PropTypes.object.isRequired
   };
 
   constructor() {
     super();
     this.state = {
-      party: "",
-      jwt: "",
       name: ""
     };
   }
@@ -38,18 +36,6 @@ class Home extends Component {
       [name]: value
     });
   };
-
-  handleLogin = (event) => {
-    const { dispatch } = this.props;
-    const { party, jwt } = this.state;
-    localStorage.setItem('party', party);
-    localStorage.setItem('jwt', jwt);
-    event.preventDefault();
-
-    dispatch({
-      'type': 'LOG_IN'
-    });
-  }
 
   handleProfileSubmit = (event) => {
     event.preventDefault();
@@ -68,34 +54,6 @@ class Home extends Component {
 
   render = () => {
     const { user, history } = this.props;
-
-    const loginForm = <form onSubmit={this.handleLogin}>
-        <h1>Login</h1>
-        <div>
-          <label>Party</label>
-        </div>
-        <div>
-          <input
-            type="text"
-            name="party"
-            onChange={this.handleChange}
-          />
-        </div>
-        <div>
-          <label>JWT</label>
-        </div>
-        <div>
-          <input
-            type="password"
-            name="jwt"
-            onChange={this.handleChange}
-          />
-        </div>
-        <input
-          type="submit"
-          value="Submit"
-        />
-      </form>;
     
     const profileForm = <form onSubmit={this.handleProfileSubmit}>
         <h1>Profile Details</h1>
@@ -121,10 +79,7 @@ class Home extends Component {
         <Header />
         <div className="home">
           <div className="main-content">
-            {user === undefined
-              ? loginForm
-              : !user.displayName ? profileForm : <BoardIndex history={history}/>
-            }
+            { !user.displayName ? profileForm : <BoardIndex history={history}/> }
           </div>
         </div>
       </>
@@ -132,16 +87,10 @@ class Home extends Component {
   };
 }
 
-const mapStateToProps = ({ boardsById, listsById, user }) => {
-  if (user) {
-    return {
-      boards: Object.keys(boardsById).map(key => boardsById[key]),
-      user,
-      listsById
-    }
-  } else {
-    return {user}
-  }
-};
+const mapStateToProps = ({ boardsById, listsById, user }) => ({
+  boards: Object.keys(boardsById).map(key => boardsById[key]),
+  user,
+  listsById
+});
 
 export default connect(mapStateToProps)(Home);
