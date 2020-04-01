@@ -21,6 +21,7 @@ def init_app(event):
         dazl.exercise(appId, 'StartApp'),
         dazl.exercise(appId, 'PauseApp'),
         dazl.exercise(appId, 'AddUser', {'party': 'Alice'}),
+        dazl.exercise(appId, 'AddUser', {'party': 'Bob'}),
         dazl.exercise(appId, 'UnpauseApp')
     ]
 
