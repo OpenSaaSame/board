@@ -189,13 +189,12 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
       boardUsersById
     }
   } catch(err) {
+    console.log(err)
     throw new NestedError(`Error processing all contracts: `, err);
   }
 }
 
-
 export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => {
-  console.log(choice, argument)
   callAndProcessAPI (
     `${ledgerUrl}exercise`,
     jwt,

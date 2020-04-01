@@ -117,10 +117,9 @@ const payloadTransform = {
     "UNASSIGN_TAG": payload => ({ cardId: payload.cardId, tagId: payload.tagId })
 }
 
-const dispatchStates = async(store, pPrivateState) => {
-    const [privateState] = await Promise.all([pPrivateState]);
+const dispatchStates = async(store, remoteState) => {
     try {
-        const state = privateState
+        const state = await remoteState;
 
         //If there are changes in flight, queue another read.
         if (store.getState().ledger.read.cancelled) {
@@ -146,8 +145,11 @@ const dispatchStates = async(store, pPrivateState) => {
             }), 10000)
         } else {
             // If reading goes wrong for other reasons,
-            // reload to get a fresh UI and token.
-            // location.reload();
+            // log out and reload to get a fresh UI and token.
+            store.dispatch({
+                type: "LOG_OUT"
+            })
+            window.location.reload();
         }
     }
 }
