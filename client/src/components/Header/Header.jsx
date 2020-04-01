@@ -25,17 +25,6 @@ class Header extends Component {
           &nbsp;<b>Open</b>Work <span>Board</span>
         </Link>
         <div className="header-right-side">
-          {user ? (
-            <img
-              src={user.imageUrl}
-              alt={user.displayName}
-              className="user-thumbnail"
-              title={user.displayName}
-            />
-          ) : (
-            <div />
-          )}
-
           <button className="signout-link" onClick={this.handleSignOut}>
             <FaSignOut className="signout-icon" fill="#303132" />
             &nbsp;Log Out
