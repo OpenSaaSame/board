@@ -44,15 +44,13 @@ cd danban
 #### Start DAML Sandbox
 
 ```shell
-cd danban/V2 && daml build
-cd danban/V2Bugfix && daml build
-cd danban/V3 && daml build
-cd danban/Upgrade/V3 && daml build
-
-daml sanbox --ledgerid=danban -w danban/.daml/dist/danban-upgrade-3.0.0.dar
+cd quickstart
+daml sandbox --ledgerid=danban -w danban-upgrade-3.0.0.dar
 daml json-api --ledger-host=localhost --ledger-port=6865 --http-port=7575
 daml navigator server
 ```
+
+If you want to build the model from scratch, run `daml build` in the following folders under `backend`: `V2`, `V2Bugfix`, `V3`, `Upgrade/V3`. The resulting `.dar` will be in `backend/Upgrade/V3/.daml/dist`
 
 #### Run the client
 

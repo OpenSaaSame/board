@@ -1,9 +1,21 @@
-import { loadState, exercise as exerciseUtil, rootErr } from "./ledgerUtils"
+import { loadState, exercise as exerciseUtil, rootErr, processResponse } from "./ledgerUtils"
 
-const ledgerUrl = "/v1/";
+const makeLedgerUrl = () => {
+    if (window.location.hostname === 'localhost') {
+        return '/v1/';
+    }
+
+    // Generate DABL URL from the location
+    let host = window.location.host.split('.')
+    const ledgerId = host[0];
+    let apiUrl = host.slice(1)
+    apiUrl.unshift('api')
+
+    return apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId;
+}
 
 export const upgrade = user => exerciseUtil(
-    ledgerUrl,
+    makeLedgerUrl(),
     user.token,
     `${user.version}.Upgrade:UpgradeInvite`,
     user.cid,
@@ -13,7 +25,7 @@ export const upgrade = user => exerciseUtil(
 export const exercise = (user, choice, args) => {
     if (user.cid) {
         exerciseUtil(
-            ledgerUrl,
+            makeLedgerUrl(),
             user.token,
             `${user.version}.Role:User`,
             user.cid,
@@ -105,14 +117,12 @@ const payloadTransform = {
     "UNASSIGN_TAG": payload => ({ cardId: payload.cardId, tagId: payload.tagId })
 }
 
-const dispatchStates = async(store, pPrivateState, pPublicState) => {
-    const [privateState, publicState] = await Promise.all([pPrivateState, pPublicState]);
+const dispatchStates = async(store, pPrivateState) => {
+    const [privateState] = await Promise.all([pPrivateState]);
     try {
-        const state = {
-                ...publicState,
-                ...privateState
-            }
-            //If there are changes in flight, queue another read.
+        const state = privateState
+
+        //If there are changes in flight, queue another read.
         if (store.getState().ledger.read.cancelled) {
             store.dispatch({
                 type: "CANCEL_READ",
@@ -158,7 +168,7 @@ const maybeRead = (store) => {
         payload: {}
     });
 
-    dispatchStates(store, loadState(ledgerUrl, user.token, user.party), fetch("/public"));
+    dispatchStates(store, loadState(makeLedgerUrl(), user.token, user.party));
 }
 
 // Persist the board to the database after almost every action.
