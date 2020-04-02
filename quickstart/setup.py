@@ -25,6 +25,8 @@ def init_app(event):
         dazl.exercise(appId, 'UnpauseApp')
     ]
 
+    print('App ready')
+
     return client.submit(commands)
 
 network.run_forever()
