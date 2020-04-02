@@ -89,8 +89,12 @@ const boardsById = (state = {}, action) => {
       const { [boardId]: deletedBoard, ...restOfBoards } = state;
       return restOfBoards;
     }
+    case "ADD_TAG": {
+      const { boardId, tagId } = action.payload;
+      return { ...state, [boardId]: { ...state[boardId], tags: [ ...state[boardId].tags, tagId ]}};
+    }
     case "SUCCEED_READ": {
-      return action.payload.boardsById;
+      return {...action.payload.boardsById, ...state};
     }
     default:
       return state;

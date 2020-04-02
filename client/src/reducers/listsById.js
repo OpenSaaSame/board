@@ -65,7 +65,7 @@ const listsById = (state = {}, action) => {
       return restOfLists;
     }    
     case "SUCCEED_READ": {
-      return action.payload.listsById;
+      return {...action.payload.listsById, ...state};
     }
     default:
       return state;

@@ -14,7 +14,7 @@ const users = (state = { list: [], byParty: {} }, action) => {
     case "SUCCEED_READ": {
       return {
         "list": action.payload.users,
-        "byParty": mapBy("party")(action.payload.users)
+        "byParty": {...state.party, ...mapBy("party")(action.payload.users)}
       }
     }
   }

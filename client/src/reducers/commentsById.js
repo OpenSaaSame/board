@@ -6,7 +6,7 @@ const commentsById = (state = {}, action) => {
       return { ...state, [commentId]: { body: comment, _id: commentId, cardId, author, createdAt } };
     }
     case "SUCCEED_READ": {
-      return action.payload.commentsById;
+      return {...state, ...action.payload.commentsById};
     }
     default:
       return state;
