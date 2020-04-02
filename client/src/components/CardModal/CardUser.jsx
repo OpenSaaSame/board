@@ -33,9 +33,9 @@ class CardUser extends Component {
 
   render() {
     const { allUsers, assignee } = this.props;
-    const users = [{party: "None", email: "None"}, ...allUsers.list ];
+    const users = [{party: "None", displayName: "None"}, ...allUsers.list ];
     const userList = users.map(user => {
-      return <option key={user.party} value={user.party}>{user.email}</option>
+      return <option key={user.party} value={user.party}>{user.displayName}</option>
     });
 
     return  <div>

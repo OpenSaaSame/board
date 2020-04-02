@@ -150,13 +150,11 @@ const filterGroupAndVersion = (party, cs) => {
     ctMap[t[0]][t[1]] = [];
   });
   cs.forEach(c => {
-    if(!party || c.observers.includes(party) || c.signatories.includes(party)) {
-      ctMap[unversionedModule(c)][templateEntity(c)].push({
-        ...c.payload,
-        version : templateVersion(c),
-        cid: c.contractId
-      })
-    }
+    ctMap[unversionedModule(c)][templateEntity(c)].push({
+      ...c.payload,
+      version : templateVersion(c),
+      cid: c.contractId
+    })
   })
   return ctMap
 }
@@ -166,9 +164,6 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
     const contracts = await loadAll(ledgerUrl, jwt);
     const contractMap = filterGroupAndVersion(party, contracts);
 
-    console.log(contracts);
-
-    const user = (contractMap.Role.User)[0];
     const boardsById = mapBy("_id")(contractMap.Board.Data);
     const listsById = mapBy("_id")(contractMap.Board.CardList);
     const cardsById = mapBy("_id")(contractMap.Board.Card);
@@ -176,6 +171,9 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
     const tagsById = mapBy("_id")(contractMap.Board.Tag);
     const users = (contractMap.User.Profile);
     users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0));
+    const userRole = (contractMap.Role.User)[0];
+    const userProfile = users.filter(user => user.party === userRole.party)[0];
+    const user = { ...userProfile, ...userRole };
     const boardUsersById = mapBy("boardId")(contractMap.Rules.Board);
 
     return {
@@ -189,10 +187,10 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
       boardUsersById
     }
   } catch(err) {
+    console.log(err)
     throw new NestedError(`Error processing all contracts: `, err);
   }
 }
-
 
 export const exercise = (ledgerUrl, jwt, templateId, contractId, choice, argument) => {
   callAndProcessAPI (

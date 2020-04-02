@@ -41,12 +41,7 @@ class User extends Component {
     }
     const user = this.props.user;
     return <div className="user">
-      <img
-        src={user.imageUrl}
-        alt={user.email || user.displayName}
-        className="user-thumbnail"
-        />
-      <span className="user-name">{user.email || user.displayName}</span>
+      <span className="user-name">{user.displayName}</span>
       <Wrapper
         className="user-rights-wrapper"
         onSelection={this.handleSelection}

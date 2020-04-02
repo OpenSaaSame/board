@@ -1,19 +1,31 @@
-import { loadState, exercise as exerciseUtil, rootErr } from "./ledgerUtils"
+import { loadState, exercise as exerciseUtil, rootErr, processResponse } from "./ledgerUtils"
 
-const ledgerUrl = "/v1/";
+const makeLedgerUrl = () => {
+    if (window.location.hostname === 'localhost') {
+        return '/v1/';
+    }
+
+    // Generate DABL URL from the location
+    let host = window.location.host.split('.')
+    const ledgerId = host[0];
+    let apiUrl = host.slice(1)
+    apiUrl.unshift('api')
+
+    return apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId;
+}
 
 export const upgrade = user => exerciseUtil(
-    ledgerUrl,
+    makeLedgerUrl(),
     user.token,
     `${user.version}.Upgrade:UpgradeInvite`,
     user.cid,
     "Accept_Upgrade", {}
 );
 
-const exercise = (user, choice, args) => {
+export const exercise = (user, choice, args) => {
     if (user.cid) {
         exerciseUtil(
-            ledgerUrl,
+            makeLedgerUrl(),
             user.token,
             `${user.version}.Role:User`,
             user.cid,
@@ -82,6 +94,7 @@ const payloadTransform = {
     "CHANGE_PERMISSIONS": payload => payload,
     "ADD_USER": payload => payload,
     "REMOVE_USER": payload => payload,
+    "PutProfile": payload => ({ displayName: payload.displayName, imageUrl: "" }),
     "DELETE_BOARD": payload => payload,
     "CHANGE_BOARD_TITLE": payload => ({ boardId: payload.boardId, newTitle: payload.boardTitle }),
     "CHANGE_BOARD_COLOR": payload => ({ boardId: payload.boardId, newColor: payload.color }),
@@ -104,14 +117,11 @@ const payloadTransform = {
     "UNASSIGN_TAG": payload => ({ cardId: payload.cardId, tagId: payload.tagId })
 }
 
-const dispatchStates = async(store, pPrivateState, pPublicState) => {
-    const [privateState, publicState] = await Promise.all([pPrivateState, pPublicState]);
+const dispatchStates = async(store, remoteState) => {
     try {
-        const state = {
-                ...publicState,
-                ...privateState
-            }
-            //If there are changes in flight, queue another read.
+        const state = await remoteState;
+
+        //If there are changes in flight, queue another read.
         if (store.getState().ledger.read.cancelled) {
             store.dispatch({
                 type: "CANCEL_READ",
@@ -135,8 +145,11 @@ const dispatchStates = async(store, pPrivateState, pPublicState) => {
             }), 10000)
         } else {
             // If reading goes wrong for other reasons,
-            // reload to get a fresh UI and token.
-            // location.reload();
+            // log out and reload to get a fresh UI and token.
+            store.dispatch({
+                type: "LOG_OUT"
+            })
+            window.location.reload();
         }
     }
 }
@@ -157,7 +170,7 @@ const maybeRead = (store) => {
         payload: {}
     });
 
-    dispatchStates(store, loadState(ledgerUrl, user.token, user.party), fetch("/public"));
+    dispatchStates(store, loadState(makeLedgerUrl(), user.token, user.party));
 }
 
 // Persist the board to the database after almost every action.
@@ -175,6 +188,7 @@ const persistMiddleware = store => next => action => {
             case "TOGGLE_PUBLIC":
             case "ADD_USER":
             case "REMOVE_USER":
+            case "PutProfile":
             case "CHANGE_PERMISSIONS":
             case "DELETE_BOARD":
 

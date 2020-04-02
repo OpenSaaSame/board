@@ -50,12 +50,7 @@ class UserList extends Component {
           }
           renderItem={(user, isHighlighted) =>
               <div key={user.party} className="item" style={{ background: isHighlighted ? 'lightgray' : 'white' }}>
-                <img
-                  src={user.imageUrl}
-                  alt={user.email || user.displayName}
-                  className="user-thumbnail"
-                />
-                <span className="user-name">{user.email || user.displayName}</span>
+                <span className="user-name">{user.displayName}</span>
               </div>
           }
           value={this.state.acValue}
