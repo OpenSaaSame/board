@@ -8,14 +8,19 @@ import Spinner from "./Spinner/Spinner";
 import Alert from "./Alert/Alert";
 import Upgrade from "./Upgrade/Upgrade";
 import LogIn from "./Session/LogIn";
+import Registration from "./Session/Registration";
 
 class App extends Component {
   render = () => {
-    const { loggedIn } = this.props;
+    const { loggedIn, user } = this.props;
 
     const loggedInRoutes = (
       <>
         <Switch>
+          <Route exact path="/registration" component={Registration} />
+          { (user && user.registered === false) &&
+            <Redirect to="/registration" />
+          }
           <Route exact path="/" component={Home} />
           <Route path="/b/:boardId" component={BoardContainer} />
           <Redirect to="/" />
@@ -27,15 +32,18 @@ class App extends Component {
     );
 
     const loggedOutRoutes = (
-      <Switch>
-        <Route exact path="/" component={LogIn} />
-        <Redirect to="/" />
-      </Switch>
+      <>
+        <Switch>
+          <Route exact path="/" component={LogIn} />
+          <Redirect to="/" />
+        </Switch>
+        <Spinner />
+      </>
     );
 
     return (
         <div id="app" className="app">
-          { loggedIn ? loggedInRoutes : loggedOutRoutes }
+          { (loggedIn && user.registered !== undefined) ? loggedInRoutes : loggedOutRoutes }
         </div>
     );
   }
@@ -43,7 +51,7 @@ class App extends Component {
 
 App.propTypes = { };
 
-const mapStateToProps = ({ loggedIn }) => ({ loggedIn });
+const mapStateToProps = ({ loggedIn, user }) => ({ loggedIn, user });
 
 // Use withRouter to prevent strange glitch where other components
 // lower down in the component tree wouldn't update from URL changes

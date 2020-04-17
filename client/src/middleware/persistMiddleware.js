@@ -1,4 +1,4 @@
-import { loadState, exercise as exerciseUtil, rootErr, processResponse } from "./ledgerUtils"
+import { loadState, exercise as exerciseUtil, create, rootErr, processResponse } from "./ledgerUtils"
 
 const makeLedgerUrl = () => {
     if (window.location.hostname === 'localhost') {
@@ -13,6 +13,20 @@ const makeLedgerUrl = () => {
 
     return apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId;
 }
+
+export const createUserSession = async (jwt, party, email, displayName) => {
+    // get admin ID
+    var admin;
+    if (window.location.hostname === 'localhost') {
+        admin = "Admin";
+    } else {
+        const dablInfo = await JSON.parse(await fetch("/.well-known/dabl.json"));
+        admin = dablInfo["userAdminParty"];
+    }
+    await create(makeLedgerUrl(), jwt, "Danban.V3_1:UserSession", { operator: admin, user: party, email, displayName });
+    window.location.reload();
+};
+
 
 export const upgrade = user => exerciseUtil(
     makeLedgerUrl(),
