@@ -45,7 +45,7 @@ class LogIn extends Component {
           <div className="main-content">
 
             <form onSubmit={this.handleLogin}>
-              <h2>Login</h2>
+              <h2>Log In</h2>
               <div>
                 <label>
                   Party
