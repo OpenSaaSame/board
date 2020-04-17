@@ -1,0 +1,23 @@
+form {
+  background: white;
+  padding: 2em;
+  font-size: 16pt;
+  border-radius: 8px;
+
+  h1 {
+    padding-left: 0
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5em;
+  }
+
+  input {
+    display: block;
+  }
+
+  input[type="submit"] {
+    cursor: pointer; 
+  }
+}

@@ -3,6 +3,7 @@ import { Title } from "react-head";
 import Header from "../Header/Header";
 import { connect } from "react-redux";
 import { createUserSession } from "../../middleware/persistMiddleware";
+import "./Session.scss"
 
 class Registration extends Component {
   constructor() {
@@ -43,35 +44,37 @@ class Registration extends Component {
         <Title>Home | OpenWork</Title>
         <Header />
         <div className="home">
-          <form onSubmit={this.handleProfileSubmit}>
-            <h1>Profile Details</h1>
-            <div>
-              <label>Name</label>
-            </div>
-            <div>
+          <div className="main-content">
+            <form onSubmit={this.handleProfileSubmit}>
+              <h2>Register Your Profile</h2>
+              <div>
+                <label>
+                  Name
+                  <input
+                    type="text"
+                    name="displayName"
+                    value={displayName}
+                    onChange={this.handleChange}
+                  />
+                </label>
+              </div>
+              <div>
+                <label>
+                  Email
+                  <input
+                    type="text"
+                    name="email"
+                    value={email}
+                    onChange={this.handleChange}
+                  />
+                </label>
+              </div>
               <input
-                type="text"
-                name="displayName"
-                value={displayName}
-                onChange={this.handleChange}
+                type="submit"
+                value="Submit"
               />
-            </div>
-            <div>
-              <label>Email</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                name="email"
-                value={email}
-                onChange={this.handleChange}
-              />
-            </div>
-            <input
-              type="submit"
-              value="Submit"
-            />
-          </form>;
+            </form>
+          </div>
         </div>
       </>
     )

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Title } from "react-head";
 import Header from "../Header/Header";
 import { connect } from "react-redux";
+import "./Session.scss"
 
 class LogIn extends Component {
 
@@ -44,26 +45,26 @@ class LogIn extends Component {
           <div className="main-content">
 
             <form onSubmit={this.handleLogin}>
-              <h1>Login</h1>
+              <h2>Login</h2>
               <div>
-                <label>Party</label>
+                <label>
+                  Party
+                  <input
+                    type="text"
+                    name="party"
+                    onChange={this.handleChange}
+                  />
+                </label>
               </div>
               <div>
-                <input
-                  type="text"
-                  name="party"
-                  onChange={this.handleChange}
-                />
-              </div>
-              <div>
-                <label>JWT</label>
-              </div>
-              <div>
-                <input
-                  type="password"
-                  name="jwt"
-                  onChange={this.handleChange}
-                />
+                <label>
+                  JWT
+                  <input
+                    type="password"
+                    name="jwt"
+                    onChange={this.handleChange}
+                  />
+                </label>
               </div>
               <input
                 type="submit"
