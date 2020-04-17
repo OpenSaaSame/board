@@ -9,11 +9,15 @@ class Header extends Component {
   static propTypes = { user: PropTypes.object, dispatch: PropTypes.func.isRequired };
 
   handleSignOut = (event) => {
+    event.preventDefault();
     const { dispatch } = this.props;
 
     dispatch({
       type: "LOG_OUT"
     });
+    dispatch({
+      type: "CANCEL_READ"
+    })
   }
 
   render = () => {
