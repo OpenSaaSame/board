@@ -38,10 +38,12 @@ class LogIn extends Component {
 
   componentWillMount = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    this.setState({
-      party: urlParams.get("party"),
-      jwt: urlParams.get("token")
-    });
+    if (urlParams.get("party") && urlParams.get("token")) {
+      this.setState({
+        party: urlParams.get("party"),
+        jwt: urlParams.get("token")
+      });
+    }
   };
 
   render = () => {
