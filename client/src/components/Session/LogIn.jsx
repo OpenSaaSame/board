@@ -24,26 +24,39 @@ class LogIn extends Component {
     });
   };
 
-  handleLogin = (event) => {
-    const { dispatch } = this.props;
+  handleSubmit = (event) => {
+    event.preventDefault();
     const { party, jwt } = this.state;
+    this.handleLogin(party, jwt);
+  };
+
+  handleLogin = (party, jwt) => {
+    const { dispatch } = this.props;
     localStorage.setItem('party', party);
     localStorage.setItem('jwt', jwt);
-    event.preventDefault();
 
     dispatch({
       'type': 'LOG_IN'
     });
-  }
+  };
 
   componentWillMount = () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("party") && urlParams.get("token")) {
-      this.setState({
-        party: urlParams.get("party"),
-        jwt: urlParams.get("token")
-      });
+      const party = urlParams.get("party")
+      const jwt = urlParams.get("token")
+      this.handleLogin(party, jwt);
     }
+  };
+
+  dablLogInButtonUrl = () => {
+    let host = window.location.host.split('.')
+    const ledgerId = host[0]
+    let loginUrl = host.slice(1)
+    loginUrl.unshift('login')
+
+    return 'https://' + loginUrl.join('.') + (window.location.port ? ':' + window.location.port : '')
+        + '/auth/login?ledgerId=' + ledgerId
   };
 
   render = () => {
@@ -55,9 +68,11 @@ class LogIn extends Component {
         <Header />
         <div className="home">
           <div className="main-content">
-
-            <form onSubmit={this.handleLogin}>
+            <form onSubmit={this.handleSubmit}>
               <h2>Log In</h2>
+              { window.location.hostname !== "localhost" &&
+                <a href={this.dablLogInButtonUrl()}>Log In with DABL</a>
+              }
               <div>
                 <label>
                   Party

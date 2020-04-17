@@ -11,7 +11,7 @@ const makeLedgerUrl = () => {
     let apiUrl = host.slice(1)
     apiUrl.unshift('api')
 
-    return apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId;
+    return 'https://' +  apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId;
 }
 
 export const createUserSession = async (jwt, party, email, displayName) => {
