@@ -1,4 +1,4 @@
-import { loadState, exercise as exerciseUtil, create, rootErr, processResponse } from "./ledgerUtils"
+import { loadState, exercise as exerciseUtil, create, rootErr } from "./ledgerUtils"
 
 const makeLedgerUrl = () => {
     if (window.location.hostname === 'localhost') {
