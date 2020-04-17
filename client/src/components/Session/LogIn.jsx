@@ -36,7 +36,17 @@ class LogIn extends Component {
     });
   }
 
+  componentWillMount = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    this.setState({
+      party: urlParams.get("party"),
+      jwt: urlParams.get("token")
+    });
+  };
+
   render = () => {
+    const { party, jwt } = this.state;
+
     return (
       <>
         <Title>Home | OpenWork</Title>
@@ -52,6 +62,7 @@ class LogIn extends Component {
                   <input
                     type="text"
                     name="party"
+                    value={party}
                     onChange={this.handleChange}
                   />
                 </label>
@@ -62,6 +73,7 @@ class LogIn extends Component {
                   <input
                     type="password"
                     name="jwt"
+                    value={jwt}
                     onChange={this.handleChange}
                   />
                 </label>
