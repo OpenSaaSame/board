@@ -8,8 +8,7 @@ import "./Header.scss";
 class Header extends Component {
   static propTypes = { user: PropTypes.object, dispatch: PropTypes.func.isRequired };
 
-  handleSignOut = (event) => {
-    event.preventDefault();
+  handleSignOut = () => {
     const { dispatch } = this.props;
 
     dispatch({
@@ -30,10 +29,13 @@ class Header extends Component {
         </Link>
         <div className="header-right-side">
           { loggedIn &&
-            <button className="signout-link" onClick={this.handleSignOut}>
-              <FaSignOut className="signout-icon" fill="#303132" />
-              &nbsp;Log Out
-            </button>
+            <Link
+              to="/"
+              className="signout-link"
+              onClick={this.handleSignOut}
+            >
+              <FaSignOut className="signout-icon" fill="#303132" />&nbsp;Log Out
+            </Link>
           }
         </div>
       </header>
