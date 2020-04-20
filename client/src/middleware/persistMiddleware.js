@@ -1,4 +1,4 @@
-import { loadState, exercise as exerciseUtil, create, rootErr } from "./ledgerUtils"
+import { loadState, exercise as exerciseUtil, create, rootErr, processResponse } from "./ledgerUtils"
 
 const makeLedgerUrl = () => {
     if (window.location.hostname === 'localhost') {
@@ -17,7 +17,9 @@ const makeLedgerUrl = () => {
 export const createUserSession = async (jwt, party, email, displayName) => {
     // get admin ID
     var admin;
-    if (window.location.hostname === 'localhost') {
+    if (process.env.REACT_APP_ADMIN_PARTY) {
+        admin = process.env.REACT_APP_ADMIN_PARTY;
+    } else if (window.location.hostname === 'localhost') {
         admin = "Admin";
     } else {
         const dablInfo = await (await fetch("/.well-known/dabl.json")).json();
