@@ -21,3 +21,21 @@ form {
     cursor: pointer; 
   }
 }
+
+.dabl-login {
+  text-align: center;
+  height: 2em;
+  line-height: 2em;
+  padding: 0.5em;
+  margin: 1em 0;
+  display: block;
+  font-weight: 600;
+  border-radius: 4px;
+  color: white;
+  background-color: #3566D3;
+  text-decoration: none;
+}
+
+.dabl-login:hover {
+  background-color: #2457C7;
+}

@@ -75,7 +75,7 @@ class LogIn extends Component {
             <form onSubmit={this.handleSubmit}>
               <h2>Log In</h2>
               { window.location.hostname !== "localhost" &&
-                <a href={this.dablLogInButtonUrl()}>Log In with DABL</a>
+                <a href={this.dablLogInButtonUrl()} className="dabl-login">Log In with DABL</a>
               }
               <div>
                 <label>
