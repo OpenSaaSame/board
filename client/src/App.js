@@ -22,15 +22,6 @@ if (localStorage.getItem('party')) {
   });
 }
 
-const poll = () => {
-  store.dispatch({
-    type: "QUEUE_READ",
-    payload: {at : Date.now()}
-  });
-}
-setInterval(poll, 10000);
-poll();
-
 function Appl() {
   return (
     <Provider store={store}>

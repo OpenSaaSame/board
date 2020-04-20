@@ -11,7 +11,7 @@ const makeLedgerUrl = () => {
     let apiUrl = host.slice(1)
     apiUrl.unshift('api')
 
-    return 'https://' +  apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId;
+    return 'https://' +  apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId + '/v1/';
 }
 
 export const createUserSession = async (jwt, party, email, displayName) => {
@@ -20,11 +20,10 @@ export const createUserSession = async (jwt, party, email, displayName) => {
     if (window.location.hostname === 'localhost') {
         admin = "Admin";
     } else {
-        const dablInfo = await JSON.parse(await fetch("/.well-known/dabl.json"));
+        const dablInfo = await (await fetch("/.well-known/dabl.json")).json();
         admin = dablInfo["userAdminParty"];
     }
     await create(makeLedgerUrl(), jwt, "Danban.V3_1:UserSession", { operator: admin, user: party, email, displayName });
-    window.location.reload();
 };
 
 
@@ -157,13 +156,13 @@ const dispatchStates = async(store, remoteState) => {
                 type: "NETWORK_RETRY",
                 payload: {}
             }), 10000)
-        } else {
-            // If reading goes wrong for other reasons,
+        } else if (store.loggedIn && store.registered) {
+            // If reading goes wrong for logged in users for other reasons,
             // log out and reload to get a fresh UI and token.
-            store.dispatch({
-                type: "LOG_OUT"
-            })
-            window.location.reload();
+            // store.dispatch({
+            //     type: "LOG_OUT"
+            // })
+            // window.location.reload();
         }
     }
 }

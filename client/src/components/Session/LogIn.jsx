@@ -38,6 +38,10 @@ class LogIn extends Component {
     dispatch({
       'type': 'LOG_IN'
     });
+    dispatch({
+      type: "QUEUE_READ",
+      payload: {at : Date.now()}
+    });
   };
 
   componentWillMount = () => {

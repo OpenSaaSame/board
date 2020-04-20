@@ -11,19 +11,40 @@ import LogIn from "./Session/LogIn";
 import Registration from "./Session/Registration";
 
 class App extends Component {
+  componentWillMount() {
+    this.timer = setInterval(()=> this.readLedger(), 10000);
+  }
+
+  componentWillUnmount() {
+    this.timer = null;
+  }
+
+  readLedger = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: "QUEUE_READ",
+      payload: {at : Date.now()}
+    });
+  };
+
   render = () => {
     const { loggedIn, user } = this.props;
+
+    const registrationNeededRoutes = (
+      <>
+        <Switch>
+          <Route exact path="/" component={Registration} />
+          <Redirect to="/" />
+        </Switch>
+        <Spinner />
+      </>
+    );
 
     const loggedInRoutes = (
       <>
         <Switch>
-          <Route exact path="/registration" component={Registration} />
-          { (user && user.registered === false) &&
-            <Redirect to="/registration" />
-          }
           <Route exact path="/" component={Home} />
           <Route path="/b/:boardId" component={BoardContainer} />
-          <Redirect to="/" />
         </Switch>
         <Spinner />
         <Alert />
@@ -37,14 +58,22 @@ class App extends Component {
           <Route exact path="/" component={LogIn} />
           <Redirect to="/" />
         </Switch>
-        <Spinner />
       </>
     );
 
+    var routes;
+    if (!loggedIn) {
+      routes = loggedOutRoutes;
+    } else if (loggedIn && user.registered === false) {
+      routes = registrationNeededRoutes;
+    } else {
+      routes = loggedInRoutes;
+    }
+
     return (
-        <div id="app" className="app">
-          { (loggedIn && user.registered !== undefined) ? loggedInRoutes : loggedOutRoutes }
-        </div>
+      <div id="app" className="app">
+        { routes }
+      </div>
     );
   }
 };

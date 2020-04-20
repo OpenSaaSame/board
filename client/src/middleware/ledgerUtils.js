@@ -38,6 +38,7 @@ export const processResponse = async response => {
 }
 
 export const callAPI = async (url, token, method, body) => {
+  console.log("Calling URL", url);
   try {
     return fetch(
       url,

@@ -9,6 +9,7 @@ class Registration extends Component {
   constructor() {
     super();
     this.state = {
+      submitted: false,
       displayName: "",
       email: ""
     };
@@ -26,19 +27,14 @@ class Registration extends Component {
 
   handleProfileSubmit = (event) => {
     event.preventDefault();
-
+    this.setState({submitted: true});
+    const { user } = this.props;
     const { displayName, email } = this.state;
-    const { dispatch, user } = this.props;
-
-    createUserSession(user.token, user.party, email, displayName);
-    dispatch({
-      type: "QUEUE_READ",
-      payload: {at : Date.now()}
-    });
+    createUserSession(user.token, user.party, email, displayName)
   };
 
   render = () => {
-    const { displayName, email } = this.state;
+    const { displayName, email, submitted } = this.state;
     return (
       <>
         <Title>Home | OpenWork</Title>
@@ -71,7 +67,8 @@ class Registration extends Component {
               </div>
               <input
                 type="submit"
-                value="Submit"
+                value={!submitted ? "Register" : "Waiting…"}
+                disabled={submitted}
               />
             </form>
           </div>
