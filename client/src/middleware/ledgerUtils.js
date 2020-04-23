@@ -7,9 +7,10 @@ const mapBy = field => list => {
   return ret;
 }
 
+const prefix = process.env.REACT_APP_V3_PACKAGE_ID ? `${process.env.REACT_APP_V3_PACKAGE_ID}:` : "";
 export const appVersions = [
   "Danban.V2",
-  "Danban.V3"
+  `${prefix}Danban.V3`
 ];
 
 export const rootErr = err => {
@@ -38,7 +39,6 @@ export const processResponse = async response => {
 }
 
 export const callAPI = async (url, token, method, body) => {
-  console.log("Calling URL", url);
   try {
     return fetch(
       url,
