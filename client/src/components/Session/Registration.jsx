@@ -41,7 +41,7 @@ class Registration extends Component {
         <Header />
         <div className="home">
           <div className="main-content">
-            <form onSubmit={this.handleProfileSubmit}>
+            <form onSubmit={this.handleProfileSubmit} className="session-form">
               <h2>Register Your Profile</h2>
               <div>
                 <label>
