@@ -6,3 +6,4 @@ stats.json
 server/dist
 *.log
 build
+*.egg-info
