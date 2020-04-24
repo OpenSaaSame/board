@@ -10,7 +10,7 @@ class LogIn extends Component {
     super();
     this.state = {
       party: "",
-      jwt: "",
+      token: "",
     };
   }
 
@@ -24,19 +24,12 @@ class LogIn extends Component {
     });
   };
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    const { party, jwt } = this.state;
-    this.handleLogin(party, jwt);
-  };
-
-  handleLogin = (party, jwt) => {
+  handleLogin = (party, token) => {
     const { dispatch } = this.props;
-    localStorage.setItem('party', party);
-    localStorage.setItem('jwt', jwt);
 
     dispatch({
-      'type': 'LOG_IN'
+      'type': 'LOG_IN',
+      'payload': { party, token }
     });
     dispatch({
       type: "QUEUE_READ",
@@ -44,12 +37,21 @@ class LogIn extends Component {
     });
   };
 
+  handleSubmit = (event) => {
+    event.preventDefault();
+    const { party, token } = this.state;
+
+    localStorage.setItem('party', party);
+    localStorage.setItem('token', token);
+
+    this.handleLogin(party, token);
+  };
+
   componentWillMount = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("party") && urlParams.get("token")) {
-      const party = urlParams.get("party")
-      const jwt = urlParams.get("token")
-      this.handleLogin(party, jwt);
+    const party = localStorage.getItem('party');
+    const token = localStorage.getItem('token');
+    if (party && token) {
+      this.handleLogin(party, token);
     }
   };
 
@@ -64,7 +66,7 @@ class LogIn extends Component {
   };
 
   render = () => {
-    const { party, jwt } = this.state;
+    const { party, token } = this.state;
 
     return (
       <>
@@ -93,11 +95,11 @@ class LogIn extends Component {
               </div>
               <div>
                 <label>
-                  JWT
+                  token
                   <input
                     type="password"
-                    name="jwt"
-                    value={jwt}
+                    name="token"
+                    value={token}
                     onChange={this.handleChange}
                   />
                 </label>

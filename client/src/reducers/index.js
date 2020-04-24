@@ -11,17 +11,14 @@ import boardUsersById from "./boardUsersById";
 
 export default (state = {}, action) => {
     if (action.type === "LOG_IN") {
+        const { party, token } = action.payload;
         return {
             ...state,
             cardsById: {},
             listsById: {},
             boardsById: {},
             loggedIn: true,
-            user: {
-                party: localStorage.getItem('party'),
-                token: localStorage.getItem('jwt'),
-                version: 'Danban.V3'
-            }
+            user: { party, token, version: 'Danban.V3' }
         };
     }
     if (action.type === "LOG_OUT") {

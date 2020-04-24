@@ -15,7 +15,7 @@ class Header extends Component {
     event.preventDefault();
 
     localStorage.removeItem('party');
-    localStorage.removeItem('jwt');
+    localStorage.removeItem('token');
     
     const { dispatch } = this.props;
     dispatch({

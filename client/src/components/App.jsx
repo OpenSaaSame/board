@@ -11,29 +11,8 @@ import LogIn from "./Session/LogIn";
 import Registration from "./Session/Registration";
 
 class App extends Component {
-  handleLogin = (party, jwt) => {
-    const { dispatch } = this.props;
-    localStorage.setItem('party', party);
-    localStorage.setItem('jwt', jwt);
-
-    dispatch({
-      'type': 'LOG_IN'
-    });
-    dispatch({
-      type: "QUEUE_READ",
-      payload: {at : Date.now()}
-    });
-  };
-
   componentWillMount() {
     this.timer = setInterval(()=> this.readLedger(), 10000);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("party") && urlParams.get("token")) {
-      const party = urlParams.get("party")
-      const jwt = urlParams.get("token")
-      this.handleLogin(party, jwt);
-    }
   }
 
   componentWillUnmount() {
@@ -54,8 +33,8 @@ class App extends Component {
     const registrationNeededRoutes = (
       <>
         <Switch>
-          <Route exact path="/" component={Registration} />
-          <Redirect to="/" />
+          <Route exact path="/register" component={Registration} />
+          <Redirect to="/register" />
         </Switch>
         <Spinner />
       </>
@@ -76,8 +55,8 @@ class App extends Component {
     const loggedOutRoutes = (
       <>
         <Switch>
-          <Route exact path="/" component={LogIn} />
-          <Redirect to="/" />
+          <Route exact path="/login" component={LogIn} />
+          <Redirect to="/login" />
         </Switch>
       </>
     );
