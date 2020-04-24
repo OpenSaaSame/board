@@ -143,7 +143,8 @@ const mapStateToProps = (state, { cardId }) => {
   const boardId = state.cardsById[cardId].boardId;
   const cardTags = state.cardsById[cardId].tags.map(tagId => state.tagsById[tagId]);
   const board = state.boardsById[boardId];
-  const tags = board.tags.map(tagId => state.tagsById[tagId]);
+  // TODO: there shouldn't be undefined tags
+  const tags = board.tags.map(tagId => state.tagsById[tagId]).filter(tag => tag !== undefined);
   return { cardId, boardId, tags, cardTags };
 };
 
