@@ -31,7 +31,7 @@ class CardTags extends Component {
     super();
     this.state = {
       newTagName: "",
-      newTagColor: ""
+      newTagColor: "#c8ebcf"
     };
   }
 
@@ -41,12 +41,14 @@ class CardTags extends Component {
     const { dispatch, boardId } = this.props;
     const tagId = shortid.generate();
 
-    if (newTagName !== "" && isHexColor(newTagColor, 'either')) {
+    const newTagColorValue = newTagColor.substring(1);
+
+    if (newTagName !== "" && isHexColor(newTagColorValue, 'either')) {
       dispatch({
         type: "ADD_TAG",
         payload: {
           name: newTagName,
-          color: newTagColor,
+          color: newTagColorValue,
           tagId,
           boardId
         }
@@ -124,11 +126,10 @@ class CardTags extends Component {
           <div className="form-row">
             <label>Color (hex):</label>
             <input
-              type="text"
+              type="color"
               value={newTagColor}
               onChange={this.handleColorChange}
               onKeyDown={this.handleKeyDown}
-              placeholder="000000"
             />
           </div>
           <input type="submit" value="Add tag" />
