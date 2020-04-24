@@ -95,7 +95,7 @@ class LogIn extends Component {
               </div>
               <div>
                 <label>
-                  token
+                  JWT
                   <input
                     type="password"
                     name="token"
