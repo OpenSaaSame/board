@@ -32,7 +32,6 @@ class App extends Component {
     if (urlParams.get("party") && urlParams.get("token")) {
       const party = urlParams.get("party")
       const jwt = urlParams.get("token")
-      console.log("params!", party);
       this.handleLogin(party, jwt);
     }
   }
