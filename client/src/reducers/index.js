@@ -25,8 +25,6 @@ export default (state = {}, action) => {
         };
     }
     if (action.type === "LOG_OUT") {
-        localStorage.removeItem('party');
-        localStorage.removeItem('jwt');
         return {
             ...state,
             loggedIn: false,

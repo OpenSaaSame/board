@@ -12,16 +12,6 @@ const store = createStore(
   composeWithDevTools(applyMiddleware(persistMiddleware))
 );
 
-if (localStorage.getItem('party')) {
-  store.dispatch({
-    type: "LOG_IN"
-  });
-  store.dispatch({
-    type: "QUEUE_READ",
-    payload: {at : Date.now()}
-  });
-}
-
 function Appl() {
   return (
     <Provider store={store}>

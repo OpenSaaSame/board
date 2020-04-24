@@ -6,18 +6,27 @@ import FaSignOut from "react-icons/lib/fa/sign-out";
 import "./Header.scss";
 
 class Header extends Component {
-  static propTypes = { user: PropTypes.object, dispatch: PropTypes.func.isRequired };
+  static propTypes = {
+    user: PropTypes.object,
+    dispatch: PropTypes.func.isRequired
+  };
 
-  handleSignOut = () => {
+  handleSignOut = (event) => {
+    event.preventDefault();
+
+    localStorage.removeItem('party');
+    localStorage.removeItem('jwt');
+    
     const { dispatch } = this.props;
-
     dispatch({
       type: "LOG_OUT"
     });
     dispatch({
       type: "CANCEL_READ"
-    })
-  }
+    });
+
+    window.location = ("/");
+  };
 
   render = () => {
     const { loggedIn } = this.props;
@@ -29,13 +38,12 @@ class Header extends Component {
         </Link>
         <div className="header-right-side">
           { loggedIn &&
-            <Link
-              to="/"
+            <button
               className="signout-link"
               onClick={this.handleSignOut}
             >
               <FaSignOut className="signout-icon" fill="#303132" />&nbsp;Log Out
-            </Link>
+            </button>
           }
         </div>
       </header>
