@@ -96,7 +96,8 @@ class CardBadges extends Component {
     const { tags } = this.props;
 
     if (tags !== undefined) {
-      return tags.map(tag =>
+      // TODO: Figure out why some tags are undefined
+      return tags.filter(tag => tag !== undefined).map(tag =>
         <div
           className="badge"
           key={tag._id}
