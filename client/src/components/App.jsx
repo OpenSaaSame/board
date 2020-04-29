@@ -42,6 +42,7 @@ class App extends Component {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/b/:boardId" component={BoardContainer} />
+          <Redirect to="/" />
         </Switch>
         <Spinner />
         <Alert />
