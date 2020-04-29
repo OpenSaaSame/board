@@ -4,6 +4,8 @@ import Header from "../Header/Header";
 import { connect } from "react-redux";
 import "./Session.scss"
 
+const isLocalhost = window.location.hostname === "localhost";
+
 class LogIn extends Component {
 
   constructor() {
@@ -11,8 +13,11 @@ class LogIn extends Component {
     this.state = {
       party: "",
       token: "",
+      showAdvancedAuth: isLocalhost
     };
   }
+
+  
 
   handleChange = (event) => {
     const target = event.target;
@@ -47,6 +52,11 @@ class LogIn extends Component {
     this.handleLogin(party, token);
   };
 
+  toggleForm = () => {
+    const { showAdvancedAuth } = this.state;
+    this.setState({showAdvancedAuth: !showAdvancedAuth});
+  }
+
   componentWillMount = () => {
     const party = localStorage.getItem('party');
     const token = localStorage.getItem('token');
@@ -66,7 +76,7 @@ class LogIn extends Component {
   };
 
   render = () => {
-    const { party, token } = this.state;
+    const { party, token, showAdvancedAuth } = this.state;
 
     return (
       <>
@@ -75,39 +85,40 @@ class LogIn extends Component {
         <div className="home">
           <div className="main-content">
             <form onSubmit={this.handleSubmit} className="session-form">
-              <h2>Log In</h2>
-              { window.location.hostname !== "localhost" &&
+              { !isLocalhost &&
                 <>
-                  <a href={this.dablLogInButtonUrl()} className="dabl-login">Log In with DABL</a>
-                  <h3>Advanced Options</h3>
+                  <div><a href={this.dablLogInButtonUrl()} className="dabl-login">Log In with DABL</a></div>
+                  <button onClick={this.toggleForm}>Advanced Options {showAdvancedAuth ? "-" : "+"}</button>
                 </>
               }
-              <div>
-                <label>
-                  Party
-                  <input
-                    type="text"
-                    name="party"
-                    value={party}
-                    onChange={this.handleChange}
-                  />
-                </label>
+              <div className={!showAdvancedAuth ? "hidden" : ""}>
+                <div>
+                  <label>
+                    Party
+                    <input
+                      type="text"
+                      name="party"
+                      value={party}
+                      onChange={this.handleChange}
+                    />
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    JWT
+                    <input
+                      type="password"
+                      name="token"
+                      value={token}
+                      onChange={this.handleChange}
+                    />
+                  </label>
+                </div>
+                <input
+                  type="submit"
+                  value="Submit"
+                />
               </div>
-              <div>
-                <label>
-                  JWT
-                  <input
-                    type="password"
-                    name="token"
-                    value={token}
-                    onChange={this.handleChange}
-                  />
-                </label>
-              </div>
-              <input
-                type="submit"
-                value="Submit"
-              />
             </form>
           </div>
         </div>
