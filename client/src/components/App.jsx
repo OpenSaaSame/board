@@ -32,10 +32,7 @@ class App extends Component {
 
     const registrationNeededRoutes = (
       <>
-        <Switch>
-          <Route exact path="/register" component={Registration} />
-          <Redirect to="/register" />
-        </Switch>
+        <Registration />
         <Spinner />
       </>
     );
@@ -53,16 +50,11 @@ class App extends Component {
     );
 
     const loggedOutRoutes = (
-      <>
-        <Switch>
-          <Route exact path="/login" component={LogIn} />
-          <Redirect to="/login" />
-        </Switch>
-      </>
+      <LogIn />
     );
 
     var routes;
-    if (!loggedIn) {
+    if (!loggedIn || user.registered === undefined) {
       routes = loggedOutRoutes;
     } else if (loggedIn && user.registered === false) {
       routes = registrationNeededRoutes;
