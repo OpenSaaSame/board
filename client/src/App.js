@@ -12,6 +12,11 @@ const store = createStore(
   composeWithDevTools(applyMiddleware(persistMiddleware))
 );
 
+// Save fragment in local storage for post-DABL redirect
+if (window.location.hash.substring(0, 3) === "#/b") {
+  localStorage.setItem('postDablPath', window.location.hash);
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 const party = urlParams.get("party");
 const token = urlParams.get("token");
@@ -19,7 +24,9 @@ if (party && token) {
   localStorage.setItem('party', party);
   localStorage.setItem('token', token);
   // Strip query params from the location before rendering the app
-  window.location = `${window.location.origin}/${window.location.hash}`
+  // Grab the saved fragement from local storage
+  const fragment = localStorage.getItem('postDablPath') || "";
+  window.location = `${window.location.origin}/${fragment}`;
 }
 
 function Appl() {
