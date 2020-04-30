@@ -124,7 +124,7 @@ class CardTags extends Component {
             />
           </div>
           <div className="form-row">
-            <label>Color (hex):</label>
+            <label>Color:</label>
             <input
               type="color"
               value={newTagColor}

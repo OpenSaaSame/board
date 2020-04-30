@@ -28,6 +28,7 @@ class Card extends Component {
     isDraggingOver: PropTypes.bool.isRequired,
     index: PropTypes.number.isRequired,
     isSignedIn: PropTypes.bool.isRequired,
+    hasWrite: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -39,7 +40,7 @@ class Card extends Component {
   }
 
   toggleCardEditor = () => {
-    if (this.props.isSignedIn) {
+    if (this.props.isSignedIn && this.props.hasWrite) {
       this.setState({ isModalOpen: !this.state.isModalOpen });
     }
   };
@@ -85,12 +86,12 @@ class Card extends Component {
   };
 
   render() {
-    const { card, index, listId, isDraggingOver, assignee, tags } = this.props;
+    const { card, index, listId, isDraggingOver, assignee, tags, hasWrite } = this.props;
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
     return (
       <>
-        <Draggable draggableId={card._id} index={index}>
+        <Draggable draggableId={card._id} index={index} isDragDisabled={!hasWrite}>
           {(provided, snapshot) => (
             <>
               {/* eslint-disable */}
@@ -105,12 +106,16 @@ class Card extends Component {
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 onClick={event => {
-                  provided.dragHandleProps.onClick(event);
-                  this.handleClick(event);
+                  if (provided.dragHandleProps) {
+                    provided.dragHandleProps.onClick(event);
+                    this.handleClick(event);
+                  }
                 }}
                 onKeyDown={event => {
-                  provided.dragHandleProps.onKeyDown(event);
-                  this.handleKeyDown(event);
+                  if (provided.dragHandleProps) {
+                    provided.dragHandleProps.onKeyDown(event);
+                    this.handleKeyDown(event);
+                  }
                 }}
                 style={{
                   ...provided.draggableProps.style,

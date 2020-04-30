@@ -20,7 +20,9 @@ class BoardTitle extends Component {
   }
 
   handleClick = () => {
-    this.setState({ isOpen: true });
+    if (this.props.hasAdmin) {
+      this.setState({ isOpen: true });
+    }
   };
 
   handleChange = event => {
@@ -62,7 +64,7 @@ class BoardTitle extends Component {
 
   render() {
     const { isOpen, newTitle } = this.state;
-    const { boardTitle } = this.props;
+    const { boardTitle, hasAdmin } = this.props;
     return isOpen ? (
       <input
         autoFocus
@@ -76,7 +78,7 @@ class BoardTitle extends Component {
         spellCheck={false}
       />
     ) : (
-      <button className="board-title-button" onClick={this.handleClick}>
+      <button className="board-title-button" onClick={this.handleClick} disabled={!hasAdmin}>
         <h1 className="board-title-text">{boardTitle}</h1>
       </button>
     );

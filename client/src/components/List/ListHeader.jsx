@@ -13,7 +13,8 @@ class ListTitle extends Component {
     boardId: PropTypes.string.isRequired,
     cards: PropTypes.arrayOf(PropTypes.string).isRequired,
     dragHandleProps: PropTypes.object.isRequired,
-    dispatch: PropTypes.func.isRequired
+    dispatch: PropTypes.func.isRequired,
+    hasWrite: PropTypes.bool.isRequired
   };
 
   constructor(props) {
@@ -63,7 +64,9 @@ class ListTitle extends Component {
   };
 
   openTitleEditor = () => {
-    this.setState({ isOpen: true });
+    if (this.props.hasWrite) {
+      this.setState({ isOpen: true });
+    }
   };
 
   handleButtonKeyDown = event => {
@@ -75,7 +78,7 @@ class ListTitle extends Component {
 
   render() {
     const { isOpen, newTitle } = this.state;
-    const { dragHandleProps, listTitle } = this.props;
+    const { dragHandleProps, listTitle, hasWrite } = this.props;
     return (
       <div className="list-header">
         {isOpen ? (
@@ -106,15 +109,17 @@ class ListTitle extends Component {
             {listTitle}
           </div>
         )}
-        <Wrapper className="delete-list-wrapper" onSelection={this.deleteList}>
-          <Button className="delete-list-button">
-            <FaTrash />
-          </Button>
-          <Menu className="delete-list-menu">
-            <div className="delete-list-header">Are you sure?</div>
-            <MenuItem className="delete-list-confirm">Delete</MenuItem>
-          </Menu>
-        </Wrapper>
+        { hasWrite &&
+          <Wrapper className="delete-list-wrapper" onSelection={this.deleteList}>
+            <Button className="delete-list-button">
+              <FaTrash />
+            </Button>
+            <Menu className="delete-list-menu">
+              <div className="delete-list-header">Are you sure?</div>
+              <MenuItem className="delete-list-confirm">Delete</MenuItem>
+            </Menu>
+          </Wrapper>
+        }
       </div>
     );
   }
