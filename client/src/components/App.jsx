@@ -12,7 +12,7 @@ import Registration from "./Session/Registration";
 
 class App extends Component {
   componentWillMount() {
-    this.timer = setInterval(()=> this.readLedger(), 10000);
+    this.timer = setInterval(()=> this.readLedger(), 30000);
   }
 
   componentWillUnmount() {
