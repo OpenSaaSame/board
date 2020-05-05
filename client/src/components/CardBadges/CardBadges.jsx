@@ -70,7 +70,7 @@ class CardBadges extends Component {
         className="badge"
         style={{ background: checked === total ? "green" : "#444" }}
       >
-        <MdDoneAll className="badge-icon" />&nbsp;
+        <MdDoneAll className="badge-icon" style={{verticalAlign: 'middle'}} />&nbsp;
         {checked}/{total}
       </div>
     );

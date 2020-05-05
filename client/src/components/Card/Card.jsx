@@ -105,18 +105,8 @@ class Card extends Component {
                 }}
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
-                onClick={event => {
-                  if (provided.dragHandleProps) {
-                    provided.dragHandleProps.onClick(event);
-                    this.handleClick(event);
-                  }
-                }}
-                onKeyDown={event => {
-                  if (provided.dragHandleProps) {
-                    provided.dragHandleProps.onKeyDown(event);
-                    this.handleKeyDown(event);
-                  }
-                }}
+                onClick={this.handleClick}
+                onKeyDown={this.handleKeyDown}
                 style={{
                   ...provided.draggableProps.style,
                 }}

@@ -42,7 +42,8 @@ class Header extends Component {
               className="signout-link"
               onClick={this.handleSignOut}
             >
-              <FaSignOutAlt className="signout-icon" fill="#303132" />&nbsp;Log Out
+              <FaSignOutAlt className="signout-icon" fill="#303132" style={{verticalAlign: 'middle'}} />
+              &nbsp;Log Out
             </button>
           }
         </div>
