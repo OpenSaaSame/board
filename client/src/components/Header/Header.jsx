@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import FaSignOut from "react-icons/lib/fa/sign-out";
+import { FaSignOutAlt } from "react-icons/fa";
 import "./Header.scss";
 
 class Header extends Component {
@@ -42,7 +42,7 @@ class Header extends Component {
               className="signout-link"
               onClick={this.handleSignOut}
             >
-              <FaSignOut className="signout-icon" fill="#303132" />&nbsp;Log Out
+              <FaSignOutAlt className="signout-icon" fill="#303132" />&nbsp;Log Out
             </button>
           }
         </div>

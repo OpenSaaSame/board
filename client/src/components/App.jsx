@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Route, Redirect, Switch, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
+import { HeadProvider } from "react-head";
 import Home from "./Home/Home";
 import BoardContainer from "./Board/BoardContainer";
 import "./App.scss";
@@ -65,7 +66,9 @@ class App extends Component {
 
     return (
       <div id="app" className="app">
-        { routes }
+        <HeadProvider>
+          { routes }
+        </HeadProvider>
       </div>
     );
   }

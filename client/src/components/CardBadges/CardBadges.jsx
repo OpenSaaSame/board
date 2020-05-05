@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import format from "date-fns/format";
-import differenceInCalendarDays from "date-fns/difference_in_calendar_days";
-import MdAlarm from "react-icons/lib/md/access-alarm";
-import MdDoneAll from "react-icons/lib/fa/check-square-o";
+import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
+import { MdAccessAlarm, MdDoneAll } from "react-icons/md";
 import "./CardBadges.scss";
 
 class CardBadges extends Component {
@@ -54,7 +53,7 @@ class CardBadges extends Component {
 
     return (
       <div className="badge" style={{ background: dueDateColor }}>
-        <MdAlarm className="badge-icon" />&nbsp;
+        <MdAccessAlarm className="badge-icon" />&nbsp;
         {dueDateString}
       </div>
     );

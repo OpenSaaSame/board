@@ -3,7 +3,7 @@ import React from "react";
 import { MoonLoader } from "react-spinners";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import FaExclamationTriagle from "react-icons/lib/fa/exclamation-triangle";
+import { FaExclamationTriangle } from "react-icons/fa";
 import ReactTooltip from 'react-tooltip'
 import "./Spinner.scss";
 
@@ -15,7 +15,7 @@ const Spinner = ({user, ledger, loggedIn}) => {
         />
         {ledger && ledger.network.error && 
             <div className="warning" data-tip="Connection Problem. Retrying." >
-                <FaExclamationTriagle  />
+                <FaExclamationTriangle  />
                 <ReactTooltip />
             </div>
         }
