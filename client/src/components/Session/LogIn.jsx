@@ -17,8 +17,6 @@ class LogIn extends Component {
     };
   }
 
-  
-
   handleChange = (event) => {
     const target = event.target;
     const value = target.value;
@@ -57,7 +55,7 @@ class LogIn extends Component {
     this.setState({showAdvancedAuth: !showAdvancedAuth});
   }
 
-  componentWillMount = () => {
+  componentDidMount = () => {
     const party = localStorage.getItem('party');
     const token = localStorage.getItem('token');
     if (party && token) {

@@ -11,7 +11,7 @@ import LogIn from "./Session/LogIn";
 import Registration from "./Session/Registration";
 
 class App extends Component {
-  componentWillMount() {
+  componentDidMount() {
     this.timer = setInterval(()=> this.readLedger(), 30000);
   }
 
