@@ -23,10 +23,11 @@ class CardBadges extends Component {
   };
 
   renderDueDate = () => {
-    const date = parseISO(this.props.date);
-    if (!date) {
+    if (!this.props.date) {
       return null;
     }
+    
+    const date = parseISO(this.props.date);
     const dueDateFromToday = differenceInCalendarDays(date, new Date());
 
     let dueDateString;
