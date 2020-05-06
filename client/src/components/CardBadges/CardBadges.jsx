@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import format from "date-fns/format";
+import { format, parseISO } from "date-fns";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import { MdAccessAlarm, MdDoneAll } from "react-icons/md";
 import "./CardBadges.scss";
@@ -23,7 +23,7 @@ class CardBadges extends Component {
   };
 
   renderDueDate = () => {
-    const { date } = this.props;
+    const date = parseISO(this.props.date);
     if (!date) {
       return null;
     }
@@ -39,7 +39,7 @@ class CardBadges extends Component {
     } else if (dueDateFromToday === 1) {
       dueDateString = "Tomorrow";
     } else {
-      dueDateString = format(date, "D MMM");
+      dueDateString = format(date, "d MMM");
     }
 
     let dueDateColor;
@@ -53,7 +53,7 @@ class CardBadges extends Component {
 
     return (
       <div className="badge" style={{ background: dueDateColor }}>
-        <MdAccessAlarm className="badge-icon" />&nbsp;
+        <MdAccessAlarm className="badge-icon" style={{verticalAlign: 'middle'}} />&nbsp;
         {dueDateString}
       </div>
     );
