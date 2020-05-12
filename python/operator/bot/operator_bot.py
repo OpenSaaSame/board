@@ -38,9 +38,8 @@ def main():
         res = client.find_active(Board.App)
         logging.info(f'found {len(res)} Board Admin contracts')
 
-        # If you want to create an app if non is found, uncomment the following
-        # logging.info(f'Creating Operator contract for {party}...')
-        # return client.submit_create_and_exercise(Board.App, { 'operator': client.party }, "StartApp", {})
+        logging.info(f'Creating Operator contract for {party}...')
+        return client.submit_create_and_exercise(Board.App, { 'operator': client.party }, "StartApp", {})
 
         boards = client.find_active(Board.Data)
         logging.info(f'found {len(res)} boards')
