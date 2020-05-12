@@ -1,7 +1,5 @@
-PYTHON := pipenv run python
-
 dar_version := $(shell grep "^version" backend/V3_1/daml.yaml | sed 's/version: //g')
-operator_bot_version := $(shell pipenv run python python/operator/setup.py --version)
+operator_bot_version := $(shell cd python ; pipenv run python operator/setup.py --version)
 ui_version := $(shell node -p "require(\"./client/package.json\").version")
 
 dar := target/ow-board-model-$(dar_version).dar
@@ -10,7 +8,7 @@ ui := target/ow-board-ui-$(ui_version).zip
 
 .PHONY: package
 package: $(operator_bot) $(dar) $(ui)
-	cd target && zip ow-board.zip *
+	cd target && zip openwork-board.zip * && rm ow-*
 
 
 $(dar):
@@ -21,7 +19,7 @@ $(dar):
 
 
 $(operator_bot):
-	cd python/operator && $(PYTHON) setup.py sdist
+	cd python/operator; pipenv run python setup.py sdist
 	rm -fr python/operator/openwork_board_operator_bot.egg-info
 	mkdir -p $(@D)
 	mv python/operator/dist/openwork-board-operator-bot-$(operator_bot_version).tar.gz $@
