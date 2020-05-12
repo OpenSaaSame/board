@@ -7,3 +7,4 @@ server/dist
 *.log
 build
 *.egg-info
+target
