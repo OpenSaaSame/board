@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import format from "date-fns/format";
-import differenceInCalendarDays from "date-fns/difference_in_calendar_days";
-import MdAlarm from "react-icons/lib/md/access-alarm";
-import MdDoneAll from "react-icons/lib/fa/check-square-o";
+import { format, parseISO } from "date-fns";
+import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
+import { MdAccessAlarm, MdDoneAll } from "react-icons/md";
 import "./CardBadges.scss";
 
 class CardBadges extends Component {
@@ -24,10 +23,11 @@ class CardBadges extends Component {
   };
 
   renderDueDate = () => {
-    const { date } = this.props;
-    if (!date) {
+    if (!this.props.date) {
       return null;
     }
+    
+    const date = parseISO(this.props.date);
     const dueDateFromToday = differenceInCalendarDays(date, new Date());
 
     let dueDateString;
@@ -40,7 +40,7 @@ class CardBadges extends Component {
     } else if (dueDateFromToday === 1) {
       dueDateString = "Tomorrow";
     } else {
-      dueDateString = format(date, "D MMM");
+      dueDateString = format(date, "d MMM");
     }
 
     let dueDateColor;
@@ -54,7 +54,7 @@ class CardBadges extends Component {
 
     return (
       <div className="badge" style={{ background: dueDateColor }}>
-        <MdAlarm className="badge-icon" />&nbsp;
+        <MdAccessAlarm className="badge-icon" style={{verticalAlign: 'middle'}} />&nbsp;
         {dueDateString}
       </div>
     );
@@ -71,7 +71,7 @@ class CardBadges extends Component {
         className="badge"
         style={{ background: checked === total ? "green" : "#444" }}
       >
-        <MdDoneAll className="badge-icon" />&nbsp;
+        <MdDoneAll className="badge-icon" style={{verticalAlign: 'middle'}} />&nbsp;
         {checked}/{total}
       </div>
     );
@@ -96,7 +96,8 @@ class CardBadges extends Component {
     const { tags } = this.props;
 
     if (tags !== undefined) {
-      return tags.map(tag =>
+      // TODO: Figure out why some tags are undefined
+      return tags.filter(tag => tag !== undefined).map(tag =>
         <div
           className="badge"
           key={tag._id}

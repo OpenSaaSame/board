@@ -31,7 +31,7 @@ class CardTags extends Component {
     super();
     this.state = {
       newTagName: "",
-      newTagColor: ""
+      newTagColor: "#c8ebcf"
     };
   }
 
@@ -41,12 +41,14 @@ class CardTags extends Component {
     const { dispatch, boardId } = this.props;
     const tagId = shortid.generate();
 
-    if (newTagName !== "" && isHexColor(newTagColor, 'either')) {
+    const newTagColorValue = newTagColor.substring(1);
+
+    if (newTagName !== "" && isHexColor(newTagColorValue, 'either')) {
       dispatch({
         type: "ADD_TAG",
         payload: {
           name: newTagName,
-          color: newTagColor,
+          color: newTagColorValue,
           tagId,
           boardId
         }
@@ -122,13 +124,12 @@ class CardTags extends Component {
             />
           </div>
           <div className="form-row">
-            <label>Color (hex):</label>
+            <label>Color:</label>
             <input
-              type="text"
+              type="color"
               value={newTagColor}
               onChange={this.handleColorChange}
               onKeyDown={this.handleKeyDown}
-              placeholder="000000"
             />
           </div>
           <input type="submit" value="Add tag" />
@@ -142,7 +143,8 @@ const mapStateToProps = (state, { cardId }) => {
   const boardId = state.cardsById[cardId].boardId;
   const cardTags = state.cardsById[cardId].tags.map(tagId => state.tagsById[tagId]);
   const board = state.boardsById[boardId];
-  const tags = board.tags.map(tagId => state.tagsById[tagId]);
+  // TODO: there shouldn't be undefined tags
+  const tags = board.tags.map(tagId => state.tagsById[tagId]).filter(tag => tag !== undefined);
   return { cardId, boardId, tags, cardTags };
 };
 

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Route, Redirect, Switch, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
+import { HeadProvider } from "react-head";
 import Home from "./Home/Home";
 import BoardContainer from "./Board/BoardContainer";
 import "./App.scss";
@@ -8,10 +9,34 @@ import Spinner from "./Spinner/Spinner";
 import Alert from "./Alert/Alert";
 import Upgrade from "./Upgrade/Upgrade";
 import LogIn from "./Session/LogIn";
+import Registration from "./Session/Registration";
 
 class App extends Component {
+  componentDidMount() {
+    this.timer = setInterval(()=> this.readLedger(), 30000);
+  }
+
+  componentWillUnmount() {
+    this.timer = null;
+  }
+
+  readLedger = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: "QUEUE_READ",
+      payload: {at : Date.now()}
+    });
+  };
+
   render = () => {
-    const { loggedIn } = this.props;
+    const { loggedIn, user } = this.props;
+
+    const registrationNeededRoutes = (
+      <>
+        <Registration />
+        <Spinner />
+      </>
+    );
 
     const loggedInRoutes = (
       <>
@@ -27,23 +52,31 @@ class App extends Component {
     );
 
     const loggedOutRoutes = (
-      <Switch>
-        <Route exact path="/" component={LogIn} />
-        <Redirect to="/" />
-      </Switch>
+      <LogIn />
     );
 
+    var routes;
+    if (!loggedIn || user.registered === undefined) {
+      routes = loggedOutRoutes;
+    } else if (loggedIn && user.registered === false) {
+      routes = registrationNeededRoutes;
+    } else {
+      routes = loggedInRoutes;
+    }
+
     return (
-        <div id="app" className="app">
-          { loggedIn ? loggedInRoutes : loggedOutRoutes }
-        </div>
+      <div id="app" className="app">
+        <HeadProvider>
+          { routes }
+        </HeadProvider>
+      </div>
     );
   }
 };
 
 App.propTypes = { };
 
-const mapStateToProps = ({ loggedIn }) => ({ loggedIn });
+const mapStateToProps = ({ loggedIn, user }) => ({ loggedIn, user });
 
 // Use withRouter to prevent strange glitch where other components
 // lower down in the component tree wouldn't update from URL changes

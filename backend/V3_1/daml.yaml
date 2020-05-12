@@ -1,0 +1,10 @@
+sdk-version: 0.13.30
+name: danban-v3-1
+source: daml
+parties:
+  - Admin
+version: 3.1.0
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - ../V3/.daml/dist/danban-v3-3.0.0.dar

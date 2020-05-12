@@ -23,11 +23,15 @@ body {
   line-height: 1;
 }
 
+#root {
+  height: 100%;
+  min-width: 100%;
+}
+
 #app {
   display: inline-flex;
   height: 100%;
   min-width: 100%;
-  min-height: 100vh;
 }
 
 button,
@@ -39,9 +43,4 @@ a {
   border: 0;
   font-size: 100%;
   font: inherit;
-}
-
-.app {
-  min-width: 100%;
-  height: 100%;
 }

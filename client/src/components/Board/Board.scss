@@ -21,6 +21,10 @@
 .blue .board-underlay {
   background: $blue;
 }
+// Legacy support
+.light-blue .board-underlay {
+  background: $blue;
+}
 .purple .board-underlay {
   background: $purple;
 }

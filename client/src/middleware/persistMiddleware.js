@@ -1,4 +1,4 @@
-import { loadState, exercise as exerciseUtil, rootErr, processResponse } from "./ledgerUtils"
+import { loadState, exercise as exerciseUtil, create, rootErr } from "./ledgerUtils"
 
 const makeLedgerUrl = () => {
     if (window.location.hostname === 'localhost') {
@@ -11,8 +11,24 @@ const makeLedgerUrl = () => {
     let apiUrl = host.slice(1)
     apiUrl.unshift('api')
 
-    return apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId;
+    return 'https://' +  apiUrl.join('.') + (window.location.port ? ':' + window.location.port : '') + '/data/' + ledgerId + '/v1/';
 }
+
+export const createUserSession = async (jwt, party, email, displayName) => {
+    // get admin ID
+    var admin;
+    if (process.env.REACT_APP_ADMIN_PARTY) {
+        admin = process.env.REACT_APP_ADMIN_PARTY;
+    } else if (window.location.hostname === 'localhost') {
+        admin = "Admin";
+    } else {
+        const dablInfo = await (await fetch("/.well-known/dabl.json")).json();
+        admin = dablInfo["userAdminParty"];
+    }
+    const prefix = process.env.REACT_APP_V3_1_PACKAGE_ID ? `${process.env.REACT_APP_V3_1_PACKAGE_ID}:` : "";
+    await create(makeLedgerUrl(), jwt, `${prefix}Danban.V3_1:UserSession`, { operator: admin, user: party, email, displayName });
+};
+
 
 export const upgrade = user => exerciseUtil(
     makeLedgerUrl(),
@@ -23,11 +39,12 @@ export const upgrade = user => exerciseUtil(
 );
 
 export const exercise = (user, choice, args) => {
+    const prefix = process.env.REACT_APP_V3_PACKAGE_ID ? `${process.env.REACT_APP_V3_PACKAGE_ID}:` : "";
     if (user.cid) {
         exerciseUtil(
             makeLedgerUrl(),
             user.token,
-            `${user.version}.Role:User`,
+            `${prefix + user.version}.Role:User`,
             user.cid,
             choice,
             args
@@ -143,13 +160,13 @@ const dispatchStates = async(store, remoteState) => {
                 type: "NETWORK_RETRY",
                 payload: {}
             }), 10000)
-        } else {
-            // If reading goes wrong for other reasons,
+        } else if (store.loggedIn && store.registered) {
+            // If reading goes wrong for logged in users for other reasons,
             // log out and reload to get a fresh UI and token.
-            store.dispatch({
-                type: "LOG_OUT"
-            })
-            window.location.reload();
+            // store.dispatch({
+            //     type: "LOG_OUT"
+            // })
+            // window.location.reload();
         }
     }
 }

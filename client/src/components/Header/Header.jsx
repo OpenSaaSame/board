@@ -2,19 +2,31 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import FaSignOut from "react-icons/lib/fa/sign-out";
+import { FaSignOutAlt } from "react-icons/fa";
 import "./Header.scss";
 
 class Header extends Component {
-  static propTypes = { user: PropTypes.object, dispatch: PropTypes.func.isRequired };
+  static propTypes = {
+    user: PropTypes.object,
+    dispatch: PropTypes.func.isRequired
+  };
 
   handleSignOut = (event) => {
-    const { dispatch } = this.props;
+    event.preventDefault();
 
+    localStorage.removeItem('party');
+    localStorage.removeItem('token');
+    
+    const { dispatch } = this.props;
     dispatch({
       type: "LOG_OUT"
     });
-  }
+    dispatch({
+      type: "CANCEL_READ"
+    });
+
+    window.location = ("/");
+  };
 
   render = () => {
     const { loggedIn } = this.props;
@@ -26,8 +38,11 @@ class Header extends Component {
         </Link>
         <div className="header-right-side">
           { loggedIn &&
-            <button className="signout-link" onClick={this.handleSignOut}>
-              <FaSignOut className="signout-icon" fill="#303132" />
+            <button
+              className="signout-link"
+              onClick={this.handleSignOut}
+            >
+              <FaSignOutAlt className="signout-icon" fill="#303132" style={{verticalAlign: 'middle'}} />
               &nbsp;Log Out
             </button>
           }

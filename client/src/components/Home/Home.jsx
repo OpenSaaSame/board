@@ -16,62 +16,11 @@ class Home extends Component {
       }).isRequired
     ).isRequired,
     listsById: PropTypes.object,
-    history: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired
+    history: PropTypes.object.isRequired
   };
-
-  constructor() {
-    super();
-    this.state = {
-      name: ""
-    };
-  }
-
-  handleChange = (event) => {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
-
-    this.setState({
-      [name]: value
-    });
-  };
-
-  handleProfileSubmit = (event) => {
-    event.preventDefault();
-
-    const { dispatch, user } = this.props;
-    const { name } = this.state;
-
-    dispatch({
-      'type': 'PutProfile',
-      payload: {
-        displayName: name,
-        party: user.party
-      }
-    });
-  }
 
   render = () => {
-    const { user, history } = this.props;
-    
-    const profileForm = <form onSubmit={this.handleProfileSubmit}>
-        <h1>Profile Details</h1>
-        <div>
-          <label>Name</label>
-        </div>
-        <div>
-          <input
-            type="text"
-            name="name"
-            onChange={this.handleChange}
-          />
-        </div>
-        <input
-          type="submit"
-          value="Submit"
-        />
-      </form>;
+    const { history } = this.props;
     
     return (
       <>
@@ -79,7 +28,7 @@ class Home extends Component {
         <Header />
         <div className="home">
           <div className="main-content">
-            { !user.displayName ? profileForm : <BoardIndex history={history}/> }
+            <BoardIndex history={history} />
           </div>
         </div>
       </>

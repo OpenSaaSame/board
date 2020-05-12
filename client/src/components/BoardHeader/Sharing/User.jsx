@@ -4,12 +4,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import classnames from "classnames";
 import { Button, Wrapper, Menu, MenuItem } from "react-aria-menubutton";
-import FaEye from "react-icons/lib/fa/eye";
-import FaTrash from "react-icons/lib/fa/trash";
-import FaPencil from "react-icons/lib/fa/pencil";
-import FaCog from "react-icons/lib/fa/cog";
-import FaGavel from "react-icons/lib/fa/gavel";
-import FaAngleDown from "react-icons/lib/fa/angle-down";
+import { FaEye, FaTrash, FaPencilAlt, FaCog, FaGavel, FaAngleDown } from "react-icons/fa";
 import "./User.scss";
 
 class User extends Component {
@@ -35,7 +30,7 @@ class User extends Component {
     const rights = {
       "Trash": {icon: <FaTrash />, text: "Remove"}, 
       "Read": {icon: <FaEye />, text: "Read"},
-      "Write": {icon: <FaPencil />, text: "Write"},
+      "Write": {icon: <FaPencilAlt />, text: "Write"},
       "Admin": {icon: <FaCog />, text: "Admin"},
       "SignedAdmin": {icon: <FaGavel />, text: "Signatory"}
     }

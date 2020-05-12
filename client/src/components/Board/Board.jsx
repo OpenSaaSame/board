@@ -134,7 +134,7 @@ class Board extends Component {
   };
 
   render = () => {
-    const { lists, boardTitle, boardId, boardColor } = this.props;
+    const { lists, boardTitle, boardId, boardColor, hasWrite } = this.props;
     return (
       <>
         <div className={classnames("board", boardColor)}>
@@ -162,10 +162,13 @@ class Board extends Component {
                         boardId={boardId}
                         index={index}
                         key={list._id}
+                        hasWrite={hasWrite}
                       />
                     ))}
                     {provided.placeholder}
-                    <ListAdder boardId={boardId} />
+                    { hasWrite &&
+                      <ListAdder boardId={boardId} />
+                    }
                   </div>
                 )}
               </Droppable>

@@ -1,0 +1,63 @@
+daml 1.2
+module Danban.V3_1 where
+
+import Danban.V3
+import Danban.V3.Role
+
+template UserSession
+  with
+    operator : Party
+    user : Party
+    displayName : Text
+    email : Text
+  where
+    signatory user
+    key user : Party
+    maintainer key
+
+    controller operator can
+      UserSessionAck: ()
+        do
+          maybeUser <- lookupByKey @User (operator, user)
+          case maybeUser of
+            None -> do
+              (appCid, _) <- fetchByKey @Admin operator
+              exercise appCid PauseApp
+              userRole <- exercise appCid AddUser with party = user
+              exercise appCid UnpauseApp
+              exercise userRole PutProfile with
+                imageUrl = ""
+                displayName
+                email = Some email
+                domain = None
+              return ()
+            Some _ ->
+              return ()
+
+testUserSessions = scenario do
+  admin <- getParty "Admin"
+  alice <- getParty "Alice"
+
+  admin `submit` do
+    app <- create Admin with operator = admin
+    exercise app StartApp
+  
+  aliceSession <- alice `submit` do
+    create UserSession with
+      operator = admin
+      user = alice
+      displayName = "Big Al"
+      email = "alice@example.com"
+  
+  admin `submit` do
+    exercise aliceSession UserSessionAck
+
+  aliceSession2 <- alice `submit` do
+    create UserSession with
+      operator = admin
+      user = alice
+      displayName = "Big Al"
+      email = "alice@example.com"
+  
+  admin `submit` do
+    exercise aliceSession2 UserSessionAck

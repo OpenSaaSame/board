@@ -7,9 +7,10 @@ const mapBy = field => list => {
   return ret;
 }
 
+const prefix = process.env.REACT_APP_V3_PACKAGE_ID ? `${process.env.REACT_APP_V3_PACKAGE_ID}:` : "";
 export const appVersions = [
   "Danban.V2",
-  "Danban.V3"
+  `${prefix}Danban.V3`
 ];
 
 export const rootErr = err => {
@@ -169,12 +170,19 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
     const cardsById = mapBy("_id")(contractMap.Board.Card);
     const commentsById = mapBy("_id")(contractMap.Board.Comment);
     const tagsById = mapBy("_id")(contractMap.Board.Tag);
-    const users = (contractMap.User.Profile);
-    users.sort((a,b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0));
-    const userRole = (contractMap.Role.User)[0];
-    const userProfile = users.filter(user => user.party === userRole.party)[0];
-    const user = { ...userProfile, ...userRole };
+    const users = (contractMap.User.Profile).sort((a,b) =>
+        (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)
+      );
     const boardUsersById = mapBy("boardId")(contractMap.Rules.Board);
+
+    var user = {};
+    if (contractMap.Role.User.length > 0) {
+      const userRole = (contractMap.Role.User)[0];
+      const userProfile = users.filter(user => user.party === userRole.party)[0];
+      user = { ...userProfile, ...userRole, registered: true };
+    } else {
+      user = { registered: false }
+    }
 
     return {
       boardsById,

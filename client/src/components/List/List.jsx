@@ -12,11 +12,12 @@ class List extends Component {
   static propTypes = {
     boardId: PropTypes.string.isRequired,
     index: PropTypes.number.isRequired,
-    list: PropTypes.shape({ _id: PropTypes.string.isRequired }).isRequired
+    list: PropTypes.shape({ _id: PropTypes.string.isRequired }).isRequired,
+    hasWrite: PropTypes.bool.isRequired
   };
 
   render = () => {
-    const { list, boardId, index } = this.props;
+    const { list, boardId, index, hasWrite } = this.props;
     return (
       <Draggable
         draggableId={list._id}
@@ -41,12 +42,15 @@ class List extends Component {
                   listId={list._id}
                   cards={list.cards}
                   boardId={boardId}
+                  hasWrite={hasWrite}
                 />
                 <div className="cards-wrapper">
-                  <Cards listId={list._id} />
+                  <Cards listId={list._id} hasWrite={hasWrite}/>
                 </div>
               </div>
-              <CardAdder listId={list._id} />
+              { hasWrite &&
+                <CardAdder listId={list._id} />
+              }
             </div>
             {provided.placeholder}
           </>

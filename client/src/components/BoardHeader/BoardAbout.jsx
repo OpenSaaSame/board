@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { Button, Wrapper, Menu } from "react-aria-menubutton";
 import PropTypes from "prop-types";
-import FaInfoCircle from "react-icons/lib/fa/info";
+import { FaInfoCircle } from "react-icons/fa";
 import marked from "marked";
 import Textarea from "react-textarea-autosize";
 import "./BoardAbout.scss";

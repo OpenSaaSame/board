@@ -1,0 +1,57 @@
+.session-form {
+  background: white;
+  padding: 2em;
+  font-size: 14pt;
+  border-radius: 8px;
+  margin: 8px auto;
+
+  h2, h3 {
+    font-weight: 400;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5em;
+  }
+
+  input[type="text"], input[type="password"] {
+    display: block;
+    margin-top: 8px;
+  }
+
+  input[type="submit"], button {
+    cursor: pointer; 
+  }
+
+  button {
+    margin-bottom: 1em;
+    color: #777;
+    background-color: transparent;
+  }
+
+  .hidden {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .session-form {
+      margin-top: 63px;
+  }
+}
+
+.dabl-login {
+  text-align: center;
+  line-height: 1.5em;
+  padding: 0.5em;
+  margin: 1em 0;
+  display: block;
+  border-radius: 4px;
+  color: white;
+  background-color: #3566D3;
+  text-decoration: none;
+}
+
+.dabl-login:hover {
+  background-color: #2457C7;
+}

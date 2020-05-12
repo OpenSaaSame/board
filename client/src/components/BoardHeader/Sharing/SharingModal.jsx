@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { Button, Wrapper, Menu } from "react-aria-menubutton";
-import FaShareSquare from "react-icons/lib/fa/share-square";
+import { FaShareSquare } from "react-icons/fa";
 import Switch from "react-switch";
 import UserList from "./UserList"
 import "./SharingModal.scss";

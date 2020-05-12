@@ -5,3 +5,5 @@ stats.json
 .DS_STORE
 server/dist
 *.log
+build
+*.egg-info

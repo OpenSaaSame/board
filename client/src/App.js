@@ -12,24 +12,22 @@ const store = createStore(
   composeWithDevTools(applyMiddleware(persistMiddleware))
 );
 
-if (localStorage.getItem('party')) {
-  store.dispatch({
-    type: "LOG_IN"
-  });
-  store.dispatch({
-    type: "QUEUE_READ",
-    payload: {at : Date.now()}
-  });
+// Save fragment in local storage for post-DABL redirect
+if (window.location.hash.substring(0, 3) === "#/b") {
+  localStorage.setItem('postDablPath', window.location.hash);
 }
 
-const poll = () => {
-  store.dispatch({
-    type: "QUEUE_READ",
-    payload: {at : Date.now()}
-  });
+const urlParams = new URLSearchParams(window.location.search);
+const party = urlParams.get("party");
+const token = urlParams.get("token");
+if (party && token) {
+  localStorage.setItem('party', party);
+  localStorage.setItem('token', token);
+  // Strip query params from the location before rendering the app
+  // Grab the saved fragement from local storage
+  const fragment = localStorage.getItem('postDablPath') || "";
+  window.location = `${window.location.origin}/${fragment}`;
 }
-setInterval(poll, 10000);
-poll();
 
 function Appl() {
   return (
