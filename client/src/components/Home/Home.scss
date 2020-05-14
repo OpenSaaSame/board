@@ -3,8 +3,6 @@ $board-width: 260px;
 $board-height: 140px;
 $board-margin: 5px;
 $main-margin: 40px;
-$add-board-bg: #a7e4d5;
-$add-board-focus-bg: #a7e4d5;
 
 @mixin board-button {
   box-sizing: border-box;
@@ -23,7 +21,7 @@ $add-board-focus-bg: #a7e4d5;
   display: inline-flex;
   justify-content: center;
   width: 100%;
-  background: #a7e4d5;
+  background: #eee;
   overflow: auto;
 }
 
@@ -53,7 +51,7 @@ $add-board-focus-bg: #a7e4d5;
   }
 }
 
-.main-content h1 {
+.main-content h2 {
   margin: 20px 5px;
   font-size: 22px;
   color: $grey;
@@ -63,19 +61,35 @@ $add-board-focus-bg: #a7e4d5;
   }
 }
 
-.boards {
-  display: inline-flex;
-  flex-wrap: wrap;
-}
-
 .board-link {
   @include board-button;
   display: inline-flex;
   flex-direction: column;
   color: white;
   overflow-wrap: break-word;
-  text-decoration: none;
-  background: rgba(255, 255, 255, 0.3);
+  text-decoration: none;  
+}
+.board-link.green {
+  background: $green;
+}
+.board-link.blue {
+  background: $blue;
+}
+// Legacy support
+.board-link.light-blue {
+  background: $blue;
+}
+.board-link.purple {
+  background: $purple;
+}
+.board-link.red {
+  background: $red;
+}
+.board-link.pink {
+  background: $pink;
+}
+.board-link.yellow {
+  background: $yellow;
 }
 
 .board-link-title {
@@ -102,8 +116,9 @@ $add-board-focus-bg: #a7e4d5;
   @include board-button;
   margin-bottom: 20px;
   border: 0;
-  background: rgba(255, 255, 255, 0.3);
+  background: white;
   color: $grey;
+  vertical-align: top; // Chrome rendering issue?
 }
 
 .add-board-button:hover,
@@ -119,7 +134,7 @@ $add-board-focus-bg: #a7e4d5;
   margin-bottom: 20px;
   padding: 8px;
   border-radius: 3px;
-  background: $add-board-bg;
+  background: white;
   color: #444;
   font-size: 16px;
 }
