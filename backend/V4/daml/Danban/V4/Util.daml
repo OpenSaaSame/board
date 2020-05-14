@@ -1,0 +1,38 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
+daml 1.2
+module Danban.V4.Util where
+
+import DA.List
+
+move : Int -> Int -> [a] -> [a]
+move oldIdx newIdx xs =
+  let lowIdx = min oldIdx newIdx
+      highIdx = max oldIdx newIdx
+      (s1, r) = splitAt lowIdx xs
+      (s2, s3) = splitAt (highIdx - lowIdx) r
+      (s2', s3') = if oldIdx < newIdx
+        then (tail s2, head s3 :: head s2 :: tail s3)
+        else (head s3 :: s2, tail s3)
+  in s1 ++ s2' ++ s3'
+
+takeAt : Int -> [a] -> (a, [a])
+takeAt idx xs
+  | idx < 0 = error "Only positive indices allowed"
+  | idx == 0 = (head xs, tail xs)
+  | otherwise =
+    let (x, xs') = takeAt (idx - 1) (tail xs)
+    in (x, head xs :: xs')
+
+insertAt : Int -> a -> [a] -> [a]
+insertAt idx x xs
+  | idx < 0 = error "Only positive indices allowed"
+  | idx == 0 = x :: xs
+  | otherwise = head xs :: insertAt (idx - 1) x (tail xs)
+
+exerciseIfKey : forall t k c r . (Template t, TemplateKey t k, Choice t c r) => k -> c -> Update (Optional r)
+exerciseIfKey k c = do
+  oCid <- lookupByKey @t k
+  case oCid of
+    None -> return None
+    Some cid -> Some <$> exercise cid c
