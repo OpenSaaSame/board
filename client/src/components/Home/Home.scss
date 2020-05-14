@@ -61,15 +61,6 @@ $main-margin: 40px;
   }
 }
 
-.boards {
-  display: inline-flex;
-  flex-wrap: wrap;
-
-  h2 {
-    display: block;
-  }
-}
-
 .board-link {
   @include board-button;
   display: inline-flex;
@@ -101,7 +92,6 @@ $main-margin: 40px;
   background: $yellow;
 }
 
-
 .board-link-title {
   padding-bottom: 5px;
   color: $grey;
@@ -128,6 +118,7 @@ $main-margin: 40px;
   border: 0;
   background: white;
   color: $grey;
+  vertical-align: top; // Chrome rendering issue?
 }
 
 .add-board-button:hover,
