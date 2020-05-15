@@ -87,8 +87,18 @@ class LogIn extends Component {
             <form onSubmit={this.handleSubmit} className="session-form">
               { !isLocalhost &&
                 <>
-                  <div><a href={this.dablLogInButtonUrl()} className="dabl-login">Log In with DABL</a></div>
-                  <button onClick={this.toggleForm}>Advanced Options {showAdvancedAuth ? "-" : "+"}</button>
+                  <div>
+                    <a
+                      href={this.dablLogInButtonUrl()}
+                      className="dabl-login"
+                      disabled={loading}
+                    >
+                      { !loading ? "Log In with DABL" : "Logging In…" }
+                    </a>
+                  </div>
+                  <button onClick={this.toggleForm}>
+                    Advanced Options {showAdvancedAuth ? "-" : "+"}
+                  </button>
                 </>
               }
               <div className={!showAdvancedAuth ? "hidden" : ""}>
@@ -116,7 +126,7 @@ class LogIn extends Component {
                 </div>
                 <input
                   type="submit"
-                  value={ !loading ? "Log In" : "Waiting…" }
+                  value={ !loading ? "Log In" : "Logging In…" }
                   disabled={loading}
                 />
               </div>
