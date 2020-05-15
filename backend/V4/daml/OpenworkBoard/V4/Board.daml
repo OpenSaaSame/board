@@ -1,9 +1,9 @@
 daml 1.2
-module Danban.V4.Board where
+module OpenworkBoard.V4.Board where
 
 import DA.List
 
-import qualified Danban.V4.User as User
+import qualified OpenworkBoard.V4.User as User
 
 template Directory
   with

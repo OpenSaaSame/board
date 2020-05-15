@@ -1,7 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
 daml 1.2
-module Danban.V4.Util where
+module OpenworkBoard.V4.Util where
 
 import DA.List
 

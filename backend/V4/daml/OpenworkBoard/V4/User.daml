@@ -1,7 +1,7 @@
 daml 1.2
-module Danban.V4.User where
+module OpenworkBoard.V4.User where
 
-import Danban.V4.Util
+import OpenworkBoard.V4.Util
 
 import DA.List
 

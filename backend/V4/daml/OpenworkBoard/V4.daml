@@ -1,9 +1,9 @@
 daml 1.2
-module Danban.V4 where
+module OpenworkBoard.V4 where
 
-import qualified Danban.V4.App as App
-import qualified Danban.V4.User as User
-import qualified Danban.V4.Role as Role
+import qualified OpenworkBoard.V4.App as App
+import qualified OpenworkBoard.V4.User as User
+import qualified OpenworkBoard.V4.Role as Role
 
 template Admin
   with

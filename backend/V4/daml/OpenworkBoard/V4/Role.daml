@@ -1,13 +1,13 @@
 daml 1.2
-module Danban.V4.Role where
+module OpenworkBoard.V4.Role where
 
 import DA.Action
 import DA.Optional
 
-import qualified Danban.V4.App as App
-import qualified Danban.V4.Board as Board
-import qualified Danban.V4.User as User
-import qualified Danban.V4.Rules as Rules
+import qualified OpenworkBoard.V4.App as App
+import qualified OpenworkBoard.V4.Board as Board
+import qualified OpenworkBoard.V4.User as User
+import qualified OpenworkBoard.V4.Rules as Rules
 
 -- Role.User gives a user the choices to operate on the app
 template User

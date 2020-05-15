@@ -1,5 +1,5 @@
 daml 1.2
-module Danban.V4.App where
+module OpenworkBoard.V4.App where
 
 -- App.Semaphore allows the op to stop all operattion, e.g. to do bulk updates
 template Semaphore
