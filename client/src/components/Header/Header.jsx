@@ -39,7 +39,7 @@ class Header extends Component {
         <div className="header-right-side">
           { loggedIn &&
             <button
-              className="signout-link"
+              className="signout-button"
               onClick={this.handleSignOut}
             >
               <FaSignOutAlt className="signout-icon" fill="#303132" style={{verticalAlign: 'middle'}} />

@@ -16,13 +16,13 @@ header {
   box-sizing: border-box;
   width: 100%;
   height: 80px;
-  padding: 5px 17px;
   background: white;
   z-index: 1;
   transition: background 0.3s;
 }
 
 .header-title {
+  margin-left: 17px;
   display: inline-flex;
   align-items: center;
   font-size: 22px;
@@ -67,14 +67,19 @@ header {
   font-size: 24px;
 }
 
-.signout-link {
+.signout-button {
   padding: 3px 5px 1px 5px;
   margin-left: 12px;
+  height: 100%;
   color: $grey;
   text-decoration: none;
   background-color: transparent;
   cursor: pointer;
 }
+.signout-button:hover {
+  background-color: #eee;
+}
+
 
 .signout-icon {
   padding-bottom: 2px;
