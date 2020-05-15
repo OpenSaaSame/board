@@ -13,7 +13,8 @@ class LogIn extends Component {
     this.state = {
       party: "",
       token: "",
-      showAdvancedAuth: isLocalhost
+      showAdvancedAuth: isLocalhost,
+      loading: false
     };
   }
 
@@ -29,6 +30,7 @@ class LogIn extends Component {
 
   handleLogin = (party, token) => {
     const { dispatch } = this.props;
+    this.setState({loading: true});
 
     dispatch({
       'type': 'LOG_IN',
@@ -74,7 +76,7 @@ class LogIn extends Component {
   };
 
   render = () => {
-    const { party, token, showAdvancedAuth } = this.state;
+    const { party, token, showAdvancedAuth, loading } = this.state;
 
     return (
       <>
@@ -114,7 +116,8 @@ class LogIn extends Component {
                 </div>
                 <input
                   type="submit"
-                  value="Submit"
+                  value={ !loading ? "Log In" : "Waiting…" }
+                  disabled={loading}
                 />
               </div>
             </form>

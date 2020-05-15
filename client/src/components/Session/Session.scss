@@ -19,14 +19,27 @@
     margin-top: 8px;
   }
 
-  input[type="submit"], button {
-    cursor: pointer; 
-  }
-
-  button {
-    margin-bottom: 1em;
-    color: #777;
-    background-color: transparent;
+  input[type='submit'], button {
+    height: 34px;
+    padding: 0 8px;
+    margin-right: 8px;
+    border: 0;
+    border-radius: 3px;
+    color: black;
+    background: #ccc;
+    font-size: inherit;
+    cursor: pointer;
+    vertical-align: bottom;
+  
+    &:hover,
+    &:focus {
+      background: #ddd;
+    }
+    &:disabled {
+      color: #aaa;
+      cursor: default;
+      background-color: #ccc
+    }
   }
 
   .hidden {
@@ -50,8 +63,8 @@
   color: white;
   background-color: #3566D3;
   text-decoration: none;
-}
 
-.dabl-login:hover {
-  background-color: #2457C7;
+  &:hover {
+    background-color: #2457C7;
+  }
 }
