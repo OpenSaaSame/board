@@ -11,27 +11,28 @@ import "./BoardAbout.scss";
 class BoardAbout extends Component {
 
   static propTypes = {
-    boardId: PropTypes.string.isRequired,
-    about: PropTypes.string,
+    board: PropTypes.object.isRequired,
+    users: PropTypes.array.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      newAbout: props.about
+      newAbout: props.board.about,
+      editing: false
     };
   }
 
   handleSubmit = event => {
     event.preventDefault();
     const { newAbout } = this.state;
-    const { dispatch, boardId } = this.props;
+    const { dispatch, board } = this.props;
 
     dispatch({
       type: "CHANGE_BOARD_ABOUT",
       payload: {
-        boardId,
+        boardId: board._id,
         about: newAbout
       }
     });
@@ -47,32 +48,52 @@ class BoardAbout extends Component {
     }
   };
 
-  render() {
-    const { about, hasAdmin } = this.props;
-    const { newAbout } = this.state;
+  toggleEdit = event => {
+    this.setState({editing: !this.state.editing});
+  }
 
-    if ((about === "" && !hasAdmin) || about === undefined) {
-      return null;
-    }
+  render() {
+    const { board, users, hasAdmin } = this.props;
+    const { newAbout, editing } = this.state;
+    const about = board.about;
 
     const adminContent = (
-      <form onSubmit={this.handleSubmit} >
-        <Textarea
-          value={newAbout}
-          onChange={this.handleChange}
-          onKeyDown={this.handleKeyDown}
-          minRows={3}
-        />
-        <input type="submit" value="Update" />
-      </form>
+      <>
+        <h2>Description</h2>
+        <form onSubmit={this.handleSubmit}>
+          { editing ?
+            <Textarea
+              value={newAbout}
+              onChange={this.handleChange}
+              onKeyDown={this.handleKeyDown}
+              minRows={3}
+            />
+          :
+            <div
+              dangerouslySetInnerHTML={{
+                __html: marked(about)
+              }}
+            />
+          }
+          <div>
+            <button onClick={this.toggleEdit}>{ editing ? "Preview" : "Edit"}</button>
+            <input type="submit" value="Update" disabled={newAbout === board.about}/>
+          </div>
+        </form>
+      </>
     );
 
     const aboutContent = (
-      <div
-        dangerouslySetInnerHTML={{
-          __html: marked(about)
-        }}
-      />
+      <>
+        { about !== "" &&
+          <h2>Description</h2>
+        }
+        <div
+          dangerouslySetInnerHTML={{
+            __html: marked(about)
+          }}
+        />
+      </>
     );
 
     return (
@@ -87,6 +108,8 @@ class BoardAbout extends Component {
           </div>
         </Button>
         <Menu className="board-about-menu">
+          <h2>{ users.length === 1 ? "Admin" : "Admins"}</h2>
+          { users.map(admin => admin.displayName).join(", ") }
           { hasAdmin ? adminContent : aboutContent }
         </Menu>
       </Wrapper>
@@ -96,8 +119,21 @@ class BoardAbout extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const { boardId } = ownProps.match.params;
+  const board = state.boardsById[boardId];
+
+  var admins;
+  if (state.boardUsersById[boardId]) {
+    admins = state.boardUsersById[boardId].users
+      .filter(user => user._2 === "SignedAdmin" || user._2 === "Admin")
+      .map(user => user._1);
+  } else {
+    admins = board.admins
+  }
+  const adminProfiles = admins.map(admin => state.users.byParty[admin]);
+
   return {
-    boardId, about: state.boardsById[boardId].about
+    board,
+    users: adminProfiles
   };
 };
 
