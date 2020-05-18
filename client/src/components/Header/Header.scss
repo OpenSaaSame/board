@@ -67,27 +67,48 @@ header {
   font-size: 24px;
 }
 
-.signout-button {
-  padding: 3px 5px 1px 5px;
-  margin-left: 12px;
+.sign-out-wrapper {
   height: 100%;
-  color: $grey;
-  text-decoration: none;
-  background-color: transparent;
-  cursor: pointer;
-}
-.signout-button:hover {
-  background-color: #eee;
-}
 
+  .sign-out-button, button {
+    text-decoration: none;
+    cursor: pointer;
+    width: 100%;
+    color: $grey;
+    background-color: transparent;
+    text-align: left;
 
-.signout-icon {
-  padding-bottom: 2px;
-  font-size: 22px;
-}
+    &:hover, &:focus {
+      background-color: $transparent-black;
+    }
+  }
 
-.google-sign-in {
-  width: 100%;
+  .sign-out-button {
+    display: block;
+    height: 100%;
+    padding: 0 20px;
+
+    svg {
+      height: 100%;
+      width: 3em;
+      background-color: transparent;
+    }
+  }
+
+  .sign-out-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 150px;
+    color: black;
+    background: white;
+    box-shadow: $transparent-black 4px 4px 2px;
+
+    button {
+      padding: 8px;
+      font-size: 16pt;
+    }
+  }
 }
 
 // Some things have to be removed for mobile layouts to avoid overflowing

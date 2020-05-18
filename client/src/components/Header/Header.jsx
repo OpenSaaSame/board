@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { FaSignOutAlt } from "react-icons/fa";
+import { Button, Wrapper, Menu } from "react-aria-menubutton";
+import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import "./Header.scss";
 
 class Header extends Component {
@@ -38,13 +39,20 @@ class Header extends Component {
         </Link>
         <div className="header-right-side">
           { loggedIn &&
-            <button
-              className="signout-button"
-              onClick={this.handleSignOut}
-            >
-              <FaSignOutAlt className="signout-icon" fill="#303132" style={{verticalAlign: 'middle'}} />
-              &nbsp;Log Out
-            </button>
+            <Wrapper className="sign-out-wrapper">
+              <Button className="sign-out-button">
+                <FaUserCircle />
+              </Button>
+              <Menu className="sign-out-menu">
+                <button
+                  className="signout-button"
+                  onClick={this.handleSignOut}
+                >
+                  <FaSignOutAlt className="signout-icon" fill="#303132" style={{verticalAlign: 'middle'}} />
+                  &nbsp;Log Out
+                </button>
+              </Menu>
+            </Wrapper>
           }
         </div>
       </header>
