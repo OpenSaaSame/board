@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { FaSignOutAlt } from "react-icons/fa";
+import { Button, Wrapper, Menu } from "react-aria-menubutton";
+import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import "./Header.scss";
 
 class Header extends Component {
@@ -29,22 +30,34 @@ class Header extends Component {
   };
 
   render = () => {
-    const { loggedIn } = this.props;
+    const { loggedIn, user } = this.props;
     return (
       <header>
         <Link to="/" className="header-title">
           <img src={'/images/openwork.png'} alt="OpenWork logo" />
-          &nbsp;<b>Open</b>Work <span>Board</span>
+          <span className="wordmark">&nbsp;<b>Open</b>Work <span>Board</span></span>
         </Link>
         <div className="header-right-side">
           { loggedIn &&
-            <button
-              className="signout-link"
-              onClick={this.handleSignOut}
-            >
-              <FaSignOutAlt className="signout-icon" fill="#303132" style={{verticalAlign: 'middle'}} />
-              &nbsp;Log Out
-            </button>
+            <Wrapper className="sign-out-wrapper">
+              <Button className="sign-out-button">
+                <FaUserCircle />
+              </Button>
+              <Menu className="sign-out-menu">
+                <div>
+                  <p>User:  {user.displayName}</p>
+                  <p>Email: {user.email}</p>
+                  <p>Id: {user.party}</p>
+                </div>
+                <button
+                  className="signout-button"
+                  onClick={this.handleSignOut}
+                >
+                  <FaSignOutAlt className="signout-icon" fill="#303132" style={{verticalAlign: 'middle'}} />
+                  &nbsp;Log Out
+                </button>
+              </Menu>
+            </Wrapper>
           }
         </div>
       </header>
@@ -52,6 +65,6 @@ class Header extends Component {
   };
 }
 
-const mapStateToProps = ({ loggedIn }) => ({ loggedIn });
+const mapStateToProps = ({ loggedIn, user }) => ({ loggedIn, user });
 
 export default connect(mapStateToProps)(Header);

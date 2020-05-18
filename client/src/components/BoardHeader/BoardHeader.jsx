@@ -9,14 +9,16 @@ import BoardAbout from "./BoardAbout";
 const BoardHeader = (props) => (
   <div className="board-header">
     <BoardTitle hasAdmin={props.hasAdmin} />
-    { props.hasAdmin &&
       <div className="board-header-right">
-        <SharingModal />
-        <ColorPicker />
+        { props.hasAdmin &&
+          <>
+            <SharingModal />
+            <ColorPicker />
+            <BoardDeleter />
+          </>
+        }
         <BoardAbout hasAdmin={props.hasAdmin} />
-        <BoardDeleter />
       </div>
-    }
   </div>
 );
 

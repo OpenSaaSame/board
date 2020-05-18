@@ -14,11 +14,11 @@
   color: $white;
   transition: background 0.1s;
   cursor: pointer;
-}
 
-.board-about:hover,
-.board-about:focus {
-  background: $transparent-black;
+  &:hover,
+  &:focus {
+    background: $transparent-black;
+  }
 }
 
 .board-about-menu {
@@ -26,38 +26,45 @@
   top: 100%;
   right: 0;
   width: 400px;
-  margin-top: 4px;
-  padding: 0 10px;
+  margin: 4px;
+  padding: 0 8px 8px;
   border-radius: 3px;
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.6);
   color: black;
   background: rgba(255, 255, 255, 0.9);
-}
-@media (max-width: 1024px) {
-  .board-about-menu {
-    width: 60vw;
+
+  textarea {
+    display: block;
+    width: 98%;
+    margin: 8px 0 8px;
+  }
+
+  input[type='submit'], button {
+    height: 34px;
+    padding: 0 8px;
+    margin-right: 8px;
+    border: 0;
+    border-radius: 3px;
+    color: black;
+    background: #ccc;
+    font-size: inherit;
+    cursor: pointer;
+    vertical-align: bottom;
+  
+    &:hover,
+    &:focus {
+      background: #ddd;
+    }
+    &:disabled {
+      color: #aaa;
+      cursor: default;
+      background-color: #ccc
+    }
   }
 }
 
-textarea {
-  display: block;
-  width: 98%;
-  margin-top: 10px;
-}
-
-input[type='submit'] {
-  display: flex;
-  align-items: center;
-  height: 34px;
-  margin: 8px 3px 8px 3px;
-  border: 0;
-  border-radius: 3px;
-  color: black;
-  background: #ccc;
-  font-size: inherit;
-
-  &:hover,
-  &:focus {
-    background: #ddd;
+@media (max-width: 1024px) {
+  .board-about-menu {
+    width: 60vw;
   }
 }
