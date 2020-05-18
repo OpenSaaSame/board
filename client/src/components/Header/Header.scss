@@ -38,9 +38,8 @@ header {
     color: rgb(29, 115, 103);
   }
 
-  span {
+  .wordmark > span {
     color: #1c468c;
-    margin-left: 10px;
   }
 }
 
@@ -116,13 +115,8 @@ header {
 }
 
 // Some things have to be removed for mobile layouts to avoid overflowing
-@media (max-width: 700px) {
-  .user-thumbnail,
-  .guest-icon {
+@media (max-width: 400px) {
+  .wordmark {
     display: none;
-  }
-
-  .signout-link {
-    margin-left: 0px;
   }
 }
