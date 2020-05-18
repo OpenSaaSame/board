@@ -128,6 +128,8 @@ $main-margin: 40px;
 
 .board-adder {
   box-sizing: border-box;
+  display: inline-block;
+  vertical-align: top; // Chrome issue?
   width: $board-width;
   height: $board-height;
   margin: $board-margin;

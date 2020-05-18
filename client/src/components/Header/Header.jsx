@@ -35,7 +35,7 @@ class Header extends Component {
       <header>
         <Link to="/" className="header-title">
           <img src={'/images/openwork.png'} alt="OpenWork logo" />
-          <span className="wordmark">&nbsp;<b>Open</b>Work <span>Board</span></span>
+          <span className="wordmark">&nbsp;<b>Open</b>Work&nbsp;<span>Board</span></span>
         </Link>
         <div className="header-right-side">
           { loggedIn &&
