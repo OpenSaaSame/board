@@ -30,7 +30,7 @@ class Header extends Component {
   };
 
   render = () => {
-    const { loggedIn } = this.props;
+    const { loggedIn, user } = this.props;
     return (
       <header>
         <Link to="/" className="header-title">
@@ -44,6 +44,11 @@ class Header extends Component {
                 <FaUserCircle />
               </Button>
               <Menu className="sign-out-menu">
+                <div>
+                  <p>User:  {user.displayName}</p>
+                  <p>Email: {user.email}</p>
+                  <p>Id: {user.party}</p>
+                </div>
                 <button
                   className="signout-button"
                   onClick={this.handleSignOut}
@@ -60,6 +65,6 @@ class Header extends Component {
   };
 }
 
-const mapStateToProps = ({ loggedIn }) => ({ loggedIn });
+const mapStateToProps = ({ loggedIn, user }) => ({ loggedIn, user });
 
 export default connect(mapStateToProps)(Header);

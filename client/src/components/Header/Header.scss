@@ -99,14 +99,18 @@ header {
     position: absolute;
     top: 100%;
     right: 0;
-    width: 150px;
-    color: black;
+    min-width: 250px;
+    color: $black-text;
     background: white;
     box-shadow: $transparent-black 4px 4px 2px;
 
-    button {
+    div, button {
       padding: 8px;
-      font-size: 16pt;
+      font-size: 14pt;
+    }
+
+    div {
+      border-bottom: $transparent-black 1px solid;
     }
   }
 }
