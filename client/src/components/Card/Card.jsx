@@ -153,7 +153,7 @@ const mapStateToProps = (state, ownProps) => {
     card,
     tags,
     isSignedIn,
-    assignee: state.users.byParty[card.assignee]
+    assignee: card ? state.users.byParty[card.assignee] : undefined
   }
 };
 
