@@ -85,8 +85,11 @@ class Card extends Component {
     });
   };
 
-  render() {
+  render() {    
     const { card, index, listId, isDraggingOver, assignee, tags, hasWrite } = this.props;
+
+    if (!card) { return null };
+
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
     return (
