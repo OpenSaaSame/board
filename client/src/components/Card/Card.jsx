@@ -85,8 +85,11 @@ class Card extends Component {
     });
   };
 
-  render() {
+  render() {    
     const { card, index, listId, isDraggingOver, assignee, tags, hasWrite } = this.props;
+
+    if (!card) { return null };
+
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
     return (
@@ -145,14 +148,15 @@ class Card extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const card = state.cardsById[ownProps.cardId]
-  const tags = card.tags ? card.tags.map(tagId => state.tagsById[tagId]) : undefined;
+  if (!card) { console.log("Card not found", ownProps.cardId) };
+  const tags = (card && card.tags) ? card.tags.map(tagId => state.tagsById[tagId]) : undefined;
   const isSignedIn = state.user !== null;
 
   return {
     card,
     tags,
     isSignedIn,
-    assignee: state.users.byParty[card.assignee]
+    assignee: card ? state.users.byParty[card.assignee] : undefined
   }
 };
 
