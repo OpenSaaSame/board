@@ -38,8 +38,9 @@ def main():
         res = client.find_active(Board.App)
         logging.info(f'found {len(res)} Board Admin contracts')
 
-        logging.info(f'Creating Operator contract for {party}...')
-        return client.submit_create_and_exercise(Board.App, { 'operator': client.party }, "StartApp", {})
+        if len(res) == 0:
+            logging.info(f'Creating Operator contract for {party}...')
+            return client.submit_create_and_exercise(Board.App, { 'operator': client.party }, "StartApp", {})
 
         boards = client.find_active(Board.Data)
         logging.info(f'found {len(res)} boards')
