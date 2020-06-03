@@ -50,7 +50,8 @@ const boardsById = (state = {}, action) => {
           title: boardTitle,
           lists: [],
           isPublic: false,
-          color: "blue"
+          color: "blue",
+          about: ""
         }
       };
     }
