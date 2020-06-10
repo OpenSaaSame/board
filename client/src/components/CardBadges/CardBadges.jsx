@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import { MdAccessAlarm, MdDoneAll } from "react-icons/md";
 import "./CardBadges.scss";
