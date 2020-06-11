@@ -1,0 +1,156 @@
+daml 1.2
+module Danban.V3_2 where
+
+import qualified Danban.V3_2.App as App
+import qualified Danban.V3_2.User as User
+import qualified Danban.V3_2.Role as Role
+import qualified Danban.V3_2.Board as Board
+
+template Admin
+  with
+    operator: Party
+  where
+    signatory operator
+
+    key operator : Party
+    maintainer key
+
+    controller operator can
+      nonconsuming StartApp
+        : ()
+        do
+          create User.Directory with operator; users = []
+          create App.Semaphore with operator; users = []
+          return ()
+
+      nonconsuming PauseApp
+        : ()
+        do exerciseByKey @App.Semaphore operator Archive
+
+      nonconsuming UnpauseApp
+        : ContractId App.Semaphore
+        do
+          (_, ud) <- fetchByKey @User.Directory operator
+          create App.Semaphore with operator; users = ud.users
+
+      nonconsuming AddUser
+        : ContractId Role.User
+        with
+          party : Party
+        do
+          exerciseByKey @User.Directory operator User.Directory_AddObs with party
+          create Role.User with ..
+
+template UserSession
+  with
+    operator : Party
+    user : Party
+    displayName : Text
+    email : Text
+  where
+    signatory user
+    key user : Party
+    maintainer key
+
+    controller operator can
+      UserSessionAck: ()
+        do
+          maybeUser <- lookupByKey @Role.User (operator, user)
+          case maybeUser of
+            None -> do
+              (appCid, _) <- fetchByKey @Admin operator
+              exercise appCid PauseApp
+              userRole <- exercise appCid AddUser with party = user
+              exercise appCid UnpauseApp
+              exercise userRole Role.PutProfile with
+                imageUrl = ""
+                displayName
+                email = Some email
+                domain = None
+              return ()
+            Some _ ->
+              return ()
+
+testUserSessions = scenario do
+  admin <- getParty "Admin"
+  alice <- getParty "Alice"
+
+  admin `submit` do
+    app <- create Admin with operator = admin
+    exercise app StartApp
+  
+  aliceSession <- alice `submit` do
+    create UserSession with
+      operator = admin
+      user = alice
+      displayName = "Big Al"
+      email = "alice@example.com"
+  
+  admin `submit` do
+    exercise aliceSession UserSessionAck
+
+  aliceSession2 <- alice `submit` do
+    create UserSession with
+      operator = admin
+      user = alice
+      displayName = "Big Al"
+      email = "alice@example.com"
+  
+  admin `submit` do
+    exercise aliceSession2 UserSessionAck
+    
+duplicateTags = scenario do
+  admin <- getParty "Admin"
+  user <- getParty "User"
+
+  submit admin do
+    create Admin with operator = admin
+    exerciseByKey @Admin admin StartApp
+    exerciseByKey @Admin admin PauseApp
+    exerciseByKey @Admin admin AddUser with
+      party = user
+    exerciseByKey @Admin admin UnpauseApp
+    
+  return ()
+
+  submit user do
+    exerciseByKey @Role.User (admin, user) Role.ADD_BOARD with
+      boardId = "123"
+      title = "Foo"
+    
+    exerciseByKey @Role.User (admin, user) Role.ADD_LIST with
+      boardId = "123"
+      listId = "abc"
+      title = "List 1"
+    
+    exerciseByKey @Role.User (admin, user) Role.ADD_CARD with
+      listId = "abc"
+      cardId = "xyz"
+      text = "Lorem ipsum"
+    
+    exerciseByKey @Role.User (admin, user) Role.ADD_TAG with
+      boardId = "123"
+      tagId = "456"
+      name = "Urgent"
+      color = "Red"
+  
+  -- You shouldn't be able to assign a non-exitant tag
+  submitMustFail user do
+    exerciseByKey @Role.User (admin, user) Role.ASSIGN_TAG with
+      tagId = "badTag"
+      cardId = "xyz"
+  
+  -- You shouldn't be able to assign a tag twice
+  submit user do
+    exerciseByKey @Role.User (admin, user) Role.ASSIGN_TAG with
+      tagId = "456"
+      cardId = "xyz"
+    
+    exerciseByKey @Role.User (admin, user) Role.ASSIGN_TAG with
+      tagId = "456"
+      cardId = "xyz"
+
+    (_, cardData) <- fetchByKey @Board.Card (admin, "xyz")
+    (_, tagData) <- fetchByKey @Board.Tag (admin, "456")
+    assert (length cardData.tags == 1)
+    assert (length tagData.cards == 1)
