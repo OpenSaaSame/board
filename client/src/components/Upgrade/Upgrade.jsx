@@ -2,17 +2,20 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-// import { upgrade } from "../../../../server/middleware/persistMiddleware"
+import { upgrade } from "../../middleware/persistMiddleware"
 import "./Upgrade.scss";
 
-// const confirmUpgrade = async user => {
-//   try{
-//     await upgrade(user);
-//     location.reload();
-//   } catch (err) {
-//     console.log(err);
-//   }
-// }
+const confirmUpgrade = async (user, upgradeInvites) => {
+  try{
+    upgrade(user, upgradeInvites[0].cid);
+    dispatch({
+      type: "QUEUE_READ",
+      payload: {at : Date.now()}
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 const skipUpgrade = dispatch => {
   dispatch({
@@ -21,7 +24,7 @@ const skipUpgrade = dispatch => {
   })
 }
 
-const Upgrade = ({dispatch, user}) => {
+const Upgrade = ({dispatch, user, upgradeInvites}) => {
   let className = "upgrade"
   if (!user || !user.needsUpgrade || user.skippedUpgrade) className += " hide"
   return <div className={className}>
@@ -38,12 +41,12 @@ const Upgrade = ({dispatch, user}) => {
       </p>
       <div className="buttons">
         <span className="skip-button" onClick={() => skipUpgrade(dispatch)}>Not yet</span>
-        {/* <span className="confirm-button" onClick={() => confirmUpgrade(user)}>Upgrade</span> */}
+        <span className="confirm-button" onClick={() => confirmUpgrade(user, upgradeInvites)}>Upgrade</span>
       </div>
     </div>
   </div>
 }
 
-Upgrade.propTypes = { user: PropTypes.object };
-const mapStateToProps = state => ({ user: state.user });
+Upgrade.propTypes = { user: PropTypes.object, upgradeInvites: PropTypes.array.isRequired };
+const mapStateToProps = state => ({ user: state.user, upgradeInvites: state.upgradeInvites });
 export default connect(mapStateToProps)(Upgrade);

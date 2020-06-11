@@ -32,6 +32,7 @@ class App extends Component {
 
     const registrationNeededRoutes = (
       <>
+        <Upgrade />
         <Registration />
         <Spinner />
       </>
@@ -46,7 +47,6 @@ class App extends Component {
         </Switch>
         <Spinner />
         <Alert />
-        <Upgrade />
       </>
     );
 

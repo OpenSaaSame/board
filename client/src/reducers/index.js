@@ -9,6 +9,7 @@ import user from "./user";
 import ledger from "./ledger";
 import users from "./users";
 import boardUsersById from "./boardUsersById";
+import upgradeInvites from "./upgradeInvites"
 
 export const login = (party, token) => ({
     'type': 'LOG_IN',
@@ -23,8 +24,9 @@ export default (state = {}, action) => {
             cardsById: {},
             listsById: {},
             boardsById: {},
+            upgradeInvites: {},
             loggedIn: true,
-            user: { party, token, version: 'Danban.V3' }
+            user: { party, token, version: 'Danban.V3_2' }
         };
     }
     if (action.type === "LOG_OUT") {
@@ -49,7 +51,8 @@ export default (state = {}, action) => {
             user,
             ledger,
             users,
-            boardUsersById
+            boardUsersById,
+            upgradeInvites
         })(others, action)
     }
 }
