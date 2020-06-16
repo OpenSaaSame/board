@@ -1,15 +1,28 @@
 import React from "react";
+
 import { createStore, applyMiddleware } from "redux";
-import { Provider } from "react-redux";   
+import { Provider } from "react-redux";
+import { createLogger } from 'redux-logger';
+
 import { HashRouter } from "react-router-dom";
+
 import rootReducer from "./reducers";
+
+
 import App from "./components/App";
 import persistMiddleware from "./middleware/persistMiddleware";
 import { composeWithDevTools } from "redux-devtools-extension";
 
 const store = createStore(
-  rootReducer,
-  composeWithDevTools(applyMiddleware(persistMiddleware))
+    rootReducer,
+    composeWithDevTools(
+        applyMiddleware(
+            persistMiddleware,
+            createLogger({
+                collapsed: true
+            })
+        )
+    )
 );
 
 // Save fragment in local storage for post-DABL redirect
