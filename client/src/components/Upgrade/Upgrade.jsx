@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { upgrade } from "../../middleware/persistMiddleware"
 import "./Upgrade.scss";
 
-const confirmUpgrade = async (user, upgradeInvites) => {
+const confirmUpgrade = async (dispatch, user, upgradeInvites) => {
   try{
     upgrade(user, upgradeInvites[0].cid);
     dispatch({
@@ -41,7 +41,7 @@ const Upgrade = ({dispatch, user, upgradeInvites}) => {
       </p>
       <div className="buttons">
         <span className="skip-button" onClick={() => skipUpgrade(dispatch)}>Not yet</span>
-        <span className="confirm-button" onClick={() => confirmUpgrade(user, upgradeInvites)}>Upgrade</span>
+        <span className="confirm-button" onClick={() => confirmUpgrade(dispatch, user, upgradeInvites)}>Upgrade</span>
       </div>
     </div>
   </div>
