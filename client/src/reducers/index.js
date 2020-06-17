@@ -10,6 +10,11 @@ import ledger from "./ledger";
 import users from "./users";
 import boardUsersById from "./boardUsersById";
 
+export const login = (party, token) => ({
+    'type': 'LOG_IN',
+    'payload': { party, token }
+});
+
 export default (state = {}, action) => {
     if (action.type === "LOG_IN") {
         const { party, token } = action.payload;

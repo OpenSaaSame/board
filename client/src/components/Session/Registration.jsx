@@ -1,8 +1,11 @@
 import React, { Component } from "react";
 import { Title } from "react-head";
-import Header from "../Header/Header";
 import { connect } from "react-redux";
-import { createUserSession } from "../../middleware/persistMiddleware";
+
+import Header from "../Header/Header";
+
+import { createUserSession, queueRead } from "../../middleware/persistMiddleware";
+
 import "./Session.scss"
 
 class Registration extends Component {
@@ -28,9 +31,21 @@ class Registration extends Component {
   handleProfileSubmit = (event) => {
     event.preventDefault();
     this.setState({submitted: true});
-    const { user } = this.props;
+
+    const { user, queueRead } = this.props;
     const { displayName, email } = this.state;
+
     createUserSession(user.token, user.party, email, displayName)
+          .then(() => {
+              /* Reduce session creation latency. This has to be done
+               * on a delay to account for the fact that the user is
+               * not fully registered until a bot has fired in
+               * response to the createUserSession call. Longer term,
+               * the streaming websocket API will fix more reliably
+               * this without the explicit sleep.
+               */
+              setTimeout(() => { queueRead(); }, 500);
+          });
   };
 
   render = () => {
@@ -80,4 +95,6 @@ class Registration extends Component {
 
 const mapStateToProps = ({ user }) => ({ user });
 
-export default connect(mapStateToProps)(Registration);
+export default connect(mapStateToProps, {
+    queueRead
+})(Registration);

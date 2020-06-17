@@ -1,8 +1,15 @@
+import "./Session.scss"
+
 import React, { Component } from "react";
 import { Title } from "react-head";
-import Header from "../Header/Header";
+
 import { connect } from "react-redux";
-import "./Session.scss"
+
+import { login } from "../../reducers/index";
+import { queueRead } from "../../middleware/persistMiddleware";
+
+import Header from "../Header/Header";
+
 
 const isLocalhost = window.location.hostname === "localhost";
 
@@ -29,17 +36,12 @@ class LogIn extends Component {
   };
 
   handleLogin = (party, token) => {
-    const { dispatch } = this.props;
+    const { login, queueRead } = this.props;
+
     this.setState({loading: true});
 
-    dispatch({
-      'type': 'LOG_IN',
-      'payload': { party, token }
-    });
-    dispatch({
-      type: "QUEUE_READ",
-      payload: {at : Date.now()}
-    });
+    login(party, token);
+    queueRead();
   };
 
   handleSubmit = (event) => {
@@ -138,4 +140,7 @@ class LogIn extends Component {
   };
 }
 
-export default connect()(LogIn);
+export default connect(null, {
+    login,
+    queueRead
+})(LogIn);

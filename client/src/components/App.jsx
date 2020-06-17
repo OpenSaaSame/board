@@ -1,10 +1,15 @@
+import "./App.scss";
+
 import React, { Component } from "react";
 import { Route, Redirect, Switch, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { HeadProvider } from "react-head";
+
+import { queueRead } from "../middleware/persistMiddleware";
+
 import Home from "./Home/Home";
 import BoardContainer from "./Board/BoardContainer";
-import "./App.scss";
+
 import Spinner from "./Spinner/Spinner";
 import Alert from "./Alert/Alert";
 import Upgrade from "./Upgrade/Upgrade";
@@ -13,20 +18,14 @@ import Registration from "./Session/Registration";
 
 class App extends Component {
   componentDidMount() {
-    this.timer = setInterval(()=> this.readLedger(), 30000);
+      this.timer = setInterval(() => {
+          this.props.queueRead();
+      }, 15000);
   }
 
   componentWillUnmount() {
     this.timer = null;
   }
-
-  readLedger = () => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: "QUEUE_READ",
-      payload: {at : Date.now()}
-    });
-  };
 
   render = () => {
     const { loggedIn, user } = this.props;
@@ -80,4 +79,6 @@ const mapStateToProps = ({ loggedIn, user }) => ({ loggedIn, user });
 
 // Use withRouter to prevent strange glitch where other components
 // lower down in the component tree wouldn't update from URL changes
-export default withRouter(connect(mapStateToProps)(App));
+export default withRouter(connect(mapStateToProps, {
+    queueRead
+})(App));
