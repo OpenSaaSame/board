@@ -56,36 +56,34 @@ class Registration extends Component {
         <Header />
         <div className="home">
           <div className="main-content">
-            <form onSubmit={this.handleProfileSubmit} className="session-form">
-              <h2>Register Your Profile</h2>
-              <div>
-                <label>
-                  Name
+            <div className="login-panel">
+              <form onSubmit={this.handleProfileSubmit} className="session-form">
+                <h2>Register Your Profile</h2>
+                <div className="field">
+                  <label htmlFor="displayName">Name</label>
                   <input
+                    id="displayName"
                     type="text"
                     name="displayName"
                     value={displayName}
-                    onChange={this.handleChange}
-                  />
-                </label>
-              </div>
-              <div>
-                <label>
-                  Email
+                    onChange={this.handleChange}/>
+                </div>
+                <div className="field">
+                  <label htmlFor="email">Email</label>
                   <input
+                    id="email"
                     type="text"
                     name="email"
                     value={email}
-                    onChange={this.handleChange}
-                  />
-                </label>
-              </div>
-              <input
-                type="submit"
-                value={!submitted ? "Register" : "Waiting…"}
-                disabled={submitted}
-              />
-            </form>
+                    onChange={this.handleChange}/>
+                </div>
+                <input
+                  type="submit"
+                  value={!submitted ? "Register" : "Waiting…"}
+                  disabled={submitted}
+                />
+              </form>
+            </div>
           </div>
         </div>
       </>

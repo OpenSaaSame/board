@@ -1,9 +1,13 @@
 import "./Session.scss"
 
+import jwtDecode from 'jwt-decode';
+
 import React, { Component } from "react";
 import { Title } from "react-head";
 
 import { connect } from "react-redux";
+
+import classnames from "classnames";
 
 import { login } from "../../reducers/index";
 import { queueRead } from "../../middleware/persistMiddleware";
@@ -13,27 +17,29 @@ import Header from "../Header/Header";
 
 const isLocalhost = window.location.hostname === "localhost";
 
+function getTokenParty(jwt) {
+    if (!jwt || jwt.split('.').length !== 3) {
+        return null;
+    }
+
+    const apiBlock = jwtDecode(jwt)["https://daml.com/ledger-api"];
+
+    if (apiBlock && apiBlock['actAs']) {
+        return apiBlock['actAs'][0];
+    }
+
+    return null;
+}
+
 class LogIn extends Component {
 
   constructor() {
     super();
     this.state = {
-      party: "",
       token: "",
-      showAdvancedAuth: isLocalhost,
       loading: false
     };
   }
-
-  handleChange = (event) => {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
-
-    this.setState({
-      [name]: value
-    });
-  };
 
   handleLogin = (party, token) => {
     const { login, queueRead } = this.props;
@@ -46,18 +52,15 @@ class LogIn extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    const { party, token } = this.state;
+      const { token } = this.state;
+
+      const party = getTokenParty(token);
 
     localStorage.setItem('party', party);
     localStorage.setItem('token', token);
 
     this.handleLogin(party, token);
   };
-
-  toggleForm = () => {
-    const { showAdvancedAuth } = this.state;
-    this.setState({showAdvancedAuth: !showAdvancedAuth});
-  }
 
   componentDidMount = () => {
     const party = localStorage.getItem('party');
@@ -78,67 +81,55 @@ class LogIn extends Component {
   };
 
   render = () => {
-    const { party, token, showAdvancedAuth, loading } = this.state;
+      const { token, loading } = this.state;
 
-    return (
+      const party = getTokenParty(token);
+
+   return (
       <>
         <Title>Home | OpenWork</Title>
         <Header />
         <div className="home">
           <div className="main-content">
-            <form onSubmit={this.handleSubmit} className="session-form">
-              { !isLocalhost &&
-                <>
-                  <div>
-                    <a
-                      href={this.dablLogInButtonUrl()}
-                      className="dabl-login"
-                      disabled={loading}
-                    >
-                      { !loading ? "Log In with DABL" : "Logging In…" }
-                    </a>
-                  </div>
-                  <button onClick={this.toggleForm}>
-                    Advanced Options {showAdvancedAuth ? "-" : "+"}
-                  </button>
-                </>
-              }
-              <div className={!showAdvancedAuth ? "hidden" : ""}>
-                <div>
-                  <label>
-                    Party
-                    <input
-                      type="text"
-                      name="party"
-                      value={party}
-                      onChange={this.handleChange}
-                    />
-                  </label>
-                </div>
-                <div>
-                  <label>
-                    JWT
-                    <input
+            <div className="login-panel">
+             { !isLocalhost &&
+                 <a
+                   href={this.dablLogInButtonUrl()}
+                   className="dabl-login"
+                   disabled={loading}>
+                   Log In with DABL
+                 </a>}
+             { isLocalhost &&
+              <form onSubmit={this.handleSubmit} className="session-form">
+                  <h2>Local Login</h2>
+                  <div className="field">
+                    <label htmlFor="token">JWT</label>
+                    <textarea
+                      id="token"
                       type="password"
                       name="token"
+                      cols={60}
+                      rows={8}
                       value={token}
-                      onChange={this.handleChange}
-                    />
-                  </label>
-                </div>
-                <input
-                  type="submit"
-                  value={ !loading ? "Log In" : "Logging In…" }
-                  disabled={loading}
-                />
-              </div>
-            </form>
-          </div>
+                      onChange={(evt) => this.setState({token: evt.target.value})}/>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="party">Party</label>
+                    <span id="party">{party}</span>
+                  </div>
+                  <input
+                    type="submit"
+                    value={ !loading ? "Log In" : "Logging In…" }
+                    disabled={!party || loading}/>
+               </form>}
+             </div>
+           </div>
         </div>
       </>
     );
   };
 }
+
 
 export default connect(null, {
     login,
