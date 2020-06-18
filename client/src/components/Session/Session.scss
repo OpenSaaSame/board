@@ -1,5 +1,6 @@
 
 .login-panel {
+    width: 600px;
     background: white;
     padding: 2em;
     border-radius: 8px;
@@ -13,9 +14,17 @@
 
         .field {
             display: flex;
-            flex-align: top;
+            align-items: baseline;
 
+            padding-top: 10px;
             padding-bottom: 10px;
+
+            input {
+                flex: 1;
+                padding: 5px;
+
+                border: 1px solid #c0c0c0;
+            }
 
             label {
                 font-weight: bold;

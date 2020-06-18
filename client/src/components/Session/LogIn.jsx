@@ -37,7 +37,8 @@ class LogIn extends Component {
     super();
     this.state = {
       token: "",
-      loading: false
+      loading: false,
+      showAdvanced: false
     };
   }
 
@@ -81,7 +82,7 @@ class LogIn extends Component {
   };
 
   render = () => {
-      const { token, loading } = this.state;
+      const { token, loading, showAdvanced } = this.state;
 
       const party = getTokenParty(token);
 
@@ -93,15 +94,23 @@ class LogIn extends Component {
           <div className="main-content">
             <div className="login-panel">
              { !isLocalhost &&
-                 <a
-                   href={this.dablLogInButtonUrl()}
-                   className="dabl-login"
-                   disabled={loading}>
-                   Log In with DABL
-                 </a>}
-             { isLocalhost &&
+                 <>
+                    <a
+                      href={this.dablLogInButtonUrl()}
+                      className="dabl-login"
+                      disabled={loading}>
+                      Log In with DABL
+                    </a>
+                    <input
+                      name="showAdvanced"
+                      type="checkbox"
+                      checked={showAdvanced}
+                      onChange={() => this.setState({ showAdvanced: !showAdvanced})} />
+                    <label htmlFor="showAdvanced">Advanced Login</label>
+               </>}
+           { (isLocalhost || showAdvanced) &&
               <form onSubmit={this.handleSubmit} className="session-form">
-                  <h2>Local Login</h2>
+                  {isLocalhost && <h2>Local Login</h2>}
                   <div className="field">
                     <label htmlFor="token">JWT</label>
                     <textarea

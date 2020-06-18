@@ -27,8 +27,6 @@ export const createUserSession = async (jwt, party, email, displayName) => {
     }
     const prefix = process.env.REACT_APP_V3_1_PACKAGE_ID ? `${process.env.REACT_APP_V3_1_PACKAGE_ID}:` : "";
 
-    console.log('creating');
-
     await create(makeLedgerUrl(), jwt, `${prefix}Danban.V3_1:UserSession`, { operator: admin, user: party, email, displayName });
 };
 
