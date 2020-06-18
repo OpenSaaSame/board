@@ -26,6 +26,7 @@ export const createUserSession = async (jwt, party, email, displayName) => {
         admin = dablInfo["userAdminParty"];
     }
     const prefix = process.env.REACT_APP_V3_1_PACKAGE_ID ? `${process.env.REACT_APP_V3_1_PACKAGE_ID}:` : "";
+
     await create(makeLedgerUrl(), jwt, `${prefix}Danban.V3_1:UserSession`, { operator: admin, user: party, email, displayName });
 };
 
@@ -261,5 +262,12 @@ const persistMiddleware = store => next => action => {
         }
     }
 };
+
+export const queueRead = () => ({
+    type: "QUEUE_READ",
+    payload: {
+        at : Date.now()
+    }
+});
 
 export default persistMiddleware;

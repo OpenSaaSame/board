@@ -1,4 +1,5 @@
 import { combineReducers } from "redux";
+
 import cardsById from "./cardsById";
 import listsById from "./listsById";
 import boardsById from "./boardsById";
@@ -8,6 +9,11 @@ import user from "./user";
 import ledger from "./ledger";
 import users from "./users";
 import boardUsersById from "./boardUsersById";
+
+export const login = (party, token) => ({
+    'type': 'LOG_IN',
+    'payload': { party, token }
+});
 
 export default (state = {}, action) => {
     if (action.type === "LOG_IN") {

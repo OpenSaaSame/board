@@ -55,10 +55,6 @@ $main-margin: 40px;
   margin: 20px 5px;
   font-size: 22px;
   color: $grey;
-
-  @media (max-width: 1024px) {
-    margin-top: 63px;
-  }
 }
 
 .board-link {
