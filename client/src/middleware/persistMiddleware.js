@@ -25,27 +25,24 @@ export const createUserSession = async (jwt, party, email, displayName) => {
         const dablInfo = await (await fetch("/.well-known/dabl.json")).json();
         admin = dablInfo["userAdminParty"];
     }
-    const prefix = process.env.REACT_APP_V3_1_PACKAGE_ID ? `${process.env.REACT_APP_V3_1_PACKAGE_ID}:` : "";
-
-    await create(makeLedgerUrl(), jwt, `${prefix}Danban.V3_1:UserSession`, { operator: admin, user: party, email, displayName });
+    await create(makeLedgerUrl(), jwt, "Danban.V3_2:UserSession", { operator: admin, user: party, email, displayName });
 };
 
 
-export const upgrade = user => exerciseUtil(
+export const upgrade = (user, upgradeCid) => exerciseUtil(
     makeLedgerUrl(),
     user.token,
     `${user.version}.Upgrade:UpgradeInvite`,
-    user.cid,
+    upgradeCid,
     "Accept_Upgrade", {}
 );
 
 export const exercise = (user, choice, args) => {
-    const prefix = process.env.REACT_APP_V3_PACKAGE_ID ? `${process.env.REACT_APP_V3_PACKAGE_ID}:` : "";
     if (user.cid) {
         exerciseUtil(
             makeLedgerUrl(),
             user.token,
-            `${prefix + user.version}.Role:User`,
+            `${user.version}.Role:User`,
             user.cid,
             choice,
             args

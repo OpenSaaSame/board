@@ -163,8 +163,6 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
 
     const contractMap = filterGroupAndVersion(party, contracts);
 
-    console.log(contractMap);
-
     const boardsById = mapBy("_id")(contractMap.Board.Data);
     const listsById = mapBy("_id")(contractMap.Board.CardList);
     const cardsById = mapBy("_id")(contractMap.Board.Card);
