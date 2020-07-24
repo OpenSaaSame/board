@@ -120,48 +120,46 @@ class CardOptions extends Component {
           alignItems: isCardNearRightBorder ? "flex-end" : "flex-start"
         }}
       >
-        {card.comments !== undefined &&
-          <>
-            <div>
-              <button onClick={this.toggleComments} className="options-list-button">
-                <div className="modal-icon">
-                  <FaCommentAlt />
-                </div>&nbsp;Comments
-              </button>
-            </div>
-            <Modal
-              isOpen={isCommentsOpen}
-              onRequestClose={this.toggleComments}
-              overlayClassName="calendar-underlay"
-              className="calendar-modal"
-              style={isThinDisplay ? commentsMobileStyle : calendarStyle}
-            >
-              <CardComments cardId={card._id} />
-            </Modal>
-            <div>
-              <button onClick={this.toggleTags} className="options-list-button">
-                <div className="modal-icon">
-                  <FaTags />
-                </div>&nbsp;Tags
-              </button>
-            </div>
-            <Modal
-              isOpen={isTagsOpen}
-              onRequestClose={this.toggleTags}
-              overlayClassName="calendar-underlay"
-              className="calendar-modal"
-              style={isThinDisplay ? commentsMobileStyle : calendarStyle}
-            >
-              <CardTags cardId={card._id} />
-            </Modal>
-            <div className="options-list-button">
+        <>
+          <div>
+            <button onClick={this.toggleComments} className="options-list-button">
               <div className="modal-icon">
-                <FaUser />
-              </div>
-              &nbsp;<CardUser cardId={card._id} assignee={card.assignee} />
+                <FaCommentAlt />
+              </div>&nbsp;Comments
+            </button>
+          </div>
+          <Modal
+            isOpen={isCommentsOpen}
+            onRequestClose={this.toggleComments}
+            overlayClassName="calendar-underlay"
+            className="calendar-modal"
+            style={isThinDisplay ? commentsMobileStyle : calendarStyle}
+          >
+            <CardComments cardId={card._id} />
+          </Modal>
+          <div>
+            <button onClick={this.toggleTags} className="options-list-button">
+              <div className="modal-icon">
+                <FaTags />
+              </div>&nbsp;Tags
+            </button>
+          </div>
+          <Modal
+            isOpen={isTagsOpen}
+            onRequestClose={this.toggleTags}
+            overlayClassName="calendar-underlay"
+            className="calendar-modal"
+            style={isThinDisplay ? commentsMobileStyle : calendarStyle}
+          >
+            <CardTags cardId={card._id} />
+          </Modal>
+          <div className="options-list-button">
+            <div className="modal-icon">
+              <FaUser />
             </div>
-          </>
-        }
+            &nbsp;<CardUser cardId={card._id} assignee={card.assignee} />
+          </div>
+        </>
         <div>
           <button onClick={this.deleteCard} className="options-list-button">
             <div className="modal-icon">
