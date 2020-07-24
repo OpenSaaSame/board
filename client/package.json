@@ -10,6 +10,7 @@
     "date-fns": "^2.12.0",
     "http-proxy-middleware": "^1.0.3",
     "jwt-decode": "^2.2.0",
+    "lodash": "^4.17.19",
     "marked": "^1.0.0",
     "nested-error-stacks": "^2.1.0",
     "node-sass": "^4.14.1",

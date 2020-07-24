@@ -95,7 +95,7 @@ const boardsById = (state = {}, action) => {
       return { ...state, [boardId]: { ...state[boardId], tags: [ ...state[boardId].tags, tagId ]}};
     }
     case "SUCCEED_READ": {
-      return {...action.payload.boardsById, ...state};
+      return {...state, ...action.payload.boardsById};
     }
     default:
       return state;

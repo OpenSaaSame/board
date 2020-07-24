@@ -46,7 +46,7 @@ const boardUsersById = (state = {}, action) => {
       }
     }
     case "SUCCEED_READ": {
-      return {...action.payload.boardUsersById, ...state};
+      return {...state, ...action.payload.boardUsersById};
     }
     default:
       return state;

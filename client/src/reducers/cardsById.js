@@ -52,7 +52,7 @@ const cardsById = (state = {}, action) => {
       return { ...state, [cardId]: { ...state[cardId], tags: state[cardId].tags.filter(id => id !== tagId) }};
     }
     case "SUCCEED_READ": {
-      return {...action.payload.cardsById, ...state};
+      return {...state, ...action.payload.cardsById};
     }
     default:
       return state;
