@@ -1,4 +1,4 @@
-dar_version := $(shell grep "^version" backend/V3_1/daml.yaml | sed 's/version: //g')
+dar_version := 3.2.0
 operator_bot_version := $(shell cd python ; pipenv run python operator/setup.py --version)
 ui_version := $(shell node -p "require(\"./client/package.json\").version")
 
@@ -21,10 +21,8 @@ all: $(operator_bot) $(dar) $(ui)
 
 
 $(dar):
-	cd backend/V3; daml build
-	cd backend/V3_1; daml build
 	mkdir -p $(@D)
-	mv backend/V3_1/.daml/dist/*.dar $@
+	cp backend/released/danban-$(dar_version).dar $@
 
 
 $(operator_bot):
