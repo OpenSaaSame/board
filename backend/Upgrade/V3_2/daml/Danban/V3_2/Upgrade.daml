@@ -1,0 +1,195 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
+daml 1.2
+module Danban.V3_2.Upgrade where
+
+import DA.Action
+import qualified DA.List as List
+import qualified DA.Next.Map as Map
+import DA.Tuple
+
+import qualified Danban.V3 as DanbanV3
+import qualified Danban.V3.Board as BoardV3
+import qualified Danban.V3.Role as RoleV3
+import qualified Danban.V3.Rules as RulesV3
+import qualified Danban.V3.User as UserV3
+
+import qualified Danban.V3_2 as DanbanV3_2
+import qualified Danban.V3_2.Board as BoardV3_2
+import qualified Danban.V3_2.Role as RoleV3_2
+import qualified Danban.V3_2.Rules as RulesV3_2
+import qualified Danban.V3_2.User as UserV3_2
+
+import Danban.V3_2.Util
+
+forA_ xs f = void (forA xs f)
+
+class Upgradable a b where
+  upgrade : a -> b
+
+-- Define the conversion rules
+
+instance Upgradable UserV3.Directory UserV3_2.Directory where
+  upgrade UserV3.Directory{..} = UserV3_2.Directory{..}
+
+upgradeProfile : Party -> Party -> Update (ContractId UserV3_2.Profile)
+upgradeProfile operator party = do
+  (cid, UserV3.Profile{..}) <- fetchByKey @UserV3.Profile (operator, party)
+  archive cid
+  (_, ud) <- fetchByKey @UserV3_2.Directory operator
+  create UserV3_2.Profile with
+    obs = ud.users
+    ..
+
+instance Upgradable BoardV3.Directory BoardV3_2.Directory where
+  upgrade BoardV3.Directory{..} = BoardV3_2.Directory{..}
+
+instance Upgradable BoardV3.Data BoardV3_2.Data where
+  upgrade BoardV3.Data{..} = BoardV3_2.Data{..}
+
+instance Upgradable BoardV3.CardList BoardV3_2.CardList where
+  upgrade BoardV3.CardList{..} = BoardV3_2.CardList{..}
+
+instance Upgradable BoardV3.Card BoardV3_2.Card where
+  upgrade BoardV3.Card{..} = BoardV3_2.Card{tags = List.dedupSort tags, ..}
+
+instance Upgradable BoardV3.Tag BoardV3_2.Tag where
+  upgrade BoardV3.Tag{..} = BoardV3_2.Tag{cards = List.dedupSort cards, ..}
+
+instance Upgradable BoardV3.Comment BoardV3_2.Comment where
+  upgrade BoardV3.Comment{..} = BoardV3_2.Comment{..}
+      
+instance Upgradable RulesV3.Board RulesV3_2.Board where
+  upgrade RulesV3.Board{..} = RulesV3_2.Board{users = newUsers; ..}
+    where
+      newUsers = map (second upgrade) users
+
+deriving instance Enum RulesV3.AccessLevel
+deriving instance Enum RulesV3_2.AccessLevel
+instance Upgradable RulesV3.AccessLevel RulesV3_2.AccessLevel where
+  upgrade = toEnum . fromEnum
+
+upgradeByKey : forall a b k . (Template b, TemplateKey a k, Upgradable a b) => k -> Update (ContractId b, b)
+upgradeByKey k = do
+  (cid, args) <- fetchByKey @a k
+  archive cid
+  let b = upgrade args
+  bcid <- create @b b
+  return (bcid, b)
+
+upgradeIfKey : forall a b k . (Template b, TemplateKey a k, Upgradable a b) => k -> Update (Optional (ContractId b, b))
+upgradeIfKey k = do
+  oCid <- lookupByKey @a k
+  case oCid of
+    Some cid -> Some <$> upgradeByKey @a k
+    None -> return None
+
+updateMap : (Map.MapKey k) => k -> (v -> v) -> Map.Map k v -> Map.Map k v
+updateMap k fn m = case Map.lookup k m of
+  None -> m
+  Some v -> Map.insert k (fn v) m
+
+template UpgradeInitiator
+  with
+    operator: Party
+  where
+    signatory operator
+
+    controller operator can
+      InitiateUpgrade
+        : ()
+        do
+          -- Convert admin contracts
+          exerciseIfKey @DanbanV3.Admin operator Archive
+          newAdminCid <- create DanbanV3_2.Admin with operator
+          (_, UserV3_2.Directory{users}) <- upgradeByKey @UserV3.Directory @UserV3_2.Directory operator
+
+          -- Create Upgrade invitations for users and create board upgraders
+          forA_ users (\party -> do
+            exerciseByKey @RoleV3.User (operator, party) Archive
+            create UpgradeInvite with ..
+            )
+
+          exercise newAdminCid DanbanV3_2.UnpauseApp
+          return ()
+
+template BoardUpgrader
+  with
+    operator : Party
+    boardId : Text
+    requiredSigs : [Party]
+    sigs : [Party]
+  where
+    signatory operator :: sigs
+    observer requiredSigs
+
+    key (operator, boardId) : (Party, Text)
+    maintainer key._1
+
+    choice Sign
+      : ()
+      with
+        party : Party
+      controller party
+      do
+        assertMsg (show party <> " is not a required signatory") (party `elem` requiredSigs)
+        let newSigs = List.dedupSort (party :: sigs)
+        newSelf <- create this with sigs = newSigs
+        when (newSigs == requiredSigs) (exercise newSelf UpgradeBoard)
+    
+    controller operator can
+      UpgradeBoard
+        : ()
+        do
+          upgradeByKey @RulesV3.Board @RulesV3_2.Board (operator, boardId)
+          (_, newBoard) <- upgradeByKey @BoardV3.Data @BoardV3_2.Data (operator, boardId)
+          forA_ newBoard.lists (\listId -> do
+            (_, newList) <- upgradeByKey @BoardV3.CardList @BoardV3_2.CardList (operator, listId)
+            forA newList.cards (\cardId -> do
+                (_, newCard) <- upgradeByKey @BoardV3.Card @BoardV3_2.Card (operator, cardId)
+                forA newCard.comments (\commentId -> do
+                    upgradeByKey @BoardV3.Comment @BoardV3_2.Comment (operator, commentId)
+                  )
+                forA newCard.tags (\tagId -> do
+                    upgradeByKey @BoardV3.Tag @BoardV3_2.Tag (operator, tagId)
+                  )
+              )
+            )
+          -- Refresh the observers and admins to fix legacy bugs 
+          exerciseByKey @BoardV3_2.Data (operator, boardId) BoardV3_2.Data_UpdateObs with
+            newObs = newBoard.obs
+          exerciseByKey @BoardV3_2.Data (operator, boardId) BoardV3_2.Data_UpdateAdmins with
+            newAdmins = newBoard.admins
+          return ()
+
+template UpgradeInvite
+  with
+    operator : Party
+    party : Party
+  where
+    signatory operator
+
+    key (operator, party) : (Party, Party)
+    maintainer key._1
+
+    controller party can
+      Accept_Upgrade
+        : ()
+        do
+          upgradeProfile operator party
+          create RoleV3_2.User with ..
+          o <- upgradeIfKey @BoardV3.Directory @BoardV3_2.Directory (operator, party)
+          case o of
+            Some (_, bd) ->  forA_ bd.boards (\boardId -> do
+              oCid <- lookupByKey @BoardUpgrader (operator, boardId)
+              cid <- case oCid of
+                Some cid -> return cid
+                None -> do
+                  (_, board) <- fetchByKey @RulesV3.Board (operator, boardId)
+                  create BoardUpgrader with
+                    requiredSigs = List.dedupSort $ signatory board
+                    sigs = [operator]
+                    ..
+              void $ exercise cid Sign with ..
+              )
+            None -> return ()

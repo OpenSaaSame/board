@@ -37,6 +37,13 @@ class App extends Component {
       </>
     );
 
+    const upgradeNeededRoutes = (
+      <>
+        <Upgrade />
+        <Spinner />
+      </>
+    );
+
     const loggedInRoutes = (
       <>
         <Switch>
@@ -46,7 +53,6 @@ class App extends Component {
         </Switch>
         <Spinner />
         <Alert />
-        <Upgrade />
       </>
     );
 
@@ -54,9 +60,11 @@ class App extends Component {
       <LogIn />
     );
 
-    var routes;
+    let routes;
     if (!loggedIn || user.registered === undefined) {
       routes = loggedOutRoutes;
+    } else if (loggedIn && user.needsUpgrade) {
+      routes = upgradeNeededRoutes;
     } else if (loggedIn && user.registered === false) {
       routes = registrationNeededRoutes;
     } else {

@@ -1,49 +1,58 @@
 
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-// import { upgrade } from "../../../../server/middleware/persistMiddleware"
+import { upgrade } from "../../middleware/persistMiddleware"
+import { Title } from "react-head";
+import Header from "../Header/Header";
+
 import "./Upgrade.scss";
 
-// const confirmUpgrade = async user => {
-//   try{
-//     await upgrade(user);
-//     location.reload();
-//   } catch (err) {
-//     console.log(err);
-//   }
-// }
+const confirmUpgrade = async (dispatch, user, upgradeInvites, setLoading) => {
+  setLoading(true);
+  try{
+    upgrade(user, upgradeInvites[0].cid);
+    dispatch({
+      type: "QUEUE_READ",
+      payload: {at : Date.now() + 500}
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-const skipUpgrade = dispatch => {
-  dispatch({
-    type: "SKIP_UPGRADE",
-    payload: {}
-  })
-}
+const humanizedVersion = (v) => v.split(".")[1].replace("_", ".");
 
-const Upgrade = ({dispatch, user}) => {
-  let className = "upgrade"
-  if (!user || !user.needsUpgrade || user.skippedUpgrade) className += " hide"
-  return <div className={className}>
-    <div className="upgrade-modal">
-      <h1>It's Upgrade Time!</h1>
-      <p>
-        You've been invited to upgrade your DAML data and rules to {user && user.version}.
-      </p>
-      <p>
-        You can choose not to upgrade, but all boards you are a signatory on will become read-only, and this UI may stop working for old boards without notice.
-      </p>
-      <p>
-        Please refer to the <a href="https://www.github.com/digital-asset/danban">github repo</a> for details about this upgrade.
-      </p>
-      <div className="buttons">
-        <span className="skip-button" onClick={() => skipUpgrade(dispatch)}>Not yet</span>
-        {/* <span className="confirm-button" onClick={() => confirmUpgrade(user)}>Upgrade</span> */}
+const Upgrade = ({dispatch, user, upgradeInvites}) => {
+  const [loading, setLoading] = useState(false);
+  
+  return (
+    <>
+      <Title>Home | OpenWork</Title>
+      <Header />
+      <div className="home">
+        <div className="main-content">
+          <div className="upgrade">
+            <h1>It's Upgrade Time!</h1>
+            <p>
+              Your workspace operator is requesting that you upgrade the database and workflows to {user && humanizedVersion(user.version)}.
+            </p>
+            <div className="buttons">
+              <span
+                className="confirm-button"
+                onClick={() => confirmUpgrade(dispatch, user, upgradeInvites, setLoading)}
+                disabled={loading}
+              >
+                { loading ? "Loading..." : "Upgrade" }
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-}
+    </>
+  );
+};
 
-Upgrade.propTypes = { user: PropTypes.object };
-const mapStateToProps = state => ({ user: state.user });
+Upgrade.propTypes = { user: PropTypes.object, upgradeInvites: PropTypes.object.isRequired };
+const mapStateToProps = state => ({ user: state.user, upgradeInvites: state.upgradeInvites });
 export default connect(mapStateToProps)(Upgrade);
