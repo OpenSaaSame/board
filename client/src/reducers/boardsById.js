@@ -53,7 +53,8 @@ const boardsById = (state = {}, action) => {
           lists: [],
           isPublic: false,
           color: "blue",
-          about: ""
+          about: "",
+          tags: []
         }
       };
     }
