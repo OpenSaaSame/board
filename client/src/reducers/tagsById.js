@@ -6,7 +6,7 @@ const tagsById = (state = {}, action) => {
       return { ...state, [tagId]: { name, color, _id: tagId, boardId }};
     }
     case "SUCCEED_READ": {
-      return {...action.payload.tagsById, ...state};
+      return {...state, ...action.payload.tagsById};
     }
     default:
       return state;

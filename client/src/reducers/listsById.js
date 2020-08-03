@@ -1,3 +1,5 @@
+import merge from 'lodash/merge';
+
 const listsById = (state = {}, action) => {
   switch (action.type) {
     case "ADD_CARD": {
@@ -65,7 +67,7 @@ const listsById = (state = {}, action) => {
       return restOfLists;
     }    
     case "SUCCEED_READ": {
-      return {...action.payload.listsById, ...state};
+      return merge({}, state, action.payload.listsById);
     }
     default:
       return state;

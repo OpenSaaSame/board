@@ -1,3 +1,5 @@
+import merge from 'lodash/merge';
+
 const boardsById = (state = {}, action) => {
   switch (action.type) {
     case "TOGGLE_PUBLIC": {
@@ -88,6 +90,7 @@ const boardsById = (state = {}, action) => {
     case "DELETE_BOARD": {
       const { boardId } = action.payload;
       const { [boardId]: deletedBoard, ...restOfBoards } = state;
+      console.log(restOfBoards);
       return restOfBoards;
     }
     case "ADD_TAG": {
@@ -95,7 +98,7 @@ const boardsById = (state = {}, action) => {
       return { ...state, [boardId]: { ...state[boardId], tags: [ ...state[boardId].tags, tagId ]}};
     }
     case "SUCCEED_READ": {
-      return {...action.payload.boardsById, ...state};
+      return merge({}, state, action.payload.boardsById);
     }
     default:
       return state;
