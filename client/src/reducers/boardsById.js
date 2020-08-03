@@ -90,7 +90,6 @@ const boardsById = (state = {}, action) => {
     case "DELETE_BOARD": {
       const { boardId } = action.payload;
       const { [boardId]: deletedBoard, ...restOfBoards } = state;
-      console.log(restOfBoards);
       return restOfBoards;
     }
     case "ADD_TAG": {
