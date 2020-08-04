@@ -1,3 +1,5 @@
+import merge from 'lodash/merge';
+
 const cardsById = (state = {}, action) => {
   switch (action.type) {
     case "ADD_CARD": {
@@ -52,7 +54,7 @@ const cardsById = (state = {}, action) => {
       return { ...state, [cardId]: { ...state[cardId], tags: state[cardId].tags.filter(id => id !== tagId) }};
     }
     case "SUCCEED_READ": {
-      return {...state, ...action.payload.cardsById};
+      return merge({}, state, action.payload.cardsById);
     }
     default:
       return state;
