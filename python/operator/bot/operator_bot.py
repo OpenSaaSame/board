@@ -9,10 +9,10 @@ from dazl import create, exercise, exercise_by_key
 dazl.setup_default_logger(logging.INFO)
 
 class Board:
-    App = "Danban.V3_2.Admin"
-    UserSession = "Danban.V3_2.UserSession"
-    UserRole = "Danban.V3_2.Role.User"
-    Data = "Danban.V3_2.Board.Data"
+    App = "OpenworkBoard.V4.Admin"
+    UserSession = "OpenworkBoard.V4.UserSession"
+    UserRole = "OpenworkBoard.V4.Role.User"
+    Data = "OpenworkBoard.V4.Board.Data"
 
 
 def main():
