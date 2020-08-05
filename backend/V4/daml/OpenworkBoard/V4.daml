@@ -4,6 +4,7 @@ module OpenworkBoard.V4 where
 import qualified OpenworkBoard.V4.App as App
 import qualified OpenworkBoard.V4.User as User
 import qualified OpenworkBoard.V4.Role as Role
+import qualified OpenworkBoard.V4.Board as Board
 
 template Admin
   with
@@ -70,41 +71,106 @@ template UserSession
             Some _ ->
               return ()
 
-testUserSessions = scenario do
-  admin <- getParty "Admin"
-  alice <- getParty "Alice"
+-- testUserSessions = scenario do
+--   admin <- getParty "Admin"
+--   alice <- getParty "Alice"
+--   bob <- getParty "Bob"
 
-  admin `submit` do
-    app <- create Admin with operator = admin
-    exercise app StartApp
+--   admin `submit` do
+--     app <- create Admin with operator = admin
+--     exercise app StartApp
   
-  aliceSession <- alice `submit` do
-    create UserSession with
-      operator = admin
-      user = alice
-      displayName = "Big Al"
-      email = "alice@example.com"
+--   aliceSession <- alice `submit` do
+--     create UserSession with
+--       operator = admin
+--       user = alice
+--       displayName = "Big Al"
+--       email = "alice@example.com"
   
-  admin `submit` do
-    exercise aliceSession UserSessionAck
+--   admin `submit` do
+--     exercise aliceSession UserSessionAck
 
-  aliceSession2 <- alice `submit` do
-    create UserSession with
-      operator = admin
-      user = alice
-      displayName = "Big Al"
-      email = "alice@example.com"
+--   aliceSession2 <- alice `submit` do
+--     create UserSession with
+--       operator = admin
+--       user = alice
+--       displayName = "Big Al"
+--       email = "alice@example.com"
   
-  admin `submit` do
-    exercise aliceSession2 UserSessionAck
+--   admin `submit` do
+--     exercise aliceSession2 UserSessionAck
+  
+--   -- New users should be added to public boards
+--   submit alice do
+--     exerciseByKey @Role.User (admin, alice) Role.ADD_BOARD with
+--       boardId = "123"
+--       title = "Foo"
+    
+--     exerciseByKey @Role.User (admin, alice) Role.TOGGLE_PUBLIC with
+--       boardId = "123"
 
-startApp = scenario do
+--   bobSession <- bob `submit` do
+--     create UserSession with
+--       operator = admin
+--       user = bob
+--       displayName = "Big Bob"
+--       email = "bob@example.com"
+  
+--   admin `submit` do
+--     exercise bobSession UserSessionAck
+--     (_boardCid, boardData) <- fetchByKey @Board.Data (admin, "123")
+--     assert (elem bob boardData.obs)
+
+duplicateTags = scenario do
   admin <- getParty "Admin"
   user <- getParty "User"
-  app <- submit admin do
+
+  submit admin do
     create Admin with operator = admin
-  submit admin do
-    exercise app StartApp
-  submit admin do
-    exercise app AddUser with
+    exerciseByKey @Admin admin StartApp
+    exerciseByKey @Admin admin PauseApp
+    exerciseByKey @Admin admin AddUser with
       party = user
+    exerciseByKey @Admin admin UnpauseApp
+
+  submit user do
+    exerciseByKey @Role.User (admin, user) Role.ADD_BOARD with
+      boardId = "123"
+      title = "Foo"
+    
+    exerciseByKey @Role.User (admin, user) Role.ADD_LIST with
+      boardId = "123"
+      listId = "abc"
+      title = "List 1"
+    
+    exerciseByKey @Role.User (admin, user) Role.ADD_CARD with
+      listId = "abc"
+      cardId = "xyz"
+      text = "Lorem ipsum"
+    
+    exerciseByKey @Role.User (admin, user) Role.ADD_TAG with
+      boardId = "123"
+      tagId = "456"
+      name = "Urgent"
+      color = "Red"
+  
+  -- You shouldn't be able to assign a non-exitant tag
+  submitMustFail user do
+    exerciseByKey @Role.User (admin, user) Role.ASSIGN_TAG with
+      tagId = "badTag"
+      cardId = "xyz"
+  
+  -- You shouldn't be able to assign a tag twice
+  submit user do
+    exerciseByKey @Role.User (admin, user) Role.ASSIGN_TAG with
+      tagId = "456"
+      cardId = "xyz"
+    
+    exerciseByKey @Role.User (admin, user) Role.ASSIGN_TAG with
+      tagId = "456"
+      cardId = "xyz"
+
+    (_, cardData) <- fetchByKey @Board.Card (admin, "xyz")
+    (_, tagData) <- fetchByKey @Board.Tag (admin, "456")
+    assert (length cardData.tags == 1)
+    assert (length tagData.cards == 1)

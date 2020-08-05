@@ -423,10 +423,13 @@ template Board
         (oldCardCid, card) <- fetchByKey @Board.Card (operator, cardId)
         (oldTagCid, tag) <- fetchByKey @Board.Tag (operator, tagId)
         
-        archive oldCardCid
-        archive oldTagCid
-        create card with tags = card.tags ++ [tagId]
-        create tag with cards = tag.cards ++ [cardId]
+        if elem tagId card.tags then
+          return oldTagCid
+        else do
+            archive oldCardCid
+            archive oldTagCid
+            create card with tags = card.tags ++ [tagId]
+            create tag with cards = tag.cards ++ [cardId]
     
     nonconsuming choice UNASSIGN_TAG
       : ContractId Board.Tag
