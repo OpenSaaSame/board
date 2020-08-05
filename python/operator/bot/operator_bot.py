@@ -9,16 +9,10 @@ from dazl import create, exercise, exercise_by_key
 dazl.setup_default_logger(logging.INFO)
 
 class Board:
-    # TODO: remove legacy package support
-    # App = "Danban.V3.Admin@006a15901a809f6096f4fe706d94e913676f01e821c30d8c0b4e01d1885aba83"
-    # UserSession = "Danban.V3_1.UserSession@f4c6953996ded4065367a73d1fd5de89e9c2bf2d9079a52560b18ce071032f7b"
-    # UserRole = "Danban.V3.Role.User@006a15901a809f6096f4fe706d94e913676f01e821c30d8c0b4e01d1885aba83"
-    # Data = "Danban.V3.Board.Data@006a15901a809f6096f4fe706d94e913676f01e821c30d8c0b4e01d1885aba83"
-
-    App = "Danban.V3.Admin"
-    UserSession = "Danban.V3_1.UserSession"
-    UserRole = "Danban.V3.Role.User"
-    Data = "Danban.V3.Board.Data"
+    App = "Danban.V3_2.Admin"
+    UserSession = "Danban.V3_2.UserSession"
+    UserRole = "Danban.V3_2.Role.User"
+    Data = "Danban.V3_2.Board.Data"
 
 
 def main():
@@ -38,8 +32,9 @@ def main():
         res = client.find_active(Board.App)
         logging.info(f'found {len(res)} Board Admin contracts')
 
-        logging.info(f'Creating Operator contract for {party}...')
-        return client.submit_create_and_exercise(Board.App, { 'operator': client.party }, "StartApp", {})
+        if len(res) == 0:
+            logging.info(f'Creating Operator contract for {party}...')
+            return client.submit_create_and_exercise(Board.App, { 'operator': client.party }, "StartApp", {})
 
         boards = client.find_active(Board.Data)
         logging.info(f'found {len(res)} boards')

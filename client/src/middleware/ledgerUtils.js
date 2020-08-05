@@ -9,8 +9,8 @@ const mapBy = field => list => {
 
 const prefix = process.env.REACT_APP_V3_PACKAGE_ID ? `${process.env.REACT_APP_V3_PACKAGE_ID}:` : "";
 export const appVersions = [
-  "Danban.V2",
-  `${prefix}Danban.V3`
+  `${prefix}Danban.V3`,
+  "Danban.V3_2"
 ];
 
 export const rootErr = err => {
@@ -98,16 +98,13 @@ export const search = async (ledgerUrl, jwt, templateId, filter) => {
 const dataTemplates = [
   ["User", "Profile"],
   ["Role", "User"],
-  ["Rules", "Board"]
+  ["Rules", "Board"],
+  ["Upgrade", "UpgradeInvite"]
 ].concat(
   ["Data", "CardList", "Card", "Comment", "Tag"].map(e => ["Board", e])
 );
 
-const exclusions = {
-  "Danban.V2" : {
-    "Board" : ["Comment", "Tag"]
-  }
-};
+const exclusions = {};
 
 const versionedTempates = dataTemplates.flatMap(t =>
   appVersions.flatMap(v =>
@@ -162,7 +159,8 @@ const filterGroupAndVersion = (party, cs) => {
 
 export const loadState = async (ledgerUrl, jwt, party = null) => {
   try {
-    const contracts = await loadAll(ledgerUrl, jwt);
+     const contracts = await loadAll(ledgerUrl, jwt);
+
     const contractMap = filterGroupAndVersion(party, contracts);
 
     const boardsById = mapBy("_id")(contractMap.Board.Data);
@@ -174,6 +172,7 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
         (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0)
       );
     const boardUsersById = mapBy("boardId")(contractMap.Rules.Board);
+    const upgradeInvites = contractMap.Upgrade.UpgradeInvite;
 
     var user = {};
     if (contractMap.Role.User.length > 0) {
@@ -192,7 +191,8 @@ export const loadState = async (ledgerUrl, jwt, party = null) => {
       tagsById,
       users,
       user,
-      boardUsersById
+      boardUsersById,
+      upgradeInvites
     }
   } catch(err) {
     console.log(err)

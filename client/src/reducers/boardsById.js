@@ -1,3 +1,5 @@
+import merge from 'lodash/merge';
+
 const boardsById = (state = {}, action) => {
   switch (action.type) {
     case "TOGGLE_PUBLIC": {
@@ -50,7 +52,9 @@ const boardsById = (state = {}, action) => {
           title: boardTitle,
           lists: [],
           isPublic: false,
-          color: "blue"
+          color: "blue",
+          about: "",
+          tags: []
         }
       };
     }
@@ -94,7 +98,7 @@ const boardsById = (state = {}, action) => {
       return { ...state, [boardId]: { ...state[boardId], tags: [ ...state[boardId].tags, tagId ]}};
     }
     case "SUCCEED_READ": {
-      return {...action.payload.boardsById, ...state};
+      return merge({}, state, action.payload.boardsById);
     }
     default:
       return state;

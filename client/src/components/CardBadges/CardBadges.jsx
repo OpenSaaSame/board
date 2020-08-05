@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import { MdAccessAlarm, MdDoneAll } from "react-icons/md";
 import "./CardBadges.scss";
@@ -27,7 +27,7 @@ class CardBadges extends Component {
       return null;
     }
     
-    const date = parseISO(this.props.date);
+    const date = new Date(Date.parse(this.props.date));
     const dueDateFromToday = differenceInCalendarDays(date, new Date());
 
     let dueDateString;

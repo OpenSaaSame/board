@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "0.1.0",
+  "version": "2.0.2",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.5.0",
@@ -9,6 +9,8 @@
     "classnames": "^2.2.6",
     "date-fns": "^2.12.0",
     "http-proxy-middleware": "^1.0.3",
+    "jwt-decode": "^2.2.0",
+    "lodash": "^4.17.19",
     "marked": "^1.0.0",
     "nested-error-stacks": "^2.1.0",
     "node-sass": "^4.14.1",
@@ -33,6 +35,7 @@
     "react-tooltip": "^4.2.5",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",
+    "redux-logger": "^3.0.6",
     "sanitize-html": "^1.23.0",
     "shortid": "^2.2.15",
     "slugify": "^1.3.5",

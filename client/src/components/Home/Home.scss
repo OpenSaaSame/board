@@ -55,10 +55,6 @@ $main-margin: 40px;
   margin: 20px 5px;
   font-size: 22px;
   color: $grey;
-
-  @media (max-width: 1024px) {
-    margin-top: 63px;
-  }
 }
 
 .board-link {
@@ -128,6 +124,8 @@ $main-margin: 40px;
 
 .board-adder {
   box-sizing: border-box;
+  display: inline-block;
+  vertical-align: top; // Chrome issue?
   width: $board-width;
   height: $board-height;
   margin: $board-margin;

@@ -8,7 +8,12 @@ const user = (state = {}, action) => {
     default:
       return state;
     case "SUCCEED_READ": {
-      return {...state, ...action.payload.user}
+      const needsUpgrade = action.payload.upgradeInvites.length !== 0;
+      return {
+        ...state,
+        needsUpgrade,
+        ...action.payload.user
+      }
     }
   }
 };

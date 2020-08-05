@@ -9,6 +9,7 @@ import "./CardAdder.scss";
 class CardAdder extends Component {
   static propTypes = {
     listId: PropTypes.string.isRequired,
+    boardId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -39,13 +40,13 @@ class CardAdder extends Component {
   handleSubmit = event => {
     event.preventDefault();
     const { newText } = this.state;
-    const { listId, dispatch } = this.props;
+    const { listId, boardId, dispatch } = this.props;
     if (newText === "") return;
 
     const cardId = shortid.generate();
     dispatch({
       type: "ADD_CARD",
-      payload: { cardText: newText, cardId, listId }
+      payload: { cardText: newText, cardId, listId, boardId }
     });
     this.toggleCardComposer();
     this.setState({ newText: "" });

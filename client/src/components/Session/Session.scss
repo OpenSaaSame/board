@@ -1,57 +1,76 @@
-.session-form {
-  background: white;
-  padding: 2em;
-  font-size: 14pt;
-  border-radius: 8px;
-  margin: 8px auto;
 
-  h2, h3 {
-    font-weight: 400;
-  }
+.login-panel {
+    width: 600px;
+    background: white;
+    padding: 2em;
+    border-radius: 8px;
+    margin: 8px auto;
 
-  label {
-    display: block;
-    margin-bottom: 0.5em;
-  }
+    .session-form {
 
-  input[type="text"], input[type="password"] {
-    display: block;
-    margin-top: 8px;
-  }
+        h2, h3 {
+            font-weight: 400;
+        }
 
-  input[type="submit"], button {
-    cursor: pointer; 
-  }
+        .field {
+            display: flex;
+            align-items: baseline;
 
-  button {
-    margin-bottom: 1em;
-    color: #777;
-    background-color: transparent;
-  }
+            padding-top: 10px;
+            padding-bottom: 10px;
 
-  .hidden {
-    display: none;
-  }
-}
+            input {
+                flex: 1;
+                padding: 5px;
 
-@media (max-width: 1024px) {
-  .session-form {
-      margin-top: 63px;
-  }
-}
+                border: 1px solid #c0c0c0;
+            }
 
-.dabl-login {
-  text-align: center;
-  line-height: 1.5em;
-  padding: 0.5em;
-  margin: 1em 0;
-  display: block;
-  border-radius: 4px;
-  color: white;
-  background-color: #3566D3;
-  text-decoration: none;
-}
+            label {
+                font-weight: bold;
+                margin-bottom: 0.5em;
+                padding-right: 10px;
+            }
 
-.dabl-login:hover {
-  background-color: #2457C7;
+        }
+
+        input[type='submit'], button {
+            height: 34px;
+            padding: 0 8px;
+            margin-right: 8px;
+            border: 0;
+            border-radius: 3px;
+            color: black;
+            background: #ccc;
+            font-size: inherit;
+            cursor: pointer;
+            vertical-align: bottom;
+
+            &:hover,
+            &:focus {
+                background: #ddd;
+            }
+            &:disabled {
+                color: #aaa;
+                cursor: default;
+                background-color: #ccc
+            }
+        }
+    }
+
+    .dabl-login {
+        text-align: center;
+        line-height: 1.5em;
+        padding: 0.5em;
+        margin: 1em 0;
+        display: block;
+        border-radius: 4px;
+        color: white;
+        background-color: #3566D3;
+        text-decoration: none;
+
+        &:hover {
+            background-color: #2457C7;
+        }
+    }
 }

@@ -49,7 +49,7 @@ class List extends Component {
                 </div>
               </div>
               { hasWrite &&
-                <CardAdder listId={list._id} />
+                <CardAdder listId={list._id} boardId={boardId} />
               }
             </div>
             {provided.placeholder}

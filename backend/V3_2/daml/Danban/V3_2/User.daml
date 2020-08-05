@@ -1,0 +1,50 @@
+daml 1.2
+module Danban.V3_2.User where
+
+import Danban.V3_2.Util
+
+import DA.List
+
+template Directory
+  with
+    operator : Party
+    users : [Party]
+  where
+    signatory operator
+    observer users
+
+    key operator : Party
+    maintainer key
+
+    controller operator can
+     Directory_AddObs
+        : ContractId Directory
+        with
+          party : Party
+        do
+          ret <- create this with users = dedupSort (party :: users)
+          forA users (\user -> exerciseIfKey @Profile (operator, user) Profile_UpdateObs)
+          return ret
+
+template Profile
+  with
+    party : Party
+    operator : Party
+    obs : [Party]
+    displayName : Text
+    imageUrl : Text
+    email: Optional Text
+    domain: Optional Text
+  where
+    signatory party, operator
+    observer obs
+
+    key (operator, party) : (Party, Party)
+    maintainer key._1
+
+    controller operator can
+      Profile_UpdateObs
+        : ContractId Profile
+        do
+          (_, userDirectory) <- fetchByKey @Directory operator
+          create this with obs = userDirectory.users

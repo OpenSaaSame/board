@@ -16,13 +16,13 @@ header {
   box-sizing: border-box;
   width: 100%;
   height: 80px;
-  padding: 5px 17px;
   background: white;
   z-index: 1;
   transition: background 0.3s;
 }
 
 .header-title {
+  margin-left: 17px;
   display: inline-flex;
   align-items: center;
   font-size: 22px;
@@ -38,9 +38,8 @@ header {
     color: rgb(29, 115, 103);
   }
 
-  span {
+  .wordmark > span {
     color: #1c468c;
-    margin-left: 10px;
   }
 }
 
@@ -67,32 +66,57 @@ header {
   font-size: 24px;
 }
 
-.signout-link {
-  padding: 3px 5px 1px 5px;
-  margin-left: 12px;
-  color: $grey;
-  text-decoration: none;
-  background-color: transparent;
-  cursor: pointer;
-}
+.sign-out-wrapper {
+  height: 100%;
 
-.signout-icon {
-  padding-bottom: 2px;
-  font-size: 22px;
-}
+  .sign-out-button, button {
+    text-decoration: none;
+    cursor: pointer;
+    width: 100%;
+    color: $grey;
+    background-color: transparent;
+    text-align: left;
 
-.google-sign-in {
-  width: 100%;
+    &:hover, &:focus {
+      background-color: $transparent-black;
+    }
+  }
+
+  .sign-out-button {
+    display: block;
+    height: 100%;
+    padding: 0 20px;
+
+    svg {
+      height: 100%;
+      width: 3em;
+      background-color: transparent;
+    }
+  }
+
+  .sign-out-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 250px;
+    color: $black-text;
+    background: white;
+    box-shadow: $transparent-black 4px 4px 2px;
+
+    div, button {
+      padding: 8px;
+      font-size: 14pt;
+    }
+
+    div {
+      border-bottom: $transparent-black 1px solid;
+    }
+  }
 }
 
 // Some things have to be removed for mobile layouts to avoid overflowing
-@media (max-width: 700px) {
-  .user-thumbnail,
-  .guest-icon {
+@media (max-width: 400px) {
+  .wordmark {
     display: none;
-  }
-
-  .signout-link {
-    margin-left: 0px;
   }
 }
