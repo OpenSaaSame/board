@@ -34,16 +34,6 @@ environment.
 
 - The [DAML SDK](https://docs.daml.com/getting-started/installation.html)
 - Node.js v13.8.0
-- [Honcho](https://pypi.org/project/honcho/)
-
-Honcho is a tool for easily running multiple processes as a group, and
-used here to simplify running the six processes that comprise a local
-Danban environment. The
-[Procfile](https://github.com/digital-asset/danban/blob/master/.gitignore)
-at the root of the project specifies the processes that are run by
-Honcho. While running, Honcho aggregates the logs of each in a single
-stream and terminates the entire group if any individual process
-terminates.
 
 #### Clone & Install Dependencies
 
@@ -59,13 +49,16 @@ make run
 ```
 
 Once Danban is running, it will present a login window that asks for a
-party and JWT token. The local build mints two local JWT tokens that
-can be used to authenticate and prints them to the log stream:
+party and JWT token. [How to create JWTs can be found in the DAML
+documemtation](https://docs.daml.com/json-api/index.html#choosing-a-party),
+but for reference here are some tokens for Alice and Bob:
 
 ```
-13:46:47 quickstart.1 | [   INFO] 2020-06-16 13:46:47,134 | root    | App ledger ready
-13:46:47 quickstart.1 | [   INFO] 2020-06-16 13:46:47,176 | root    | JWT for 'Alice' => 'eyJhbGc...'
-13:46:47 quickstart.1 | [   INFO] 2020-06-16 13:46:47,177 | root    | JWT for 'Bob' => 'eyJhbGciO...'
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwczovL2RhbWwuY29tL2xlZGdlci1hcGkiOnsibGVkZ2VySWQiOiJkYW5iYW4iLCJhcHBsaWNhdGlvbklkIjoiZm9vYmFyIiwiYWN0QXMiOlsiQWxpY2UiXX19.o-OCSkNCHiPAnScBaIqzmLFmSu3WZTpU9prQEvi82fo
+```
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwczovL2RhbWwuY29tL2xlZGdlci1hcGkiOnsibGVkZ2VySWQiOiJkYW5iYW4iLCJhcHBsaWNhdGlvbklkIjoiZm9vYmFyIiwiYWN0QXMiOlsiQm9iIl19fQ.jPzJsB4MPjYIOm4PC46tqrjAip0RztZvd7FS5Vbnc5U
 ```
 
 Please be aware of the fact that the local Danban environment runs
@@ -74,7 +67,14 @@ persist after the environment is shut down.
 
 #### Building the model from scratch
 
-If you want to build the model from scratch, run `daml build` in the following folders under `backend`: `V2`, `V2Bugfix`, `V3`, `Upgrade/V3`. The resulting `.dar` will be in `backend/Upgrade/V3/.daml/dist`
+If you want to build the model from scratch:
+
+```shell
+cd backend/V4
+daml build
+```
+
+The resulting `.dar` will be in `backend/Upgrade/V4/.daml/dist`
 
 #### Run the client
 

@@ -1,7 +1,0 @@
-sdk-version: 0.13.55
-name: fabric-quickstart
-parties:
-  - Admin
-  - Alice
-  - Bob
-version: 0.0.1
