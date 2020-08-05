@@ -38,7 +38,11 @@ template Admin
         with
           party : Party
         do
+          (_, userDir) <- fetchByKey @User.Directory operator
           exerciseByKey @User.Directory operator User.Directory_AddObs with party
+          forA userDir.users (\user -> do
+              exerciseByKey @Board.Directory (operator, user) Board.Directory_UpdatePublic
+            )
           create Role.User with ..
 
 template UserSession
@@ -71,55 +75,55 @@ template UserSession
             Some _ ->
               return ()
 
--- testUserSessions = scenario do
---   admin <- getParty "Admin"
---   alice <- getParty "Alice"
---   bob <- getParty "Bob"
+testUserSessions = scenario do
+  admin <- getParty "Admin"
+  alice <- getParty "Alice"
+  bob <- getParty "Bob"
 
---   admin `submit` do
---     app <- create Admin with operator = admin
---     exercise app StartApp
+  admin `submit` do
+    app <- create Admin with operator = admin
+    exercise app StartApp
   
---   aliceSession <- alice `submit` do
---     create UserSession with
---       operator = admin
---       user = alice
---       displayName = "Big Al"
---       email = "alice@example.com"
+  aliceSession <- alice `submit` do
+    create UserSession with
+      operator = admin
+      user = alice
+      displayName = "Big Al"
+      email = "alice@example.com"
   
---   admin `submit` do
---     exercise aliceSession UserSessionAck
+  admin `submit` do
+    exercise aliceSession UserSessionAck
 
---   aliceSession2 <- alice `submit` do
---     create UserSession with
---       operator = admin
---       user = alice
---       displayName = "Big Al"
---       email = "alice@example.com"
+  aliceSession2 <- alice `submit` do
+    create UserSession with
+      operator = admin
+      user = alice
+      displayName = "Big Al"
+      email = "alice@example.com"
   
---   admin `submit` do
---     exercise aliceSession2 UserSessionAck
+  admin `submit` do
+    exercise aliceSession2 UserSessionAck
   
---   -- New users should be added to public boards
---   submit alice do
---     exerciseByKey @Role.User (admin, alice) Role.ADD_BOARD with
---       boardId = "123"
---       title = "Foo"
+  -- New users should be added to existing public boards
+  submit alice do
+    exerciseByKey @Role.User (admin, alice) Role.ADD_BOARD with
+      boardId = "123"
+      title = "Foo"
     
---     exerciseByKey @Role.User (admin, alice) Role.TOGGLE_PUBLIC with
---       boardId = "123"
+    exerciseByKey @Role.User (admin, alice) Role.TOGGLE_PUBLIC with
+      boardId = "123"
 
---   bobSession <- bob `submit` do
---     create UserSession with
---       operator = admin
---       user = bob
---       displayName = "Big Bob"
---       email = "bob@example.com"
+  bobSession <- bob `submit` do
+    create UserSession with
+      operator = admin
+      user = bob
+      displayName = "Big Bob"
+      email = "bob@example.com"
   
---   admin `submit` do
---     exercise bobSession UserSessionAck
---     (_boardCid, boardData) <- fetchByKey @Board.Data (admin, "123")
---     assert (elem bob boardData.obs)
+  admin `submit` do
+    exercise bobSession UserSessionAck
+    (_boardCid, boardData) <- fetchByKey @Board.Data (admin, "123")
+    assert (elem bob boardData.obs)
 
 duplicateTags = scenario do
   admin <- getParty "Admin"

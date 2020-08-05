@@ -17,6 +17,15 @@ template Directory
     key (operator, party) : (Party, Party)
     maintainer key._1, key._2
 
+    controller operator can
+      nonconsuming Directory_UpdatePublic
+        : ()
+        do
+          forA boards (\ board -> do
+              exerciseByKey @Data (operator, board) Data_UpdatePublic
+            )
+          return ()
+
     controller [operator, party] can
       Directory_AddBoard
         : ContractId Directory
