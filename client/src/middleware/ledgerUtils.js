@@ -7,10 +7,8 @@ const mapBy = field => list => {
   return ret;
 }
 
-const prefix = process.env.REACT_APP_V3_PACKAGE_ID ? `${process.env.REACT_APP_V3_PACKAGE_ID}:` : "";
 export const appVersions = [
-  `${prefix}Danban.V3`,
-  "Danban.V3_2"
+  "OpenworkBoard.V4"
 ];
 
 export const rootErr = err => {

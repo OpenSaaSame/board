@@ -26,7 +26,7 @@ export default (state = {}, action) => {
             boardsById: {},
             upgradeInvites: {},
             loggedIn: true,
-            user: { party, token, version: 'Danban.V3_2' }
+            user: { party, token, version: 'OpenworkBoard.V34' }
         };
     }
     if (action.type === "LOG_OUT") {

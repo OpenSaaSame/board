@@ -25,7 +25,7 @@ export const createUserSession = async (jwt, party, email, displayName) => {
         const dablInfo = await (await fetch("/.well-known/dabl.json")).json();
         admin = dablInfo["userAdminParty"];
     }
-    await create(makeLedgerUrl(), jwt, "Danban.V3_2:UserSession", { operator: admin, user: party, email, displayName });
+    await create(makeLedgerUrl(), jwt, "OpenworkBoard.V4:UserSession", { operator: admin, user: party, email, displayName });
 };
 
 
