@@ -200,7 +200,6 @@ const persistMiddleware = store => next => action => {
     if (user) {
         switch (action.type) {
             case "ADD_BOARD":
-                if (user.needsUpgrade) { break; };
             case "TOGGLE_PUBLIC":
             case "ADD_USER":
             case "REMOVE_USER":
