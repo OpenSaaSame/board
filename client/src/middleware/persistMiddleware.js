@@ -200,6 +200,7 @@ const persistMiddleware = store => next => action => {
     if (user) {
         switch (action.type) {
             case "ADD_BOARD":
+                if (user.needsUpgrade) { break; };
             case "TOGGLE_PUBLIC":
             case "ADD_USER":
             case "REMOVE_USER":
@@ -230,14 +231,13 @@ const persistMiddleware = store => next => action => {
             case "UNASSIGN_TAG":
 
             case "ADD_COMMENT":
-                if (!user.needsUpgrade)
-                    store.dispatch({
-                        type: "QUEUE_WRITE",
-                        payload: {
-                            type: action.type,
-                            payload: action.payload
-                        }
-                    });
+                store.dispatch({
+                    type: "QUEUE_WRITE",
+                    payload: {
+                        type: action.type,
+                        payload: action.payload
+                    }
+                });
                 break;
 
             case "QUEUE_READ":
