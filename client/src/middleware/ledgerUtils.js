@@ -159,7 +159,7 @@ const filterGroupAndVersion = (party, cs) => {
 
 export const loadState = async (ledgerUrl, jwt, party = null) => {
   try {
-     const contracts = await loadAll(ledgerUrl, jwt);
+    const contracts = await loadAll(ledgerUrl, jwt);
 
     const contractMap = filterGroupAndVersion(party, contracts);
 
