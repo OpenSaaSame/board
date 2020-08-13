@@ -1,0 +1,181 @@
+daml 1.2
+module Danban.V3_2_1.Test where
+
+import qualified Danban.V3 as DanbanV3
+import qualified Danban.V3.Board as BoardV3
+import qualified Danban.V3.Role as RoleV3
+import qualified Danban.V3.Rules as RulesV3
+import qualified Danban.V3.User as UserV3
+
+import qualified Danban.V3_2 as DanbanV3_2
+import qualified Danban.V3_2.Board as BoardV3_2
+import qualified Danban.V3_2.Role as RoleV3_2
+import qualified Danban.V3_2.Rules as RulesV3_2
+import qualified Danban.V3_2.User as UserV3_2
+
+import Danban.V3_2_1.Upgrade
+
+e2e = scenario do
+  admin <- getParty "Admin"
+  user1 <- getParty "User 1"
+  user2 <- getParty "User 2"
+  user3 <- getParty "User 3"
+
+  -- Create a V3.1 board
+  app <- submit admin do
+    create DanbanV3.Admin with operator = admin
+  submit admin do
+    exercise app DanbanV3.StartApp
+
+  -- Log in as user1
+  user1Role <- submit admin do
+    exercise app DanbanV3.PauseApp
+    role <- exercise app DanbanV3.AddUser with
+      party = user1
+    exercise app DanbanV3.UnpauseApp
+    return role
+  
+  -- user1 creates a profile, board, list, card, tags
+  submit user1 do
+    exercise user1Role RoleV3.PutProfile with
+      displayName = "User 1"
+      imageUrl = "https://example.com/user1.jpg"
+      email = None
+      domain = None
+
+    exercise user1Role RoleV3.ADD_BOARD with
+      boardId = "123"
+      title = "User 1 Board"
+    
+    exercise user1Role RoleV3.ADD_LIST with
+      boardId = "123"
+      listId = "abc"
+      title = "List 1"
+    
+    exercise user1Role RoleV3.ADD_CARD with
+      listId = "abc"
+      cardId = "def"
+      text = "Lorem ipsum"
+
+    exercise user1Role RoleV3.ADD_TAG with
+      boardId = "123"
+      tagId = "tag-id-1"
+      name = "Urgent"
+      color = "fff"
+    
+    -- accidentally assigns a duplicate tag...
+    exercise user1Role RoleV3.ASSIGN_TAG with
+      cardId = "def"
+      tagId = "tag-id-1"
+
+    exercise user1Role RoleV3.ASSIGN_TAG with
+      cardId = "def"
+      tagId = "tag-id-1"
+  
+  -- user3 signs in
+  user3Role <- submit admin do
+    -- (app, _) <- fetchByKey @DanbanV3.Admin admin
+    exercise app DanbanV3.PauseApp
+    role <- exercise app DanbanV3.AddUser with
+      party = user3
+    exercise app DanbanV3.UnpauseApp
+    return role
+
+  -- user3 creates a profile, but no board
+  submit user3 do
+    exercise user3Role RoleV3.PutProfile with
+      displayName = "User 3"
+      imageUrl = "https://example.com/user3.jpg"
+      email = None
+      domain = None
+  
+  -- user1 invites user3 to the board
+  submit user1 do
+    exercise user1Role RoleV3.ADD_USER with
+      boardId = "123"
+      newUser = user3
+  
+  -- With the broken V3 build tag-id-1 will not
+  -- be visible to user3
+
+  -- Initiate V3_2 upgrade
+  app <- submit admin do
+    upgrade <- create UpgradeInitiator with
+      operator = admin
+    exercise upgrade InitiateUpgrade
+    (app, _) <- fetchByKey @DanbanV3_2.Admin admin
+    return app
+  
+  -- Log in as user2
+  user2Role <- submit admin do
+    exercise app DanbanV3_2.PauseApp
+    role <- exercise app DanbanV3_2.AddUser with
+      party = user2
+    exercise app DanbanV3_2.UnpauseApp
+    return role
+
+  -- user2 creates a profile,  board, list, card, tag
+  submit user2 do
+    exercise user2Role RoleV3_2.PutProfile with
+      displayName = "User 2"
+      imageUrl = "https://example.com/user2.jpg"
+      email = None
+      domain = None
+
+    exercise user2Role RoleV3_2.ADD_BOARD with
+      boardId = "456"
+      title = "User 2 Board"
+    
+    exercise user2Role RoleV3_2.ADD_LIST with
+      boardId = "456"
+      listId = "xyz"
+      title = "List 2"
+    
+    exercise user2Role RoleV3_2.ADD_CARD with
+      listId = "xyz"
+      cardId = "uvw"
+      text = "Call me Ishmael"
+    
+    exercise user2Role RoleV3_2.ADD_TAG with
+      boardId = "456"
+      tagId = "x1y2z3"
+      name = "Urgent"
+      color = "fff"
+    
+    exercise user2Role RoleV3_2.ASSIGN_TAG with
+      cardId = "uvw"
+      tagId = "x1y2z3"
+    
+    -- shares it with user1, makes them admin
+    exercise user2Role RoleV3_2.ADD_USER with
+      boardId = "456"
+      newUser = user1
+    
+    exercise user2Role RoleV3_2.CHANGE_PERMISSIONS with
+      boardId = "456"
+      user = user1
+      access = RulesV3_2.Admin
+  
+  -- user1 accepts the upgrade request
+  submit user1 do
+    (upgradeInvite, _) <- fetchByKey @UpgradeInvite (admin, user1)
+    exercise upgradeInvite Accept_Upgrade
+
+    (user1Role, _) <- fetchByKey @RoleV3_2.User (admin, user1)
+
+    -- and adds a card to user2's board
+    exercise user1Role RoleV3_2.ADD_CARD with
+      listId = "xyz"
+      cardId = "tuv"
+      text = "Call me maybe"
+  
+  -- user3 comes back upgrades, and creates a board
+  submit user3 do
+    (upgradeInvite, _) <- fetchByKey @UpgradeInvite (admin, user3)
+    exercise upgradeInvite Accept_Upgrade
+
+    (user3Role, _) <- fetchByKey @RoleV3_2.User (admin, user3)
+    
+    exercise user3Role RoleV3_2.ADD_BOARD with
+      boardId = "789"
+      title = "User 3 Board"
