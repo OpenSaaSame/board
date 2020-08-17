@@ -11,11 +11,11 @@ class BoardFilter extends Component {
     boardId: PropTypes.string.isRequired,
     boardUsers: PropTypes.array.isRequired,
     allProfiles: PropTypes.object.isRequired,
+    boardTags: PropTypes.array.isRequired,
     dispatch: PropTypes.func.isRequired
   };
 
-  handleSubmit = event => {
-    event.preventDefault();
+  handleUserChange = event => {
     const { dispatch, boardId } = this.props;
     const filteredUser = event.target.value;
 
@@ -37,11 +37,29 @@ class BoardFilter extends Component {
     }
   };
 
-  handleChange = event => {
-    this.setState({ newAbout: event.target.value });
+  handleTagChange = event => {
+    const { dispatch, boardId } = this.props;
+    const filteredTag = event.target.value;
+
+    if (filteredTag === "") {
+      dispatch({
+        type: "UNSET_TAG_FILTER",
+        payload: {
+          boardId
+        }
+      });
+    } else {
+      dispatch({
+        type: "SET_TAG_FILTER",
+        payload: {
+          boardId,
+          filteredTag
+        }
+      });
+    }
   };
 
-  radioItem = user => {
+  userRadioItem = user => {
     const { allProfiles } = this.props;
     return (
       <div key={user}>
@@ -53,8 +71,19 @@ class BoardFilter extends Component {
     );
   };
 
+  tagRadioItem = tag => {
+    return (
+      <div key={tag._id}>
+        <label>
+          <input type="radio" id={tag._id} name="tagFilter" value={tag._id} />
+          {tag.name}
+        </label>
+      </div>
+    );
+  };
+
   render() {
-    const { boardUsers } = this.props;
+    const { boardUsers, boardTags } = this.props;
 
     return (
       <Wrapper
@@ -69,11 +98,18 @@ class BoardFilter extends Component {
         </Button>
         <Menu className="board-about-menu">
           <h3>Users</h3>
-          <form onChange={this.handleSubmit}>
+          <form onChange={this.handleUserChange}>
             <div>
               <label><input type="radio" name="userFilter" value="" />Show all</label>
             </div>
-            { boardUsers.map(user => this.radioItem(user)) }
+            { boardUsers.map(user => this.userRadioItem(user)) }
+          </form>
+          <h3>Tags</h3>
+          <form onChange={this.handleTagChange}>
+            <div>
+              <label><input type="radio" name="tagFilter" value="" />Show all</label>
+            </div>
+            { boardTags.map(tag => this.tagRadioItem(tag)) }
           </form>
         </Menu>
       </Wrapper>
@@ -85,7 +121,8 @@ const mapStateToProps = (state, ownProps) => {
   const { boardId } = ownProps.match.params;
   const allProfiles = state.users.byParty;
   const boardUsers = state.boardUsersById[boardId].users.map(user => user._1);
-  return { boardId, allProfiles, boardUsers };
+  const boardTags = state.boardsById[boardId].tags.map(tagId => state.tagsById[tagId]);
+  return { boardId, allProfiles, boardUsers, boardTags };
 };
 
 export default withRouter(connect(mapStateToProps)(BoardFilter));

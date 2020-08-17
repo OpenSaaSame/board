@@ -87,9 +87,9 @@ class Card extends Component {
   };
 
   render() {    
-    const { card, index, listId, isDraggingOver, assignee, tags, hasWrite, filteredUser } = this.props;
+    const { card, index, listId, isDraggingOver, assignee, tags, hasWrite, filteredUser, filteredTag } = this.props;
 
-    if (!card || (filteredUser && card.assignee !== filteredUser)) { return null };
+    if (!card || (filteredUser && card.assignee !== filteredUser) || (filteredTag && !card.tags.includes(filteredTag))) { return null };
     
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
@@ -152,14 +152,15 @@ const mapStateToProps = (state, ownProps) => {
   if (!card) { console.log("Card not found", ownProps.cardId) };
   const tags = (card && card.tags) ? card.tags.map(tagId => state.tagsById[tagId]) : undefined;
   const isSignedIn = state.user !== null;
-  const filteredUser = state.boardsById[card.boardId].filteredUser;
+  const { filteredUser, filteredTag } = state.boardsById[card.boardId];
 
   return {
     card,
     tags,
     isSignedIn,
     assignee: card ? state.users.byParty[card.assignee] : undefined,
-    filteredUser
+    filteredUser,
+    filteredTag
   }
 };
 
