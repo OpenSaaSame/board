@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { Button, Wrapper, Menu } from "react-aria-menubutton";
 import PropTypes from "prop-types";
-import { FaInfoCircle } from "react-icons/fa";
+import { FaFilter } from "react-icons/fa";
 
 class BoardFilter extends Component {
 
@@ -91,7 +91,7 @@ class BoardFilter extends Component {
         onSelection={this.handleSelection}
       >
         <Button className="board-about">
-          <FaInfoCircle />
+          <FaFilter />
           <div className="board-header-right-text">
             &nbsp;Filters &nbsp;&#9662;
           </div>
