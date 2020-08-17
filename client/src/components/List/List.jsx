@@ -45,7 +45,7 @@ class List extends Component {
                   hasWrite={hasWrite}
                 />
                 <div className="cards-wrapper">
-                  <Cards listId={list._id} hasWrite={hasWrite}/>
+                  <Cards listId={list._id} hasWrite={hasWrite} />
                 </div>
               </div>
               { hasWrite &&

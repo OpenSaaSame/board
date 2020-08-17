@@ -29,6 +29,7 @@ class Card extends Component {
     index: PropTypes.number.isRequired,
     isSignedIn: PropTypes.bool.isRequired,
     hasWrite: PropTypes.bool.isRequired,
+    filteredUser: PropTypes.string,
     dispatch: PropTypes.func.isRequired
   };
 
@@ -86,15 +87,15 @@ class Card extends Component {
   };
 
   render() {    
-    const { card, index, listId, isDraggingOver, assignee, tags, hasWrite } = this.props;
+    const { card, index, listId, isDraggingOver, assignee, tags, hasWrite, filteredUser, filteredTag } = this.props;
 
-    if (!card) { return null };
-
+    if (!card || (filteredUser && card.assignee !== filteredUser) || (filteredTag && !card.tags.includes(filteredTag))) { return null };
+    
     const { isModalOpen } = this.state;
     const checkboxes = findCheckboxes(card.text);
     return (
       <>
-        <Draggable draggableId={card._id} index={index} isDragDisabled={!hasWrite}>
+        <Draggable draggableId={card._id} index={index} isDragDisabled={!hasWrite} >
           {(provided, snapshot) => (
             <>
               {/* eslint-disable */}
@@ -151,12 +152,15 @@ const mapStateToProps = (state, ownProps) => {
   if (!card) { console.log("Card not found", ownProps.cardId) };
   const tags = (card && card.tags) ? card.tags.map(tagId => state.tagsById[tagId]) : undefined;
   const isSignedIn = state.user !== null;
+  const { filteredUser, filteredTag } = state.boardsById[card.boardId];
 
   return {
     card,
     tags,
     isSignedIn,
-    assignee: card ? state.users.byParty[card.assignee] : undefined
+    assignee: card ? state.users.byParty[card.assignee] : undefined,
+    filteredUser,
+    filteredTag
   }
 };
 
