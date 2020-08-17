@@ -25,7 +25,8 @@ class Cards extends Component {
   };
 
   render() {
-    const { listId, cards, hasWrite } = this.props;
+    let { listId, cards, hasWrite } = this.props;
+
     return (
       <Droppable droppableId={listId}>
         {(provided, { isDraggingOver }) => (
