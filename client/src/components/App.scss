@@ -49,3 +49,17 @@ a {
   font-size: 100%;
   font: inherit;
 }
+
+:root {
+  --background-color: white;
+  --accent-background-color: hsl(0, 0%, 93%);
+  --text-color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: black;
+    --accent-background-color: hsl(0, 0%, 7%);
+    --text-color: white;
+  }
+}

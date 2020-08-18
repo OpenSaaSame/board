@@ -21,7 +21,7 @@ $main-margin: 40px;
   display: inline-flex;
   justify-content: center;
   width: 100%;
-  background: #eee;
+  background: var(--accent-background-color);
   overflow: auto;
 }
 
@@ -54,14 +54,12 @@ $main-margin: 40px;
 .main-content h2 {
   margin: 20px 5px;
   font-size: 22px;
-  color: $grey;
 }
 
 .board-link {
   @include board-button;
   display: inline-flex;
   flex-direction: column;
-  color: white;
   overflow-wrap: break-word;
   text-decoration: none;  
 }
@@ -90,7 +88,7 @@ $main-margin: 40px;
 
 .board-link-title {
   padding-bottom: 5px;
-  color: $grey;
+  color: var(--text-color);
 }
 
 .mini-board {
@@ -112,8 +110,8 @@ $main-margin: 40px;
   @include board-button;
   margin-bottom: 20px;
   border: 0;
-  background: white;
-  color: $grey;
+  background-color: var(--background-color);
+  color: var(--text-color);
   vertical-align: top; // Chrome rendering issue?
 }
 
@@ -132,8 +130,6 @@ $main-margin: 40px;
   margin-bottom: 20px;
   padding: 8px;
   border-radius: 3px;
-  background: white;
-  color: #444;
   font-size: 16px;
 }
 
@@ -143,7 +139,7 @@ $main-margin: 40px;
   border: none;
   border-radius: 3px;
   background: $success-button-color;
-  color: white;
+  // color: white;
   font-size: 14px;
   font-weight: 700;
   transition: background 0.2s;

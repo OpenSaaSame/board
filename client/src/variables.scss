@@ -33,15 +33,3 @@ $grey: #303132;
 
 $list-width: 300px;
 $list-radius: 6px;
-
-:root {
-  --background-color: white;
-  --text-color: black;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: black;
-    --text-color: white;
-  }
-}
