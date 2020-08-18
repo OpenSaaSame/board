@@ -53,6 +53,7 @@ a {
 :root {
   --background-color: white;
   --accent-background-color: hsl(0, 0%, 93%);
+  --background-color-tertiary: hsl(0, 0%, 75%);
   --text-color: black;
 }
 
@@ -60,6 +61,7 @@ a {
   :root {
     --background-color: black;
     --accent-background-color: hsl(0, 0%, 7%);
+    --background-color-tertiary: hsl(0, 0%, 25%);
     --text-color: white;
   }
 }

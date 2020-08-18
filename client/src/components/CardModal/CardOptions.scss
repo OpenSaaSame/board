@@ -23,15 +23,15 @@
   padding: 0 6px;
   border: 0;
   border-radius: 3px;
-  color: black;
-  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-color);
+  background: var(--accent-background-color);
   font-size: inherit;
   cursor: pointer;
 }
 
 .options-list-button:hover,
 .options-list-button:focus {
-  background: white;
+  background-color: var(--background-color-tertiary);
 }
 
 .modal-icon {
