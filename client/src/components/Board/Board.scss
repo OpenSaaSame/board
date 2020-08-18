@@ -15,27 +15,29 @@
   z-index: -1;
   transition: background 0.3s;
 }
-.green .board-underlay {
-  background: $green;
-}
-.blue .board-underlay {
-  background: $blue;
-}
-// Legacy support
-.light-blue .board-underlay {
-  background: $blue;
-}
-.purple .board-underlay {
-  background: $purple;
-}
-.red .board-underlay {
-  background: $red;
-}
-.pink .board-underlay {
-  background: $pink;
-}
-.yellow .board-underlay {
-  background: $yellow;
+@media (prefers-color-scheme: light) {
+  .green .board-underlay {
+    background: $green;
+  }
+  .blue .board-underlay {
+    background: $blue;
+  }
+  // Legacy support
+  .light-blue .board-underlay {
+    background: $blue;
+  }
+  .purple .board-underlay {
+    background: $purple;
+  }
+  .red .board-underlay {
+    background: $red;
+  }
+  .pink .board-underlay {
+    background: $pink;
+  }
+  .yellow .board-underlay {
+    background: $yellow;
+  }
 }
 
 .lists-wrapper {

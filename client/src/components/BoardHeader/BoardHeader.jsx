@@ -5,6 +5,7 @@ import BoardDeleter from "./BoardDeleter";
 import SharingModal from "./Sharing/SharingModal";
 import "./BoardHeader.scss"
 import BoardAbout from "./BoardAbout";
+import BoardFilter from "./BoardFilter";
 
 const BoardHeader = (props) => (
   <div className="board-header">
@@ -17,6 +18,7 @@ const BoardHeader = (props) => (
             <BoardDeleter />
           </>
         }
+        <BoardFilter />
         <BoardAbout hasAdmin={props.hasAdmin} />
       </div>
   </div>

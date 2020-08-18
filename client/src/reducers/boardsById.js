@@ -97,6 +97,22 @@ const boardsById = (state = {}, action) => {
       const { boardId, tagId } = action.payload;
       return { ...state, [boardId]: { ...state[boardId], tags: [ ...state[boardId].tags, tagId ]}};
     }
+    case "SET_USER_FILTER" : {
+      const { boardId, filteredUser } = action.payload;
+      return { ...state, [boardId]: { ...state[boardId], filteredUser } };
+    }
+    case "UNSET_USER_FILTER" : {
+      const { boardId } = action.payload;
+      return { ...state, [boardId]: { ...state[boardId], filteredUser: null } };
+    }
+    case "SET_TAG_FILTER" : {
+      const { boardId, filteredTag } = action.payload;
+      return { ...state, [boardId]: { ...state[boardId], filteredTag } };
+    }
+    case "UNSET_TAG_FILTER" : {
+      const { boardId } = action.payload;
+      return { ...state, [boardId]: { ...state[boardId], filteredTag: null } };
+    }
     case "SUCCEED_READ": {
       return merge({}, state, action.payload.boardsById);
     }
