@@ -61,29 +61,32 @@ $main-margin: 40px;
   display: inline-flex;
   flex-direction: column;
   overflow-wrap: break-word;
-  text-decoration: none;  
+  text-decoration: none;
+  background-color: var(--background-color);
 }
-.board-link.green {
-  background: $green;
-}
-.board-link.blue {
-  background: $blue;
-}
-// Legacy support
-.board-link.light-blue {
-  background: $blue;
-}
-.board-link.purple {
-  background: $purple;
-}
-.board-link.red {
-  background: $red;
-}
-.board-link.pink {
-  background: $pink;
-}
-.board-link.yellow {
-  background: $yellow;
+@media (prefers-color-scheme: light) {
+  .board-link.green {
+    background: $green;
+  }
+  .board-link.blue {
+    background: $blue;
+  }
+  // Legacy support
+  .board-link.light-blue {
+    background: $blue;
+  }
+  .board-link.purple {
+    background: $purple;
+  }
+  .board-link.red {
+    background: $red;
+  }
+  .board-link.pink {
+    background: $pink;
+  }
+  .board-link.yellow {
+    background: $yellow;
+  }
 }
 
 .board-link-title {

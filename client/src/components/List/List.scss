@@ -20,7 +20,7 @@
   border-radius: $list-radius;
   font-size: 14px;
   transition: box-shadow 0.15s, background 0.3s;
-  background: rgba(255, 255, 255, 0.3);
+  background: $transparent-white;
 }
 
 .board-title-text,
@@ -36,11 +36,11 @@
   }
 }
 .list-title-button {
-  color: $grey !important;
+  color: var(--text-color) !important;
 }
 .delete-list-button {
   svg {
-    fill: $grey;
+    fill: var(--text-color);
   }
 }
 

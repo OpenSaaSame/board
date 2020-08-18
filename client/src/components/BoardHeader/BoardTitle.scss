@@ -19,7 +19,7 @@
 
 .board-title-text {
   margin: 0;
-  color: $white;
+  color: var(--text-color);
   font-size: 20px;
   overflow: hidden;
   text-overflow: ellipsis;
