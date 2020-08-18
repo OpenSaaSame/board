@@ -11,7 +11,6 @@
   align-items: center;
   padding: 8px 10px 8px 10px;
   border-radius: 3px;
-  color: $white;
   transition: background 0.1s;
   cursor: pointer;
 
@@ -29,9 +28,8 @@
   margin: 4px;
   padding: 0 8px 8px;
   border-radius: 3px;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.6);
-  color: black;
-  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0px 1px 3px $less-transparent-black;
+  background: var(--background-color);
 
   textarea {
     display: block;

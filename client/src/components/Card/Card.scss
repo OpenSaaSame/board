@@ -19,7 +19,7 @@
 }
 
 .card-title--drag {
-  box-shadow: 1px 9px 8px 1px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 1px 9px 8px 1px $transparent-black !important;
   opacity: 1 !important;
 }
 
@@ -115,6 +115,6 @@
   pre {
     margin: 4px 0;
     padding: 4px 2px;
-    background: rgba(100, 100, 100, 0.08);
+    background: $white;
   }
 }

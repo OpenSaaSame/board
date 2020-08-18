@@ -31,9 +31,8 @@
 .board-header-right-text,
 .board-header-right {
   font-family: 'Lato', sans-serif;
-  color: $grey !important;
   svg {
-    fill: $grey;
+    // fill: var();
   }
 }
 .list-title-button {
