@@ -210,5 +210,5 @@ e2e = scenario do
     (user3Role, _) <- fetchByKey @RoleV3_2.User (admin, user3)
     
     exercise user3Role RoleV3_2.ADD_BOARD with
-      boardId = "789"
+      boardId = "999"
       title = "User 3 Board"

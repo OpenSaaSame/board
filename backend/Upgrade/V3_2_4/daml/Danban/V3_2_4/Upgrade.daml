@@ -179,24 +179,27 @@ template UpgradeInvite
               return ()
           oldDirCid <- lookupByKey @BoardV3.Directory (operator, party)
           case oldDirCid of
-            Some bdId -> do
-              exerciseIfKey @BoardV3.Directory (operator, party) Archive
-              return bdId
-            None -> do
-              bdId <- upgradeByKey @BoardV3.Directory @BoardV3_2.Directory (operator, party)
-              return fromSome bdId
-          -- o <- upgradeIfKey @BoardV3.Directory @BoardV3_2.Directory (operator, party)
-          case o of
-            Some (_, bd) ->  forA_ bd.boards (\boardId -> do
-              oCid <- lookupByKey @BoardUpgrader (operator, boardId)
-              cid <- case oCid of
-                Some cid -> return cid
+            Some oldId -> do
+              (_, oldDirData) <- fetchByKey @BoardV3.Directory (operator, party)
+              newDirCid <- lookupByKey @BoardV3_2.Directory (operator, party)
+              case newDirCid of
+                Some newId ->
+                  exercise oldId Archive
                 None -> do
-                  (_, board) <- fetchByKey @RulesV3.Board (operator, boardId)
-                  create BoardUpgrader with
-                    requiredSigs = List.dedupSort $ signatory board
-                    sigs = [operator]
-                    ..
-              void $ exercise cid Sign with ..
-              )
-            None -> return ()
+                  upgradeIfKey @BoardV3.Directory @BoardV3_2.Directory (operator, party)
+                  return ()
+              forA_ oldDirData.boards (\boardId -> do
+                  oCid <- lookupByKey @BoardUpgrader (operator, boardId)
+                  cid <- case oCid of
+                    Some cid -> return cid
+                    None -> do
+                      (_, board) <- fetchByKey @RulesV3.Board (operator, boardId)
+                      create BoardUpgrader with
+                        requiredSigs = List.dedupSort $ signatory board
+                        sigs = [operator]
+                        ..
+                  void $ exercise cid Sign with ..
+                )
+              return ()
+            None -> do
+              return ()
