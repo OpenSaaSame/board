@@ -148,11 +148,16 @@ class Card extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const card = state.cardsById[ownProps.cardId]
-  if (!card) { console.log("Card not found", ownProps.cardId) };
-  const tags = (card && card.tags) ? card.tags.map(tagId => state.tagsById[tagId]) : undefined;
   const isSignedIn = state.user !== null;
-  const { filteredUser, filteredTag } = state.boardsById[card.boardId];
+
+  const card = state.cardsById[ownProps.cardId]
+  let tags, filteredUser, filteredTag;
+  if (card) {
+    tags = card.tags ? card.tags.map(tagId => state.tagsById[tagId]) : undefined;
+    const board = state.boardsById[card.boardId];
+    filteredUser = board.filteredUser;
+    filteredTag = board.filteredTag;
+  } else { console.log("Card not found", ownProps.cardId) };
 
   return {
     card,
