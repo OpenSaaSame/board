@@ -122,7 +122,7 @@ const mapStateToProps = (state, ownProps) => {
   const board = state.boardsById[boardId];
   const cards = board.lists.map(list => state.listsById[list]).flatMap(list => list.cards);
   const allProfiles = state.users.byParty;
-  const boardAssignees = [... new Set(cards.map(card => state.cardsById[card].assignee).filter(user => user !== null))];
+  const boardAssignees = [...new Set(cards.map(card => state.cardsById[card].assignee).filter(user => user !== null))];
   const boardTags = board.tags.map(tagId => state.tagsById[tagId]);
   return { boardId, allProfiles, boardAssignees, boardTags };
 };
