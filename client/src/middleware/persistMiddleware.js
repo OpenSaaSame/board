@@ -29,10 +29,10 @@ export const createUserSession = async (jwt, party, email, displayName) => {
 };
 
 
-export const upgrade = (user, upgradeCid) => exerciseUtil(
+export const upgrade = (user, upgradeVersion, upgradeCid) => exerciseUtil(
     makeLedgerUrl(),
     user.token,
-    `${user.version}.Upgrade:UpgradeInvite`,
+    `${upgradeVersion}.Upgrade:UpgradeInvite`,
     upgradeCid,
     "Accept_Upgrade", {}
 );
