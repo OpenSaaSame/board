@@ -128,7 +128,7 @@ const mapStateToProps = (state, ownProps) => {
     .filter(user => user !== null);
   const allProfiles = state.users.byParty;
   const boardAssignees = [...new Set(assignees)];
-  const boardTags = board.tags.map(tagId => state.tagsById[tagId]);
+  const boardTags = board.tags.map(tagId => state.tagsById[tagId]).filter(tag => tag !== undefined);
   return { boardId, allProfiles, boardAssignees, boardTags };
 };
 
