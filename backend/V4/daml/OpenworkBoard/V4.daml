@@ -125,7 +125,7 @@ testUserSessions = scenario do
     (_boardCid, boardData) <- fetchByKey @Board.Data (admin, "123")
     assert (elem bob boardData.obs)
 
-duplicateTags = scenario do
+testTagsAndComments = scenario do
   admin <- getParty "Admin"
   user <- getParty "User"
 
@@ -178,3 +178,13 @@ duplicateTags = scenario do
     (_, tagData) <- fetchByKey @Board.Tag (admin, "456")
     assert (length cardData.tags == 1)
     assert (length tagData.cards == 1)
+  
+  -- Users should be able to delete tags
+  submit user do
+    exerciseByKey @Role.User (admin, user) Role.DELETE_TAG with
+      tagId = "456"
+    
+    (_, cardData) <- fetchByKey @Board.Card (admin, "xyz")
+    (_, boardData) <- fetchByKey @Board.Data (admin, "123")
+    assert (cardData.tags == [])
+    assert (boardData.tags == [])

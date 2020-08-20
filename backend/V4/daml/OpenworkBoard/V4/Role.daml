@@ -299,3 +299,12 @@ template User
           fetchByKey @App.Semaphore operator
           (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
           exerciseByKey @Rules.Board (operator, boardId) Rules.UNASSIGN_TAG with user = party; ..
+
+      nonconsuming DELETE_TAG
+          : ContractId Board.Data
+        with
+          tagId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Tag{boardId}) <- fetchByKey @Board.Tag (operator, tagId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.DELETE_TAG with user = party; ..

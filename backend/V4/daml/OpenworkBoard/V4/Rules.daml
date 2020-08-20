@@ -447,3 +447,24 @@ template Board
         archive oldTagCid
         create card with tags = (delete tagId card.tags)
         create tag with cards = (delete cardId tag.cards)
+    
+    nonconsuming choice DELETE_TAG
+      : ContractId Board.Data
+      with
+        user : Party
+        tagId : Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldTagCid, tag) <- fetchByKey @Board.Tag (operator, tagId)
+        archive oldTagCid
+
+        forA tag.cards (\cardId -> do
+            (cardCid, cardData) <- fetchByKey @Board.Card (operator, cardId)
+            exercise cardCid Archive
+            create cardData with tags = (delete tagId cardData.tags)
+          )
+        
+        (boardCid, boardData) <- fetchByKey @Board.Data (operator, tag.boardId)
+        exercise boardCid Archive
+        create boardData with tags = (delete tagId boardData.tags)
