@@ -14,6 +14,8 @@ class Board:
     UserRole = "Danban.V3_2.Role.User"
     Data = "Danban.V3_2.Board.Data"
 
+    OldUpgrade = "Danban.V3_2.Upgrade.UpgradeInvite"
+    NewUpgrade = "Danban.V3_2_4.Upgrade.UpgradeInvite"
 
 def main():
     url = os.getenv('DAML_LEDGER_URL')
@@ -44,7 +46,11 @@ def main():
         logging.info(f'found {len(user_sessions)} UserSession contracts')
         onboard_user_commands = [exercise(cid, 'UserSessionAck') for cid in user_sessions.keys()]
 
-        return update_board_commands + onboard_user_commands
+        old_upgrade_invites = client.find_active(Board.OldUpgrade)
+        logging.info(f'found {len(old_upgrade_invites)} v3.2 UgradeInvite contracts')
+        create_upgrade_commands = [create(Board.NewUpgrade, { 'operator': client.party, 'party': cdata['party'] }) for cdata in old_upgrade_invites.values()]
+
+        return update_board_commands + onboard_user_commands + create_upgrade_commands
 
     # Once app is initialized, onboard any pending users
     @client.ledger_created(Board.App)
