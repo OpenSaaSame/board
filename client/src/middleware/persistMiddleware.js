@@ -245,6 +245,8 @@ const persistMiddleware = store => next => action => {
                 maybeRead(store);
                 break;
             case "SUCCEED_WRITE":
+                maybeWrite(state, store.dispatch);
+                break;
             case "NETWORK_RETRY":
                 maybeWrite(state, store.dispatch);
                 maybeRead(store);
