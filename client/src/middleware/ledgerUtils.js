@@ -10,7 +10,8 @@ const mapBy = field => list => {
 const prefix = process.env.REACT_APP_V3_PACKAGE_ID ? `${process.env.REACT_APP_V3_PACKAGE_ID}:` : "";
 export const appVersions = [
   `${prefix}Danban.V3`,
-  "Danban.V3_2"
+  "Danban.V3_2",
+  "Danban.V3_2_4"
 ];
 
 export const rootErr = err => {
@@ -104,7 +105,11 @@ const dataTemplates = [
   ["Data", "CardList", "Card", "Comment", "Tag"].map(e => ["Board", e])
 );
 
-const exclusions = {};
+const exclusions = {
+  "Danban.V3_2" : {
+    "Upgrade" : ["UpgradeInvite"]
+  }
+};
 
 const versionedTempates = dataTemplates.flatMap(t =>
   appVersions.flatMap(v =>
@@ -159,7 +164,7 @@ const filterGroupAndVersion = (party, cs) => {
 
 export const loadState = async (ledgerUrl, jwt, party = null) => {
   try {
-     const contracts = await loadAll(ledgerUrl, jwt);
+    const contracts = await loadAll(ledgerUrl, jwt);
 
     const contractMap = filterGroupAndVersion(party, contracts);
 

@@ -9,7 +9,7 @@ class BoardFilter extends Component {
 
   static propTypes = {
     boardId: PropTypes.string.isRequired,
-    boardUsers: PropTypes.array.isRequired,
+    boardAssignees: PropTypes.array.isRequired,
     allProfiles: PropTypes.object.isRequired,
     boardTags: PropTypes.array.isRequired,
     dispatch: PropTypes.func.isRequired
@@ -83,7 +83,7 @@ class BoardFilter extends Component {
   };
 
   render() {
-    const { boardUsers, boardTags } = this.props;
+    const { boardAssignees, boardTags } = this.props;
 
     return (
       <Wrapper
@@ -102,7 +102,7 @@ class BoardFilter extends Component {
             <div>
               <label><input type="radio" name="userFilter" value="" />Show all</label>
             </div>
-            { boardUsers.map(user => this.userRadioItem(user)) }
+            { boardAssignees.map(user => this.userRadioItem(user)) }
           </form>
           <h3>Tags</h3>
           <form onChange={this.handleTagChange}>
@@ -119,10 +119,17 @@ class BoardFilter extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   const { boardId } = ownProps.match.params;
+  const board = state.boardsById[boardId];
+  const cardIds = board.lists.map(list => state.listsById[list]).flatMap(list => list.cards);
+  const assignees = cardIds
+    .map(card => state.cardsById[card])
+    .filter(card => card !== undefined)
+    .map(card => card.assignee)
+    .filter(user => user !== null);
   const allProfiles = state.users.byParty;
-  const boardUsers = state.boardUsersById[boardId].users.map(user => user._1);
-  const boardTags = state.boardsById[boardId].tags.map(tagId => state.tagsById[tagId]);
-  return { boardId, allProfiles, boardUsers, boardTags };
+  const boardAssignees = [...new Set(assignees)];
+  const boardTags = board.tags.map(tagId => state.tagsById[tagId]).filter(tag => tag !== undefined);
+  return { boardId, allProfiles, boardAssignees, boardTags };
 };
 
 export default withRouter(connect(mapStateToProps)(BoardFilter));

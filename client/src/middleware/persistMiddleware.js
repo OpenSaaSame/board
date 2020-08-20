@@ -29,10 +29,10 @@ export const createUserSession = async (jwt, party, email, displayName) => {
 };
 
 
-export const upgrade = (user, upgradeCid) => exerciseUtil(
+export const upgrade = (user, upgradeVersion, upgradeCid) => exerciseUtil(
     makeLedgerUrl(),
     user.token,
-    `${user.version}.Upgrade:UpgradeInvite`,
+    `${upgradeVersion}.Upgrade:UpgradeInvite`,
     upgradeCid,
     "Accept_Upgrade", {}
 );
@@ -230,14 +230,13 @@ const persistMiddleware = store => next => action => {
             case "UNASSIGN_TAG":
 
             case "ADD_COMMENT":
-                if (!user.needsUpgrade)
-                    store.dispatch({
-                        type: "QUEUE_WRITE",
-                        payload: {
-                            type: action.type,
-                            payload: action.payload
-                        }
-                    });
+                store.dispatch({
+                    type: "QUEUE_WRITE",
+                    payload: {
+                        type: action.type,
+                        payload: action.payload
+                    }
+                });
                 break;
 
             case "QUEUE_READ":
@@ -246,6 +245,8 @@ const persistMiddleware = store => next => action => {
                 maybeRead(store);
                 break;
             case "SUCCEED_WRITE":
+                maybeWrite(state, store.dispatch);
+                break;
             case "NETWORK_RETRY":
                 maybeWrite(state, store.dispatch);
                 maybeRead(store);

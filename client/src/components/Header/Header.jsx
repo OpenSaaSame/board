@@ -47,6 +47,7 @@ class Header extends Component {
                 <div>
                   <p>User:  {user.displayName}</p>
                   <p>Email: {user.email}</p>
+                  <p>Version: {user.version}</p>
                   <p>Id: {user.party}</p>
                 </div>
                 <button

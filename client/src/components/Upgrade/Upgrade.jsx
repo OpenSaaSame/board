@@ -8,10 +8,10 @@ import Header from "../Header/Header";
 
 import "./Upgrade.scss";
 
-const confirmUpgrade = async (dispatch, user, upgradeInvites, setLoading) => {
+const confirmUpgrade = async (dispatch, user, upgradeInvite, setLoading) => {
   setLoading(true);
   try{
-    upgrade(user, upgradeInvites[0].cid);
+    upgrade(user, upgradeInvite.version, upgradeInvite.cid);
     dispatch({
       type: "QUEUE_READ",
       payload: {at : Date.now() + 500}
@@ -25,6 +25,7 @@ const humanizedVersion = (v) => v.split(".")[1].replace("_", ".");
 
 const Upgrade = ({dispatch, user, upgradeInvites}) => {
   const [loading, setLoading] = useState(false);
+  const latestInvite = upgradeInvites[0];
   
   return (
     <>
@@ -40,7 +41,7 @@ const Upgrade = ({dispatch, user, upgradeInvites}) => {
             <div className="buttons">
               <span
                 className="confirm-button"
-                onClick={() => confirmUpgrade(dispatch, user, upgradeInvites, setLoading)}
+                onClick={() => confirmUpgrade(dispatch, user, latestInvite, setLoading)}
                 disabled={loading}
               >
                 { loading ? "Loading..." : "Upgrade" }

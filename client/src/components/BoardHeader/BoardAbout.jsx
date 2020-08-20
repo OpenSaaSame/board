@@ -110,6 +110,8 @@ class BoardAbout extends Component {
         <Menu className="board-about-menu">
           <h2>{ users.length === 1 ? "Admin" : "Admins"}</h2>
           { users.map(admin => admin.displayName).join(", ") }
+          <h2>Model Version</h2>
+          { board.version }
           { hasAdmin ? adminContent : aboutContent }
         </Menu>
       </Wrapper>
