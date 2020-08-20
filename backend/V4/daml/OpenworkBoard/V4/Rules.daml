@@ -411,6 +411,21 @@ template Board
           author = user
           createdAt = now
 
+    nonconsuming choice DELETE_COMMENT
+      : ContractId Board.Card
+      with
+        user : Party
+        commentId : Text
+      controller [operator, user]
+      do
+        checkAccess user Write
+        (oldCommentCid, comment) <- fetchByKey @Board.Comment (operator, commentId)
+        archive oldCommentCid
+        
+        (cardCid, cardData) <- fetchByKey @Board.Card (operator, comment.cardId)
+        exercise cardCid Archive
+        create cardData with comments = (delete commentId cardData.comments)
+
     nonconsuming choice ASSIGN_TAG
       : ContractId Board.Tag
       with

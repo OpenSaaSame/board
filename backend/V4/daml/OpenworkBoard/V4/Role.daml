@@ -269,6 +269,16 @@ template User
           (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
           exerciseByKey @Rules.Board (operator, boardId) Rules.ADD_COMMENT with user = party; ..
       
+      nonconsuming DELETE_COMMENT
+          : ContractId Board.Card
+        with
+          commentId : Text
+        do
+          fetchByKey @App.Semaphore operator
+          (_, Board.Comment{cardId}) <- fetchByKey @Board.Comment (operator, commentId)
+          (_, Board.Card{boardId}) <- fetchByKey @Board.Card (operator, cardId)
+          exerciseByKey @Rules.Board (operator, boardId) Rules.DELETE_COMMENT with user = party; ..
+
       nonconsuming ADD_TAG
           : ContractId Board.Tag
         with

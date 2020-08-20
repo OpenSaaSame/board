@@ -188,3 +188,21 @@ testTagsAndComments = scenario do
     (_, boardData) <- fetchByKey @Board.Data (admin, "123")
     assert (cardData.tags == [])
     assert (boardData.tags == [])
+  
+  -- Users should be able to add and delete comments
+  submit user do
+    exerciseByKey @Role.User (admin, user) Role.ADD_COMMENT with
+      cardId = "xyz"
+      commentId = "comment-id-1"
+      comment = "Nice work!"
+    
+    fetchByKey @Board.Comment (admin, "comment-id-1")
+
+    exerciseByKey @Role.User (admin, user) Role.DELETE_COMMENT with
+      commentId = "comment-id-1"
+    
+    (_, card) <- fetchByKey @Board.Card (admin, "xyz")
+    assert (card.comments == [])
+  
+  submitMustFail user do
+    fetchByKey @Board.Comment (admin, "comment-id-1")
