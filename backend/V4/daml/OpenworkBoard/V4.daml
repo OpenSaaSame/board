@@ -179,6 +179,16 @@ testTagsAndComments = scenario do
     assert (length cardData.tags == 1)
     assert (length tagData.cards == 1)
   
+  -- Users should be able to edit tags
+  submit user do
+    exerciseByKey @Role.User (admin, user) Role.EDIT_TAG with
+      tagId = "456"
+      name = "Wontfix"
+      color = "Green"
+    
+    (_, tagData) <- fetchByKey @Board.Tag (admin, "456")
+    assert (tagData.name == "Wontfix" && tagData.color == "Green")
+  
   -- Users should be able to delete tags
   submit user do
     exerciseByKey @Role.User (admin, user) Role.DELETE_TAG with

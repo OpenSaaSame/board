@@ -203,6 +203,20 @@ template Board
           operator = board.operator
           cards = []
           ..
+
+    nonconsuming choice EDIT_TAG
+      : ContractId Board.Tag
+      with
+        admin : Party
+        name : Text
+        color : Text
+        tagId : Text
+      controller [operator, admin]
+      do
+        checkAccess admin Admin
+        (oldCid, tagData) <- fetchByKey @Board.Tag (operator, tagId)
+        archive oldCid
+        create tagData with name; color
     
     nonconsuming choice ADD_LIST
       : ContractId Board.CardList
