@@ -4,7 +4,7 @@ const cardsById = (state = {}, action) => {
   switch (action.type) {
     case "ADD_CARD": {
       const { cardText, cardId, boardId } = action.payload;
-      return { ...state, [cardId]: { text: cardText, _id: cardId, boardId, tags: [], comments: [] } };
+      return { ...state, [cardId]: { text: cardText, _id: cardId, boardId, tags: [], comments: [], assignee: null } };
     }
     case "CHANGE_CARD_TEXT": {
       const { cardText, cardId } = action.payload;

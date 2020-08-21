@@ -6,8 +6,8 @@
 
 header {
   font-family: 'Lato', sans-serif;
-
   font-weight: normal;
+  background-color: var(--background-color);
   position: fixed;
   display: flex;
   justify-content: space-between;
@@ -16,7 +16,6 @@ header {
   box-sizing: border-box;
   width: 100%;
   height: 80px;
-  background: white;
   z-index: 1;
   transition: background 0.3s;
 }
@@ -53,7 +52,6 @@ header {
   align-items: center;
   box-sizing: border-box;
   height: 100%;
-  color: white;
 }
 
 .user-thumbnail {
@@ -70,11 +68,11 @@ header {
   height: 100%;
 
   .sign-out-button, button {
+    color: var(--text-color);
+    background-color: var(--background-color);
     text-decoration: none;
     cursor: pointer;
     width: 100%;
-    color: $grey;
-    background-color: transparent;
     text-align: left;
 
     &:hover, &:focus {
@@ -91,16 +89,16 @@ header {
       height: 100%;
       width: 3em;
       background-color: transparent;
+      color: var(--text-color)
     }
   }
 
   .sign-out-menu {
+    background-color: var(--background-color);
     position: absolute;
     top: 100%;
     right: 0;
     min-width: 250px;
-    color: $black-text;
-    background: white;
     box-shadow: $transparent-black 4px 4px 2px;
 
     div, button {

@@ -7,8 +7,6 @@ import { Title } from "react-head";
 
 import { connect } from "react-redux";
 
-import classnames from "classnames";
-
 import { login } from "../../reducers/index";
 import { queueRead } from "../../middleware/persistMiddleware";
 

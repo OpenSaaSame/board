@@ -3,8 +3,8 @@
 .user {
   position: relative;
   border-width: 1px;
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.1);
+  background: $white;
+  border-color: $transparent-black;
   border-radius: 14px;
   border-style: solid;
   margin-bottom: -1px;
@@ -40,12 +40,12 @@
   display: inline-block;
   padding: 5px;
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.1);
+  background: $transparent-black;
   border-radius: 0 14px 14px 0;
 
   &:hover,
   &:focus {
-    background: rgba(0, 0, 0, 0.2);
+    background: $less-transparent-black;
   }
 }
 
@@ -56,7 +56,7 @@
   padding: 5px;
   border-radius: 3px;
   width: 100px;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow: 0px 1px 3px $less-transparent-black;
   color: black;
   background: white;
   z-index: 999;
@@ -72,7 +72,7 @@
 
     &:hover,
     &:focus {
-      background: rgba(0, 0, 0, 0.6);
+      background: $less-transparent-black;
       color: white;
     }
   }

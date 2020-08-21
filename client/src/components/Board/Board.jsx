@@ -134,13 +134,13 @@ class Board extends Component {
   };
 
   render = () => {
-    const { lists, boardTitle, boardId, boardColor, hasWrite } = this.props;
+    const { lists, boardTitle, boardId, boardColor, hasWrite, hasAdmin } = this.props;
     return (
       <>
         <div className={classnames("board", boardColor)}>
           <Title>{boardTitle} | OpenWork</Title>
           <Header />
-          <BoardHeader hasAdmin={this.props.hasAdmin} />
+          <BoardHeader hasAdmin={hasAdmin} />
           {/* eslint-disable jsx-a11y/no-static-element-interactions */}
           <div
             className="lists-wrapper"
@@ -186,7 +186,7 @@ const mapStateToProps = (state, ownProps) => {
   const boardUsersKnown = !(typeof state.boardUsersById[board._id] === 'undefined');
   const boardUser = boardUsersKnown && state.boardUsersById[board._id].users.filter(user => user._1 === state.user.party);
   const hasAdmin = boardUsersKnown && boardUser.length > 0 && ["Admin", "SignedAdmin"].includes(boardUser[0]._2);
-  const hasWrite = boardUsersKnown && boardUser.length > 0 && ["Write", "Admin", "SignedAdmin"].includes(boardUser[0]._2);
+  const hasWrite = state.user.version === board.version && boardUsersKnown && boardUser.length > 0 && ["Write", "Admin", "SignedAdmin"].includes(boardUser[0]._2);
 
   return {
     lists: board.lists.map(listId => state.listsById[listId]),
