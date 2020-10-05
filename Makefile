@@ -13,6 +13,7 @@ dar := target/ow-board-model-$(dar_version).dar
 operator_bot := target/ow-board-operator-bot-$(operator_bot_version).tar.gz
 ui := target/ow-board-ui-$(ui_version).zip
 dabl_meta := target/dabl-meta.yaml
+icon := target/danban-icon.png
 
 .PHONY: package publish
 
@@ -28,12 +29,15 @@ target/${NAME}.dit: all
 $(dabl_meta): $(target_dir) dabl-meta.yaml
 	cp dabl-meta.yaml $@
 
+$(icon): $(target_dir) danban-icon.png
+	cp danban-icon.png $@
+
 .PHONY: run
 run: all
 	honcho start
 
 .PHONY: all
-all: $(operator_bot) $(dar) $(ui) $(dabl_meta)
+all: $(operator_bot) $(dar) $(ui) $(dabl_meta) $(icon)
 
 $(dar):
 	mkdir -p $(@D)

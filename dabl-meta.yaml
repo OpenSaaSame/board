@@ -1,6 +1,6 @@
 catalog:
     name: openwork-board
-    version: 3.2.0
+    version: 3.2.1
     short_description: OpenWork Board
     description: A privacy-focused Kanban board.
     release_date: 2020-09-18
@@ -8,6 +8,8 @@ catalog:
     url: https://github.com/digital-asset/danban
     license: Apache-2.0
     demo_url: https://board.opensaasame.org/
+    tags: [dabl-sample-app, application]
+    icon_file: danban-icon.png
 subdeployments:
     - ow-board-model-3.2.0.dar
     - ow-board-operator-bot-2.0.2.tar.gz
