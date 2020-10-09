@@ -1,4 +1,4 @@
-# OpenWork board
+# OpenWork Board
 
 A Kanban board backed by a DAML ledger, inspired by
 [Trello](https://trello.com/home) and based on
@@ -29,8 +29,7 @@ A Kanban board backed by a DAML ledger, inspired by
 
 ### Development
 
-You need the following software to be installed to run a local Danban
-environment.
+You need the following software to be installed to run a local app:
 
 - The [DAML SDK](https://docs.daml.com/getting-started/installation.html)
 - Node.js v13.8.0
@@ -38,7 +37,7 @@ environment.
 
 Honcho is a tool for easily running multiple processes as a group, and
 used here to simplify running the six processes that comprise a local
-Danban environment. The
+app environment. The
 [Procfile](https://github.com/digital-asset/danban/blob/master/.gitignore)
 at the root of the project specifies the processes that are run by
 Honcho. While running, Honcho aggregates the logs of each in a single
@@ -48,17 +47,17 @@ terminates.
 #### Clone & Install Dependencies
 
 ```shell
-git clone https://github.com/digital-asset/danban.git
-cd danban
+git clone https://github.com/OpenSaaSame/board.git
+cd board
 ```
 
-#### Build and Start Danban
+#### Build and Start
 
 ```shell
 make run
 ```
 
-Once Danban is running, it will present a login window that asks for a
+Once the app is running, it will present a login window that asks for a
 party and JWT token. The local build mints two local JWT tokens that
 can be used to authenticate and prints them to the log stream:
 
@@ -68,7 +67,7 @@ can be used to authenticate and prints them to the log stream:
 13:46:47 quickstart.1 | [   INFO] 2020-06-16 13:46:47,177 | root    | JWT for 'Bob' => 'eyJhbGciO...'
 ```
 
-Please be aware of the fact that the local Danban environment runs
+Please be aware of the fact that the local app runs
 against an in-memory ledger. The contents of this ledger do not
 persist after the environment is shut down.
 
