@@ -1,53 +1,38 @@
-BASENAME=$(shell yq -r '.catalog.name' < dabl-meta.yaml)
-VERSION=$(shell yq -r '.catalog.version' < dabl-meta.yaml)
+DIT_NAME=$(shell ddit targetname)
+BASENAME=$(shell ddit targetname --basename)
+VERSION=$(shell ddit ditversion)
+
 
 TAG_NAME=${BASENAME}-v${VERSION}
 NAME=${BASENAME}-${VERSION}
-DAR_NAME=${BASENAME}.dar
 
-dar_version := 3.2.0
-operator_bot_version := $(shell cd python ; pipenv run python operator/setup.py --version)
-ui_version := $(shell node -p "require(\"./client/package.json\").version")
-
-dar := target/ow-board-model-$(dar_version).dar
-operator_bot := target/ow-board-operator-bot-$(operator_bot_version).tar.gz
-ui := target/ow-board-ui-$(ui_version).zip
-dabl_meta := target/dabl-meta.yaml
-icon := target/danban-icon.png
+operator_bot := target/ow-board-operator-bot-$(VERSION).tar.gz
+ui := target/ow-board-ui-$(VERSION).zip
 
 .PHONY: package publish
 
+all: package
+
 publish: package
-	git tag -f "${TAG_NAME}"
-	ghr -replace "${TAG_NAME}" "target/${NAME}.dit"
+	ddit release
 
-package: target/${NAME}.dit
+package: ${DIT_NAME}
 
-target/${NAME}.dit: all
-	cd target && zip ${NAME}.dit * && rm ow-*
-
-$(dabl_meta): $(target_dir) dabl-meta.yaml
-	cp dabl-meta.yaml $@
-
-$(icon): $(target_dir) danban-icon.png
-	cp danban-icon.png $@
+${DIT_NAME}: dabl-meta.yaml $(operator_bot) $(ui)
+	ddit build \
+       --subdeployment $(operator_bot) $(ui) backend/released/danban-3.2.0.dar
 
 .PHONY: run
-run: all
+run: package
 	honcho start
 
 .PHONY: all
-all: $(operator_bot) $(dar) $(ui) $(dabl_meta) $(icon)
-
-$(dar):
-	mkdir -p $(@D)
-	cp backend/released/danban-$(dar_version).dar $@
 
 $(operator_bot):
-	cd python/operator; pipenv run python setup.py sdist
+	cd python/operator; DDIT_VERSION=$(VERSION) pipenv run python setup.py sdist
 	rm -fr python/operator/openwork_board_operator_bot.egg-info
 	mkdir -p $(@D)
-	mv python/operator/dist/openwork-board-operator-bot-$(operator_bot_version).tar.gz $@
+	mv python/operator/dist/openwork-board-operator-bot-$(VERSION).tar.gz $@
 	rm -r python/operator/dist
 
 
@@ -55,9 +40,9 @@ $(ui):
 	cd client; \
 		npm install; \
 		npm run build; \
-		zip -r ow-board-ui-$(ui_version).zip build
+		zip -r ow-board-ui-$(VERSION).zip build
 	mkdir -p $(@D)
-	mv client/ow-board-ui-$(ui_version).zip $@
+	mv client/ow-board-ui-$(VERSION).zip $@
 
 .PHONY: clean
 clean:
