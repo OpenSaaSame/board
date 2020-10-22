@@ -49,4 +49,5 @@ clean:
 	rm -fr python/operator/openwork_board_operator_bot.egg-info \
 		python/operator/dist \
 		target/* \
-		client/build
+		client/build \
+		${DIT_NAME}

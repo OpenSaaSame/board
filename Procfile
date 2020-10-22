@@ -1,4 +1,4 @@
-sandbox: daml sandbox --ledgerid=danban -w quickstart/danban-v3-1-3.1.0.dar
+sandbox: daml sandbox --ledgerid=danban -w backend/released/danban-3.2.0.dar
 
 jsonapi: sleep 10 && daml json-api --ledger-host=localhost --ledger-port=6865 --http-port=7575 --allow-insecure-tokens
 navigator: sleep 10 && daml navigator server
