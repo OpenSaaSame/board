@@ -1,7 +1,8 @@
+import os
 from setuptools import setup
 
 setup(name='openwork-board-operator-bot',
-      version='2.0.2',
+      version=os.environ.get('DDIT_VERSION', 'runtime'),
       description='OpenWork Board Operator',
       author='Digital Asset',
       author_email='community@digitalasset.com',
