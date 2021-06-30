@@ -1,6 +1,6 @@
 # OpenWork Board
 
-A Kanban board backed by a DAML ledger, inspired by
+A Kanban board backed by a Daml ledger, inspired by
 [Trello](https://trello.com/home) and based on
 [react-kanban](https://github.com/markusenglund/react-kanban).
 
@@ -14,7 +14,7 @@ A Kanban board backed by a DAML ledger, inspired by
   checklists on the cards.
 - Works great on touch devices.
 - Public and private boards, with sharing functionality
-- Fully backed by a DAML ledger
+- Fully backed by a Daml ledger
 
 ### Tech stack
 
@@ -24,14 +24,14 @@ A Kanban board backed by a DAML ledger, inspired by
 - [Sass](https://github.com/sass/sass)
 - [Webpack](https://github.com/webpack/webpack)
 - [Babel](https://github.com/babel/babel)
-- [DAML](https://daml.com)
-- [project:DABL](https://projectdabl.com)
+- [Daml](https://daml.com)
+- [Daml Hub](https://hub.daml.com)
 
 ### Development
 
 You need the following software to be installed to run a local app:
 
-- The [DAML SDK](https://docs.daml.com/getting-started/installation.html)
+- The [Daml SDK](https://docs.daml.com/getting-started/installation.html)
 - Node.js v13.8.0
 - [Honcho](https://pypi.org/project/honcho/)
 

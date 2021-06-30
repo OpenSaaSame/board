@@ -97,7 +97,7 @@ class LogIn extends Component {
                       href={this.dablLogInButtonUrl()}
                       className="dabl-login"
                       disabled={loading}>
-                      Log In with DABL
+                      Log In with Daml Hub
                     </a>
                     <input
                       name="showAdvanced"
